@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: itwars-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: itwars
+      POSTGRES_PASSWORD: itwars_dev_password
+      POSTGRES_DB: itwars
+    ports:
+      - "5432:5432"
+    volumes:
+      - itwars_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  itwars_postgres_data:
