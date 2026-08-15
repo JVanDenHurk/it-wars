@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import BounceTicketButton from "@/components/BounceTicketButton";
 import GenerateTicketButton from "@/components/GenerateTicketButton";
 import ResolveTicketButton from "@/components/ResolveTicketButton";
 import { auth } from "@/lib/auth";
@@ -29,9 +30,6 @@ function calculateTicketValue(
 }
 
 export default async function TicketsPage() {
-  /*
-   * Check authentication
-   */
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -40,9 +38,6 @@ export default async function TicketsPage() {
     redirect("/");
   }
 
-  /*
-   * Get current player
-   */
   const player = await prisma.player.findUnique({
     where: {
       userId: session.user.id,
@@ -53,9 +48,6 @@ export default async function TicketsPage() {
     redirect("/dashboard");
   }
 
-  /*
-   * Get player's open tickets
-   */
   const tickets = await prisma.ticket.findMany({
     where: {
       assignedToId: player.id,
@@ -170,20 +162,13 @@ export default async function TicketsPage() {
 
                 {/* Actions */}
                 <div className="mt-6 flex items-start gap-3">
-
                   <ResolveTicketButton
                     ticketId={ticket.id}
                   />
 
-                  {/* Bounce comes next */}
-                  <button
-                    type="button"
-                    disabled
-                    className="border border-zinc-700 px-4 py-2 font-bold opacity-40"
-                  >
-                    Bounce
-                  </button>
-
+                  <BounceTicketButton
+                    ticketId={ticket.id}
+                  />
                 </div>
               </div>
             );

@@ -126,15 +126,49 @@ exports.Prisma.PlayerScalarFieldEnum = {
   username: 'username',
   level: 'level',
   xp: 'xp',
-  hp: 'hp',
-  maxHp: 'maxHp',
+  careerPath: 'careerPath',
+  credits: 'credits',
   energy: 'energy',
   maxEnergy: 'maxEnergy',
-  credits: 'credits',
-  attack: 'attack',
-  defence: 'defence',
-  accuracy: 'accuracy',
-  stress: 'stress',
+  kills: 'kills',
+  bankruptcies: 'bankruptcies',
+  ticketsResolved: 'ticketsResolved',
+  correctBounces: 'correctBounces',
+  incorrectBounces: 'incorrectBounces',
+  incorrectResolves: 'incorrectResolves',
+  lifetimeCreditsEarned: 'lifetimeCreditsEarned',
+  lifetimeTicketsHandled: 'lifetimeTicketsHandled',
+  lastActiveAt: 'lastActiveAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TicketScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  category: 'category',
+  status: 'status',
+  maxValue: 'maxValue',
+  baseXp: 'baseXp',
+  assignedToId: 'assignedToId',
+  lastSentById: 'lastSentById',
+  bounceCount: 'bounceCount',
+  resolvedAt: 'resolvedAt',
+  expiredAt: 'expiredAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TicketTemplateScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  category: 'category',
+  difficulty: 'difficulty',
+  maxValue: 'maxValue',
+  baseXp: 'baseXp',
+  active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -199,10 +233,31 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.CareerPath = exports.$Enums.CareerPath = {
+  NETWORK: 'NETWORK',
+  SYSTEMS: 'SYSTEMS',
+  SECURITY: 'SECURITY'
+};
 
+exports.TicketCategory = exports.$Enums.TicketCategory = {
+  SERVICE_DESK: 'SERVICE_DESK',
+  NETWORK: 'NETWORK',
+  SYSTEMS: 'SYSTEMS',
+  SECURITY: 'SECURITY'
+};
+
+exports.TicketStatus = exports.$Enums.TicketStatus = {
+  OPEN: 'OPEN',
+  RESOLVED: 'RESOLVED',
+  BOUNCED: 'BOUNCED',
+  FAILED: 'FAILED',
+  EXPIRED: 'EXPIRED'
+};
 
 exports.Prisma.ModelName = {
   Player: 'Player',
+  Ticket: 'Ticket',
+  TicketTemplate: 'TicketTemplate',
   User: 'User',
   Session: 'Session',
   Account: 'Account',
