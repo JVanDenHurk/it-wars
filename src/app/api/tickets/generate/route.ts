@@ -18,7 +18,7 @@ function getResolvableCategories(
 ): ResolvableCategory[] {
   const categories = new Set<ResolvableCategory>();
 
-  // Levels 1-3 are Service Desk players.
+  // Levels 1-3 count as Service Desk.
   if (players.some((player) => player.level < 4)) {
     categories.add("SERVICE_DESK");
   }
@@ -57,79 +57,154 @@ function getResolvableCategories(
   return Array.from(categories);
 }
 
+function randomSeconds(min: number, max: number) {
+  return Math.floor(
+    Math.random() * (max - min + 1) + min
+  );
+}
+
+function getNextTicketTime(
+  queuePenaltyActive: boolean
+) {
+  /*
+   * Normal queue:
+   * 60-120 seconds
+   *
+   * Ownership warning:
+   * 180-300 seconds
+   */
+  const seconds = queuePenaltyActive
+    ? randomSeconds(180, 300)
+    : randomSeconds(60, 120);
+
+  return new Date(
+    Date.now() + seconds * 1000
+  );
+}
+
 export async function POST() {
   try {
+    /*
+     * Authentication
+     */
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
     if (!session) {
       return NextResponse.json(
-        { error: "Not authenticated." },
-        { status: 401 }
-      );
-    }
-
-    const player = await prisma.player.findUnique({
-      where: {
-        userId: session.user.id,
-      },
-    });
-
-    if (!player) {
-      return NextResponse.json(
-        { error: "Player not found." },
-        { status: 404 }
+        {
+          error: "Not authenticated.",
+        },
+        {
+          status: 401,
+        }
       );
     }
 
     /*
-     * Find players that are currently eligible to receive tickets.
-     *
-     * For now:
-     * - player must not be bankrupt
-     *
-     * Later:
-     * - we'll also filter by lastActiveAt
+     * Current player
      */
-    const availablePlayers = await prisma.player.findMany({
-      where: {
-        credits: {
-          gt: 0,
+    const player =
+      await prisma.player.findUnique({
+        where: {
+          userId: session.user.id,
         },
-      },
+      });
 
-      select: {
-        level: true,
-        careerPath: true,
-      },
-    });
+    if (!player) {
+      return NextResponse.json(
+        {
+          error: "Player not found.",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    const now = new Date();
+
+    /*
+     * If the player is not due a new
+     * ticket yet, don't generate one.
+     */
+    if (
+      player.nextTicketAt &&
+      player.nextTicketAt > now
+    ) {
+      return NextResponse.json({
+        success: true,
+        generated: false,
+        nextTicketAt:
+          player.nextTicketAt,
+      });
+    }
+
+    /*
+     * Check whether THIS PLAYER has
+     * an active queue penalty.
+     *
+     * It does not affect other players.
+     */
+    const queuePenaltyActive =
+      player.queuePenaltyUntil !== null &&
+      player.queuePenaltyUntil > now;
+
+    /*
+     * Find all non-bankrupt players.
+     *
+     * Their roles determine which
+     * ticket categories are allowed
+     * to exist in the game.
+     */
+    const availablePlayers =
+      await prisma.player.findMany({
+        where: {
+          credits: {
+            gt: 0,
+          },
+        },
+
+        select: {
+          level: true,
+          careerPath: true,
+        },
+      });
 
     const resolvableCategories =
-      getResolvableCategories(availablePlayers);
+      getResolvableCategories(
+        availablePlayers
+      );
 
-    if (resolvableCategories.length === 0) {
+    if (
+      resolvableCategories.length === 0
+    ) {
       return NextResponse.json(
         {
           error:
             "No resolver teams are currently available.",
         },
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
 
     /*
-     * Only use templates that somebody can eventually resolve.
+     * Only load templates that somebody
+     * in the game can eventually resolve.
      */
-    const templates = await prisma.ticketTemplate.findMany({
-      where: {
-        active: true,
+    const templates =
+      await prisma.ticketTemplate.findMany({
+        where: {
+          active: true,
 
-        category: {
-          in: resolvableCategories,
+          category: {
+            in: resolvableCategories,
+          },
         },
-      },
-    });
+      });
 
     if (templates.length === 0) {
       return NextResponse.json(
@@ -137,7 +212,9 @@ export async function POST() {
           error:
             "No ticket templates are available for the current resolver teams.",
         },
-        { status: 404 }
+        {
+          status: 404,
+        }
       );
     }
 
@@ -146,50 +223,84 @@ export async function POST() {
      */
     const template =
       templates[
-        Math.floor(Math.random() * templates.length)
+        Math.floor(
+          Math.random() *
+            templates.length
+        )
       ];
 
     /*
-     * Create the live ticket in the current player's queue.
-     *
-     * The category remains hidden in the UI.
+     * Calculate this player's next
+     * allowed system-ticket time.
      */
-    const ticket = await prisma.ticket.create({
-      data: {
-        title: template.title,
-        description: template.description,
-        category: template.category,
-
-        maxValue: template.maxValue,
-        baseXp: template.baseXp,
-
-        assignedToId: player.id,
-      },
-    });
+    const nextTicketAt =
+      getNextTicketTime(
+        queuePenaltyActive
+      );
 
     /*
-     * Mark player as active.
+     * Create the ticket and update
+     * the player's timer together.
      */
-    await prisma.player.update({
-      where: {
-        id: player.id,
-      },
+    const [ticket] =
+      await prisma.$transaction([
+        prisma.ticket.create({
+          data: {
+            title:
+              template.title,
 
-      data: {
-        lastActiveAt: new Date(),
-      },
-    });
+            description:
+              template.description,
+
+            category:
+              template.category,
+
+            maxValue:
+              template.maxValue,
+
+            baseXp:
+              template.baseXp,
+
+            assignedToId:
+              player.id,
+
+            /*
+             * null means this came from
+             * the game, not another player.
+             */
+            lastSentById: null,
+          },
+        }),
+
+        prisma.player.update({
+          where: {
+            id: player.id,
+          },
+
+          data: {
+            nextTicketAt,
+            lastActiveAt: now,
+          },
+        }),
+      ]);
 
     return NextResponse.json({
       success: true,
-      ticket,
+      generated: true,
+      ticketId: ticket.id,
+      nextTicketAt,
+      queuePenaltyActive,
     });
   } catch (error) {
-    console.error("Generate ticket error:", error);
+    console.error(
+      "Generate ticket error:",
+      error
+    );
 
     return NextResponse.json(
       {
-        error: "Unable to generate ticket.",
+        error:
+          "Unable to generate ticket.",
       },
       {
         status: 500,

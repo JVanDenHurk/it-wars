@@ -4,12 +4,13 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getLevelFromXp } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
+import { calculateTicketValue } from "@/lib/ticket-value";
 
 function getPlayerCategory(
   level: number,
   careerPath: string | null
 ) {
-  // Levels 1-3 are Service Desk
+  // Levels 1-3 are Service Desk.
   if (level < 4) {
     return "SERVICE_DESK";
   }
@@ -27,27 +28,6 @@ function getPlayerCategory(
   }
 
   return null;
-}
-
-function calculateTicketValue(
-  maxValue: number,
-  createdAt: Date
-) {
-  const ageMs = Date.now() - createdAt.getTime();
-  const ageMinutes = Math.floor(ageMs / 60000);
-
-  // Lose 2% of the maximum value every minute.
-  const lossPerMinute = maxValue * 0.02;
-
-  const value = Math.floor(
-    maxValue - ageMinutes * lossPerMinute
-  );
-
-  // Minimum ticket value is 10%.
-  return Math.max(
-    Math.floor(maxValue * 0.1),
-    value
-  );
 }
 
 export async function POST(
@@ -117,7 +97,8 @@ export async function POST(
     }
 
     /*
-     * Make sure the ticket belongs to this player
+     * Make sure the ticket belongs
+     * to the current player.
      */
     if (ticket.assignedToId !== player.id) {
       return NextResponse.json(
@@ -127,7 +108,7 @@ export async function POST(
     }
 
     /*
-     * Ticket must still be open
+     * Ticket must still be open.
      */
     if (ticket.status !== "OPEN") {
       return NextResponse.json(
@@ -139,7 +120,8 @@ export async function POST(
     }
 
     /*
-     * Determine what category this player can resolve
+     * Determine which ticket category
+     * this player can resolve.
      */
     const playerCategory = getPlayerCategory(
       player.level,
@@ -155,6 +137,12 @@ export async function POST(
      * ============================
      */
     if (correct) {
+      /*
+       * Shared ticket-value calculation.
+       *
+       * Ticket value can now decay
+       * all the way down to 0 CR.
+       */
       const reward = calculateTicketValue(
         ticket.maxValue,
         ticket.createdAt
@@ -178,7 +166,7 @@ export async function POST(
 
       await prisma.$transaction([
         /*
-         * Close ticket
+         * Close ticket.
          */
         prisma.ticket.update({
           where: {
@@ -191,7 +179,7 @@ export async function POST(
         }),
 
         /*
-         * Reward player
+         * Reward player.
          */
         prisma.player.update({
           where: {

@@ -128,8 +128,6 @@ exports.Prisma.PlayerScalarFieldEnum = {
   xp: 'xp',
   careerPath: 'careerPath',
   credits: 'credits',
-  energy: 'energy',
-  maxEnergy: 'maxEnergy',
   kills: 'kills',
   bankruptcies: 'bankruptcies',
   ticketsResolved: 'ticketsResolved',
@@ -139,6 +137,8 @@ exports.Prisma.PlayerScalarFieldEnum = {
   lifetimeCreditsEarned: 'lifetimeCreditsEarned',
   lifetimeTicketsHandled: 'lifetimeTicketsHandled',
   lastActiveAt: 'lastActiveAt',
+  queuePenaltyUntil: 'queuePenaltyUntil',
+  nextTicketAt: 'nextTicketAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

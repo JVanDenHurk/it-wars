@@ -2,35 +2,12 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import ClearQueuePenaltyButton from "@/components/ClearQueuePenaltyButton";
 import SignOutButton from "@/components/SignOutButton";
+import TicketTimer from "@/components/TicketTimer";
 import { auth } from "@/lib/auth";
+import { getRoleTitle } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
-
-function getRoleTitle(level: number, careerPath: string | null) {
-  if (level === 1) return "Service Desk Analyst";
-  if (level === 2) return "Service Desk Analyst II";
-  if (level === 3) return "Senior Service Desk Analyst";
-
-  if (careerPath === "NETWORK") {
-    if (level === 4) return "Network Engineer";
-    if (level === 5) return "Senior Network Engineer";
-    return "Network Specialist";
-  }
-
-  if (careerPath === "SYSTEMS") {
-    if (level === 4) return "Systems Engineer";
-    if (level === 5) return "Senior Systems Engineer";
-    return "Systems Specialist";
-  }
-
-  if (careerPath === "SECURITY") {
-    if (level === 4) return "Security Analyst";
-    if (level === 5) return "Security Engineer";
-    return "Security Specialist";
-  }
-
-  return "Career Path Required";
-}
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({
@@ -74,6 +51,26 @@ export default async function DashboardPage() {
     player.level,
     player.careerPath
   );
+
+  const now = new Date();
+
+  const queuePenaltyActive =
+    player.queuePenaltyUntil !== null &&
+    player.queuePenaltyUntil > now;
+
+  const queuePenaltyMinutesRemaining =
+    queuePenaltyActive && player.queuePenaltyUntil
+      ? Math.max(
+          1,
+          Math.ceil(
+            (
+              player.queuePenaltyUntil.getTime() -
+              now.getTime()
+            ) /
+              60000
+          )
+        )
+      : 0;
 
   return (
     <main className="min-h-screen bg-black p-8 text-white">
@@ -144,8 +141,35 @@ export default async function DashboardPage() {
               {openTickets}
             </p>
           </div>
-
         </div>
+
+        {/* Ownership Warning */}
+        {queuePenaltyActive && (
+          <div className="mt-4 border border-yellow-900 bg-yellow-950/20 p-6">
+            <p className="text-xs uppercase tracking-wide text-yellow-500">
+              Ownership Warning
+            </p>
+
+            <h2 className="mt-2 text-xl font-bold text-yellow-300">
+              Your queue priority has been reduced
+            </h2>
+
+            <p className="mt-2 text-sm text-zinc-300">
+              You transferred a ticket that you could have resolved.
+            </p>
+
+            <p className="mt-2 text-sm text-zinc-400">
+              New tickets will arrive less frequently while this warning is active.
+            </p>
+
+            <p className="mt-3 text-sm font-bold text-yellow-400">
+              Approximately {queuePenaltyMinutesRemaining} minute
+              {queuePenaltyMinutesRemaining === 1 ? "" : "s"} remaining.
+            </p>
+
+            <ClearQueuePenaltyButton />
+          </div>
+        )}
 
         {/* PvP */}
         <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -197,7 +221,6 @@ export default async function DashboardPage() {
               </p>
             </div>
           </div>
-
         </div>
 
         {/* Queue */}
@@ -217,6 +240,13 @@ export default async function DashboardPage() {
               <p className="mt-2 text-zinc-400">
                 Ticket value decreases while it remains in your queue.
               </p>
+
+              <div className="mt-5 border-t border-zinc-800 pt-4">
+                <TicketTimer
+                  nextTicketAt={player.nextTicketAt}
+                  queuePenaltyActive={queuePenaltyActive}
+                />
+              </div>
             </div>
 
             <Link

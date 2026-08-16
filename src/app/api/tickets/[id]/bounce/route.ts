@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
+import { getLevelFromXp } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
 
 function getPlayerCategory(
@@ -136,22 +137,106 @@ export async function POST(
       );
     }
 
+    const senderCategory = getPlayerCategory(
+      player.level,
+      player.careerPath
+    );
+
     const targetCategory = getPlayerCategory(
       target.level,
       target.careerPath
     );
 
-    const correct =
-      targetCategory === ticket.category;
+    /*
+     * SAME-TEAM HANDOFF
+     *
+     * Example:
+     * SDA -> SDA for an SDA ticket.
+     *
+     * Ticket still transfers.
+     * No credit penalty.
+     * Sender gets a 5 minute personal queue slowdown.
+     */
+    if (
+      senderCategory === ticket.category &&
+      targetCategory === ticket.category
+    ) {
+      const queuePenaltyUntil =
+        new Date(Date.now() + 5 * 60 * 1000);
 
-    if (correct) {
+      await prisma.$transaction([
+        prisma.ticket.update({
+          where: {
+            id: ticket.id,
+          },
+          data: {
+            assignedToId: target.id,
+            lastSentById: player.id,
+            bounceCount: {
+              increment: 1,
+            },
+          },
+        }),
+
+        prisma.player.update({
+          where: {
+            id: player.id,
+          },
+          data: {
+            queuePenaltyUntil,
+
+            lifetimeTicketsHandled: {
+              increment: 1,
+            },
+
+            lastActiveAt: new Date(),
+          },
+        }),
+      ]);
+
+      return NextResponse.json({
+        success: true,
+        outcome: "OWNERSHIP_WARNING",
+        target: target.username,
+        queuePenaltyUntil,
+        message:
+          "You transferred a ticket that you could have resolved. Your queue priority has been reduced for 5 minutes.",
+      });
+    }
+
+    /*
+     * CORRECT ESCALATION
+     *
+     * Example:
+     * SDA receives Network ticket
+     * -> sends it to Network Engineer.
+     */
+    if (targetCategory === ticket.category) {
       const currentValue = calculateTicketValue(
         ticket.maxValue,
         ticket.createdAt
       );
 
-      const reward = Math.floor(currentValue * 0.25);
+      const reward = Math.max(
+        1,
+        Math.floor(currentValue * 0.25)
+      );
+
       const xpReward = 5;
+
+      const newXp =
+        player.xp + xpReward;
+
+      const newLevel =
+        getLevelFromXp(newXp);
+
+      const levelledUp =
+        newLevel > player.level;
+
+      const careerUnlocked =
+        player.level < 4 &&
+        newLevel >= 4 &&
+        !player.careerPath;
 
       await prisma.$transaction([
         prisma.ticket.update({
@@ -176,9 +261,8 @@ export async function POST(
               increment: reward,
             },
 
-            xp: {
-              increment: xpReward,
-            },
+            xp: newXp,
+            level: newLevel,
 
             correctBounces: {
               increment: 1,
@@ -199,51 +283,85 @@ export async function POST(
 
       return NextResponse.json({
         success: true,
+        outcome: "CORRECT_BOUNCE",
         correct: true,
+        target: target.username,
         reward,
         xp: xpReward,
-        target: target.username,
+        level: newLevel,
+        levelledUp,
+        careerUnlocked,
       });
     }
 
-    const penalty = 50;
+    /*
+     * WRONG TEAM
+     *
+     * Ticket still transfers.
+     * Sender loses credits.
+     */
+    const penalty = 100;
 
     const newCredits = Math.max(
       0,
       player.credits - penalty
     );
 
-    await prisma.player.update({
-      where: {
-        id: player.id,
-      },
-      data: {
-        credits: newCredits,
-
-        incorrectBounces: {
-          increment: 1,
+    await prisma.$transaction([
+      prisma.ticket.update({
+        where: {
+          id: ticket.id,
         },
-
-        lifetimeTicketsHandled: {
-          increment: 1,
+        data: {
+          assignedToId: target.id,
+          lastSentById: player.id,
+          bounceCount: {
+            increment: 1,
+          },
         },
+      }),
 
-        lastActiveAt: new Date(),
-      },
-    });
+      prisma.player.update({
+        where: {
+          id: player.id,
+        },
+        data: {
+          credits: newCredits,
+
+          incorrectBounces: {
+            increment: 1,
+          },
+
+          lifetimeTicketsHandled: {
+            increment: 1,
+          },
+
+          lastActiveAt: new Date(),
+        },
+      }),
+    ]);
 
     return NextResponse.json({
       success: true,
+      outcome: "WRONG_BOUNCE",
       correct: false,
+      target: target.username,
       penalty,
+      credits: newCredits,
       bankrupt: newCredits === 0,
+      message:
+        "Wrong team. They are not happy about having to deal with your ticket.",
     });
   } catch (error) {
     console.error("Bounce ticket error:", error);
 
     return NextResponse.json(
-      { error: "Internal server error." },
-      { status: 500 }
+      {
+        error: "Internal server error.",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }

@@ -3,31 +3,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import BounceTicketButton from "@/components/BounceTicketButton";
-import GenerateTicketButton from "@/components/GenerateTicketButton";
 import ResolveTicketButton from "@/components/ResolveTicketButton";
+import TicketTimer from "@/components/TicketTimer";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
-function calculateTicketValue(
-  maxValue: number,
-  createdAt: Date
-) {
-  const ageMs = Date.now() - createdAt.getTime();
-  const ageMinutes = Math.floor(ageMs / 60000);
-
-  // Ticket loses 2% of its maximum value every minute.
-  const lossPerMinute = maxValue * 0.02;
-
-  const currentValue = Math.floor(
-    maxValue - ageMinutes * lossPerMinute
-  );
-
-  // Ticket can never be worth less than 10% of its original value.
-  return Math.max(
-    Math.floor(maxValue * 0.1),
-    currentValue
-  );
-}
+import { calculateTicketValue } from "@/lib/ticket-value";
 
 export default async function TicketsPage() {
   const session = await auth.api.getSession({
@@ -58,6 +38,12 @@ export default async function TicketsPage() {
     },
   });
 
+  const now = new Date();
+
+  const queuePenaltyActive =
+    player.queuePenaltyUntil !== null &&
+    player.queuePenaltyUntil > now;
+
   return (
     <main className="min-h-screen bg-black p-8 text-white">
       <div className="mx-auto max-w-5xl">
@@ -83,9 +69,12 @@ export default async function TicketsPage() {
           </Link>
         </div>
 
-        {/* Generate Ticket */}
-        <div className="mt-8">
-          <GenerateTicketButton />
+        {/* Ticket Timer */}
+        <div className="mt-8 border border-zinc-800 bg-zinc-950 p-5">
+          <TicketTimer
+            nextTicketAt={player.nextTicketAt}
+            queuePenaltyActive={queuePenaltyActive}
+          />
         </div>
 
         {/* Ticket Queue */}
@@ -99,7 +88,7 @@ export default async function TicketsPage() {
               </h2>
 
               <p className="mt-2 text-zinc-400">
-                Pull a ticket to start working.
+                Waiting for your next ticket...
               </p>
             </div>
           )}
@@ -138,7 +127,13 @@ export default async function TicketsPage() {
 
                   {/* Current Value */}
                   <div className="text-right">
-                    <p className="text-xl font-bold">
+                    <p
+                      className={`text-xl font-bold ${
+                        value === 0
+                          ? "text-red-400"
+                          : ""
+                      }`}
+                    >
                       {value} CR
                     </p>
 
@@ -158,6 +153,12 @@ export default async function TicketsPage() {
                   <span>
                     Age: {ageMinutes}m
                   </span>
+
+                  {value === 0 && (
+                    <span className="font-bold text-red-400">
+                      No credit value remaining
+                    </span>
+                  )}
                 </div>
 
                 {/* Actions */}

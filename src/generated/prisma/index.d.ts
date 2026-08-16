@@ -1583,8 +1583,6 @@ export namespace Prisma {
     level: number | null
     xp: number | null
     credits: number | null
-    energy: number | null
-    maxEnergy: number | null
     kills: number | null
     bankruptcies: number | null
     ticketsResolved: number | null
@@ -1600,8 +1598,6 @@ export namespace Prisma {
     level: number | null
     xp: number | null
     credits: number | null
-    energy: number | null
-    maxEnergy: number | null
     kills: number | null
     bankruptcies: number | null
     ticketsResolved: number | null
@@ -1620,8 +1616,6 @@ export namespace Prisma {
     xp: number | null
     careerPath: $Enums.CareerPath | null
     credits: number | null
-    energy: number | null
-    maxEnergy: number | null
     kills: number | null
     bankruptcies: number | null
     ticketsResolved: number | null
@@ -1631,6 +1625,8 @@ export namespace Prisma {
     lifetimeCreditsEarned: number | null
     lifetimeTicketsHandled: number | null
     lastActiveAt: Date | null
+    queuePenaltyUntil: Date | null
+    nextTicketAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1643,8 +1639,6 @@ export namespace Prisma {
     xp: number | null
     careerPath: $Enums.CareerPath | null
     credits: number | null
-    energy: number | null
-    maxEnergy: number | null
     kills: number | null
     bankruptcies: number | null
     ticketsResolved: number | null
@@ -1654,6 +1648,8 @@ export namespace Prisma {
     lifetimeCreditsEarned: number | null
     lifetimeTicketsHandled: number | null
     lastActiveAt: Date | null
+    queuePenaltyUntil: Date | null
+    nextTicketAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1666,8 +1662,6 @@ export namespace Prisma {
     xp: number
     careerPath: number
     credits: number
-    energy: number
-    maxEnergy: number
     kills: number
     bankruptcies: number
     ticketsResolved: number
@@ -1677,6 +1671,8 @@ export namespace Prisma {
     lifetimeCreditsEarned: number
     lifetimeTicketsHandled: number
     lastActiveAt: number
+    queuePenaltyUntil: number
+    nextTicketAt: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1688,8 +1684,6 @@ export namespace Prisma {
     level?: true
     xp?: true
     credits?: true
-    energy?: true
-    maxEnergy?: true
     kills?: true
     bankruptcies?: true
     ticketsResolved?: true
@@ -1705,8 +1699,6 @@ export namespace Prisma {
     level?: true
     xp?: true
     credits?: true
-    energy?: true
-    maxEnergy?: true
     kills?: true
     bankruptcies?: true
     ticketsResolved?: true
@@ -1725,8 +1717,6 @@ export namespace Prisma {
     xp?: true
     careerPath?: true
     credits?: true
-    energy?: true
-    maxEnergy?: true
     kills?: true
     bankruptcies?: true
     ticketsResolved?: true
@@ -1736,6 +1726,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: true
     lifetimeTicketsHandled?: true
     lastActiveAt?: true
+    queuePenaltyUntil?: true
+    nextTicketAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1748,8 +1740,6 @@ export namespace Prisma {
     xp?: true
     careerPath?: true
     credits?: true
-    energy?: true
-    maxEnergy?: true
     kills?: true
     bankruptcies?: true
     ticketsResolved?: true
@@ -1759,6 +1749,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: true
     lifetimeTicketsHandled?: true
     lastActiveAt?: true
+    queuePenaltyUntil?: true
+    nextTicketAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1771,8 +1763,6 @@ export namespace Prisma {
     xp?: true
     careerPath?: true
     credits?: true
-    energy?: true
-    maxEnergy?: true
     kills?: true
     bankruptcies?: true
     ticketsResolved?: true
@@ -1782,6 +1772,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: true
     lifetimeTicketsHandled?: true
     lastActiveAt?: true
+    queuePenaltyUntil?: true
+    nextTicketAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -1881,8 +1873,6 @@ export namespace Prisma {
     xp: number
     careerPath: $Enums.CareerPath | null
     credits: number
-    energy: number
-    maxEnergy: number
     kills: number
     bankruptcies: number
     ticketsResolved: number
@@ -1892,6 +1882,8 @@ export namespace Prisma {
     lifetimeCreditsEarned: number
     lifetimeTicketsHandled: number
     lastActiveAt: Date
+    queuePenaltyUntil: Date | null
+    nextTicketAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: PlayerCountAggregateOutputType | null
@@ -1923,8 +1915,6 @@ export namespace Prisma {
     xp?: boolean
     careerPath?: boolean
     credits?: boolean
-    energy?: boolean
-    maxEnergy?: boolean
     kills?: boolean
     bankruptcies?: boolean
     ticketsResolved?: boolean
@@ -1934,6 +1924,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: boolean
     lifetimeTicketsHandled?: boolean
     lastActiveAt?: boolean
+    queuePenaltyUntil?: boolean
+    nextTicketAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -1950,8 +1942,6 @@ export namespace Prisma {
     xp?: boolean
     careerPath?: boolean
     credits?: boolean
-    energy?: boolean
-    maxEnergy?: boolean
     kills?: boolean
     bankruptcies?: boolean
     ticketsResolved?: boolean
@@ -1961,6 +1951,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: boolean
     lifetimeTicketsHandled?: boolean
     lastActiveAt?: boolean
+    queuePenaltyUntil?: boolean
+    nextTicketAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -1974,8 +1966,6 @@ export namespace Prisma {
     xp?: boolean
     careerPath?: boolean
     credits?: boolean
-    energy?: boolean
-    maxEnergy?: boolean
     kills?: boolean
     bankruptcies?: boolean
     ticketsResolved?: boolean
@@ -1985,6 +1975,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: boolean
     lifetimeTicketsHandled?: boolean
     lastActiveAt?: boolean
+    queuePenaltyUntil?: boolean
+    nextTicketAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -1998,8 +1990,6 @@ export namespace Prisma {
     xp?: boolean
     careerPath?: boolean
     credits?: boolean
-    energy?: boolean
-    maxEnergy?: boolean
     kills?: boolean
     bankruptcies?: boolean
     ticketsResolved?: boolean
@@ -2009,11 +1999,13 @@ export namespace Prisma {
     lifetimeCreditsEarned?: boolean
     lifetimeTicketsHandled?: boolean
     lastActiveAt?: boolean
+    queuePenaltyUntil?: boolean
+    nextTicketAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type PlayerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "username" | "level" | "xp" | "careerPath" | "credits" | "energy" | "maxEnergy" | "kills" | "bankruptcies" | "ticketsResolved" | "correctBounces" | "incorrectBounces" | "incorrectResolves" | "lifetimeCreditsEarned" | "lifetimeTicketsHandled" | "lastActiveAt" | "createdAt" | "updatedAt", ExtArgs["result"]["player"]>
+  export type PlayerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "username" | "level" | "xp" | "careerPath" | "credits" | "kills" | "bankruptcies" | "ticketsResolved" | "correctBounces" | "incorrectBounces" | "incorrectResolves" | "lifetimeCreditsEarned" | "lifetimeTicketsHandled" | "lastActiveAt" | "queuePenaltyUntil" | "nextTicketAt" | "createdAt" | "updatedAt", ExtArgs["result"]["player"]>
   export type PlayerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     assignedTickets?: boolean | Player$assignedTicketsArgs<ExtArgs>
@@ -2042,8 +2034,6 @@ export namespace Prisma {
       xp: number
       careerPath: $Enums.CareerPath | null
       credits: number
-      energy: number
-      maxEnergy: number
       kills: number
       bankruptcies: number
       ticketsResolved: number
@@ -2053,6 +2043,8 @@ export namespace Prisma {
       lifetimeCreditsEarned: number
       lifetimeTicketsHandled: number
       lastActiveAt: Date
+      queuePenaltyUntil: Date | null
+      nextTicketAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["player"]>
@@ -2488,8 +2480,6 @@ export namespace Prisma {
     readonly xp: FieldRef<"Player", 'Int'>
     readonly careerPath: FieldRef<"Player", 'CareerPath'>
     readonly credits: FieldRef<"Player", 'Int'>
-    readonly energy: FieldRef<"Player", 'Int'>
-    readonly maxEnergy: FieldRef<"Player", 'Int'>
     readonly kills: FieldRef<"Player", 'Int'>
     readonly bankruptcies: FieldRef<"Player", 'Int'>
     readonly ticketsResolved: FieldRef<"Player", 'Int'>
@@ -2499,6 +2489,8 @@ export namespace Prisma {
     readonly lifetimeCreditsEarned: FieldRef<"Player", 'Int'>
     readonly lifetimeTicketsHandled: FieldRef<"Player", 'Int'>
     readonly lastActiveAt: FieldRef<"Player", 'DateTime'>
+    readonly queuePenaltyUntil: FieldRef<"Player", 'DateTime'>
+    readonly nextTicketAt: FieldRef<"Player", 'DateTime'>
     readonly createdAt: FieldRef<"Player", 'DateTime'>
     readonly updatedAt: FieldRef<"Player", 'DateTime'>
   }
@@ -9796,8 +9788,6 @@ export namespace Prisma {
     xp: 'xp',
     careerPath: 'careerPath',
     credits: 'credits',
-    energy: 'energy',
-    maxEnergy: 'maxEnergy',
     kills: 'kills',
     bankruptcies: 'bankruptcies',
     ticketsResolved: 'ticketsResolved',
@@ -9807,6 +9797,8 @@ export namespace Prisma {
     lifetimeCreditsEarned: 'lifetimeCreditsEarned',
     lifetimeTicketsHandled: 'lifetimeTicketsHandled',
     lastActiveAt: 'lastActiveAt',
+    queuePenaltyUntil: 'queuePenaltyUntil',
+    nextTicketAt: 'nextTicketAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -10056,8 +10048,6 @@ export namespace Prisma {
     xp?: IntFilter<"Player"> | number
     careerPath?: EnumCareerPathNullableFilter<"Player"> | $Enums.CareerPath | null
     credits?: IntFilter<"Player"> | number
-    energy?: IntFilter<"Player"> | number
-    maxEnergy?: IntFilter<"Player"> | number
     kills?: IntFilter<"Player"> | number
     bankruptcies?: IntFilter<"Player"> | number
     ticketsResolved?: IntFilter<"Player"> | number
@@ -10067,6 +10057,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: IntFilter<"Player"> | number
     lifetimeTicketsHandled?: IntFilter<"Player"> | number
     lastActiveAt?: DateTimeFilter<"Player"> | Date | string
+    queuePenaltyUntil?: DateTimeNullableFilter<"Player"> | Date | string | null
+    nextTicketAt?: DateTimeNullableFilter<"Player"> | Date | string | null
     createdAt?: DateTimeFilter<"Player"> | Date | string
     updatedAt?: DateTimeFilter<"Player"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -10082,8 +10074,6 @@ export namespace Prisma {
     xp?: SortOrder
     careerPath?: SortOrderInput | SortOrder
     credits?: SortOrder
-    energy?: SortOrder
-    maxEnergy?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -10093,6 +10083,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: SortOrder
     lifetimeTicketsHandled?: SortOrder
     lastActiveAt?: SortOrder
+    queuePenaltyUntil?: SortOrderInput | SortOrder
+    nextTicketAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -10111,8 +10103,6 @@ export namespace Prisma {
     xp?: IntFilter<"Player"> | number
     careerPath?: EnumCareerPathNullableFilter<"Player"> | $Enums.CareerPath | null
     credits?: IntFilter<"Player"> | number
-    energy?: IntFilter<"Player"> | number
-    maxEnergy?: IntFilter<"Player"> | number
     kills?: IntFilter<"Player"> | number
     bankruptcies?: IntFilter<"Player"> | number
     ticketsResolved?: IntFilter<"Player"> | number
@@ -10122,6 +10112,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: IntFilter<"Player"> | number
     lifetimeTicketsHandled?: IntFilter<"Player"> | number
     lastActiveAt?: DateTimeFilter<"Player"> | Date | string
+    queuePenaltyUntil?: DateTimeNullableFilter<"Player"> | Date | string | null
+    nextTicketAt?: DateTimeNullableFilter<"Player"> | Date | string | null
     createdAt?: DateTimeFilter<"Player"> | Date | string
     updatedAt?: DateTimeFilter<"Player"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -10137,8 +10129,6 @@ export namespace Prisma {
     xp?: SortOrder
     careerPath?: SortOrderInput | SortOrder
     credits?: SortOrder
-    energy?: SortOrder
-    maxEnergy?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -10148,6 +10138,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: SortOrder
     lifetimeTicketsHandled?: SortOrder
     lastActiveAt?: SortOrder
+    queuePenaltyUntil?: SortOrderInput | SortOrder
+    nextTicketAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: PlayerCountOrderByAggregateInput
@@ -10168,8 +10160,6 @@ export namespace Prisma {
     xp?: IntWithAggregatesFilter<"Player"> | number
     careerPath?: EnumCareerPathNullableWithAggregatesFilter<"Player"> | $Enums.CareerPath | null
     credits?: IntWithAggregatesFilter<"Player"> | number
-    energy?: IntWithAggregatesFilter<"Player"> | number
-    maxEnergy?: IntWithAggregatesFilter<"Player"> | number
     kills?: IntWithAggregatesFilter<"Player"> | number
     bankruptcies?: IntWithAggregatesFilter<"Player"> | number
     ticketsResolved?: IntWithAggregatesFilter<"Player"> | number
@@ -10179,6 +10169,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: IntWithAggregatesFilter<"Player"> | number
     lifetimeTicketsHandled?: IntWithAggregatesFilter<"Player"> | number
     lastActiveAt?: DateTimeWithAggregatesFilter<"Player"> | Date | string
+    queuePenaltyUntil?: DateTimeNullableWithAggregatesFilter<"Player"> | Date | string | null
+    nextTicketAt?: DateTimeNullableWithAggregatesFilter<"Player"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Player"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Player"> | Date | string
   }
@@ -10666,8 +10658,6 @@ export namespace Prisma {
     xp?: number
     careerPath?: $Enums.CareerPath | null
     credits?: number
-    energy?: number
-    maxEnergy?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -10677,6 +10667,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: number
     lifetimeTicketsHandled?: number
     lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutPlayerInput
@@ -10692,8 +10684,6 @@ export namespace Prisma {
     xp?: number
     careerPath?: $Enums.CareerPath | null
     credits?: number
-    energy?: number
-    maxEnergy?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -10703,6 +10693,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: number
     lifetimeTicketsHandled?: number
     lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -10715,8 +10707,6 @@ export namespace Prisma {
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
     credits?: IntFieldUpdateOperationsInput | number
-    energy?: IntFieldUpdateOperationsInput | number
-    maxEnergy?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -10726,6 +10716,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
     lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
     lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutPlayerNestedInput
@@ -10741,8 +10733,6 @@ export namespace Prisma {
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
     credits?: IntFieldUpdateOperationsInput | number
-    energy?: IntFieldUpdateOperationsInput | number
-    maxEnergy?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -10752,6 +10742,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
     lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
     lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -10766,8 +10758,6 @@ export namespace Prisma {
     xp?: number
     careerPath?: $Enums.CareerPath | null
     credits?: number
-    energy?: number
-    maxEnergy?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -10777,6 +10767,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: number
     lifetimeTicketsHandled?: number
     lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -10787,8 +10779,6 @@ export namespace Prisma {
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
     credits?: IntFieldUpdateOperationsInput | number
-    energy?: IntFieldUpdateOperationsInput | number
-    maxEnergy?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -10798,6 +10788,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
     lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
     lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10810,8 +10802,6 @@ export namespace Prisma {
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
     credits?: IntFieldUpdateOperationsInput | number
-    energy?: IntFieldUpdateOperationsInput | number
-    maxEnergy?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -10821,6 +10811,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
     lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
     lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11403,6 +11395,17 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
@@ -11431,8 +11434,6 @@ export namespace Prisma {
     xp?: SortOrder
     careerPath?: SortOrder
     credits?: SortOrder
-    energy?: SortOrder
-    maxEnergy?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -11442,6 +11443,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: SortOrder
     lifetimeTicketsHandled?: SortOrder
     lastActiveAt?: SortOrder
+    queuePenaltyUntil?: SortOrder
+    nextTicketAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -11451,8 +11454,6 @@ export namespace Prisma {
     level?: SortOrder
     xp?: SortOrder
     credits?: SortOrder
-    energy?: SortOrder
-    maxEnergy?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -11471,8 +11472,6 @@ export namespace Prisma {
     xp?: SortOrder
     careerPath?: SortOrder
     credits?: SortOrder
-    energy?: SortOrder
-    maxEnergy?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -11482,6 +11481,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: SortOrder
     lifetimeTicketsHandled?: SortOrder
     lastActiveAt?: SortOrder
+    queuePenaltyUntil?: SortOrder
+    nextTicketAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -11494,8 +11495,6 @@ export namespace Prisma {
     xp?: SortOrder
     careerPath?: SortOrder
     credits?: SortOrder
-    energy?: SortOrder
-    maxEnergy?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -11505,6 +11504,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: SortOrder
     lifetimeTicketsHandled?: SortOrder
     lastActiveAt?: SortOrder
+    queuePenaltyUntil?: SortOrder
+    nextTicketAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -11514,8 +11515,6 @@ export namespace Prisma {
     level?: SortOrder
     xp?: SortOrder
     credits?: SortOrder
-    energy?: SortOrder
-    maxEnergy?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -11584,6 +11583,20 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type EnumTicketCategoryFilter<$PrismaModel = never> = {
     equals?: $Enums.TicketCategory | EnumTicketCategoryFieldRefInput<$PrismaModel>
     in?: $Enums.TicketCategory[] | ListEnumTicketCategoryFieldRefInput<$PrismaModel>
@@ -11607,17 +11620,6 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type PlayerScalarRelationFilter = {
@@ -11733,20 +11735,6 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type BoolFilter<$PrismaModel = never> = {
@@ -12060,6 +12048,10 @@ export namespace Prisma {
     set?: Date | string
   }
 
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
   export type UserUpdateOneRequiredWithoutPlayerNestedInput = {
     create?: XOR<UserCreateWithoutPlayerInput, UserUncheckedCreateWithoutPlayerInput>
     connectOrCreate?: UserCreateOrConnectWithoutPlayerInput
@@ -12142,10 +12134,6 @@ export namespace Prisma {
 
   export type EnumTicketStatusFieldUpdateOperationsInput = {
     set?: $Enums.TicketStatus
-  }
-
-  export type NullableDateTimeFieldUpdateOperationsInput = {
-    set?: Date | string | null
   }
 
   export type PlayerUpdateOneRequiredWithoutAssignedTicketsNestedInput = {
@@ -12369,6 +12357,17 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -12448,6 +12447,20 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type NestedEnumTicketCategoryFilter<$PrismaModel = never> = {
     equals?: $Enums.TicketCategory | EnumTicketCategoryFieldRefInput<$PrismaModel>
     in?: $Enums.TicketCategory[] | ListEnumTicketCategoryFieldRefInput<$PrismaModel>
@@ -12460,17 +12473,6 @@ export namespace Prisma {
     in?: $Enums.TicketStatus[] | ListEnumTicketStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.TicketStatus[] | ListEnumTicketStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumTicketStatusFilter<$PrismaModel> | $Enums.TicketStatus
-  }
-
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type NestedEnumTicketCategoryWithAggregatesFilter<$PrismaModel = never> = {
@@ -12518,20 +12520,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type NestedBoolFilter<$PrismaModel = never> = {
@@ -12782,8 +12770,6 @@ export namespace Prisma {
     xp?: number
     careerPath?: $Enums.CareerPath | null
     credits?: number
-    energy?: number
-    maxEnergy?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -12793,6 +12779,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: number
     lifetimeTicketsHandled?: number
     lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutPlayerInput
@@ -12807,8 +12795,6 @@ export namespace Prisma {
     xp?: number
     careerPath?: $Enums.CareerPath | null
     credits?: number
-    energy?: number
-    maxEnergy?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -12818,6 +12804,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: number
     lifetimeTicketsHandled?: number
     lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     sentTickets?: TicketUncheckedCreateNestedManyWithoutLastSentByInput
@@ -12834,8 +12822,6 @@ export namespace Prisma {
     xp?: number
     careerPath?: $Enums.CareerPath | null
     credits?: number
-    energy?: number
-    maxEnergy?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -12845,6 +12831,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: number
     lifetimeTicketsHandled?: number
     lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutPlayerInput
@@ -12859,8 +12847,6 @@ export namespace Prisma {
     xp?: number
     careerPath?: $Enums.CareerPath | null
     credits?: number
-    energy?: number
-    maxEnergy?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -12870,6 +12856,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: number
     lifetimeTicketsHandled?: number
     lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -12897,8 +12885,6 @@ export namespace Prisma {
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
     credits?: IntFieldUpdateOperationsInput | number
-    energy?: IntFieldUpdateOperationsInput | number
-    maxEnergy?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -12908,6 +12894,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
     lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
     lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutPlayerNestedInput
@@ -12922,8 +12910,6 @@ export namespace Prisma {
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
     credits?: IntFieldUpdateOperationsInput | number
-    energy?: IntFieldUpdateOperationsInput | number
-    maxEnergy?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -12933,6 +12919,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
     lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
     lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sentTickets?: TicketUncheckedUpdateManyWithoutLastSentByNestedInput
@@ -12955,8 +12943,6 @@ export namespace Prisma {
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
     credits?: IntFieldUpdateOperationsInput | number
-    energy?: IntFieldUpdateOperationsInput | number
-    maxEnergy?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -12966,6 +12952,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
     lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
     lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutPlayerNestedInput
@@ -12980,8 +12968,6 @@ export namespace Prisma {
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
     credits?: IntFieldUpdateOperationsInput | number
-    energy?: IntFieldUpdateOperationsInput | number
-    maxEnergy?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -12991,6 +12977,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
     lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
     lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -13072,8 +13060,6 @@ export namespace Prisma {
     xp?: number
     careerPath?: $Enums.CareerPath | null
     credits?: number
-    energy?: number
-    maxEnergy?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -13083,6 +13069,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: number
     lifetimeTicketsHandled?: number
     lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
@@ -13096,8 +13084,6 @@ export namespace Prisma {
     xp?: number
     careerPath?: $Enums.CareerPath | null
     credits?: number
-    energy?: number
-    maxEnergy?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -13107,6 +13093,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: number
     lifetimeTicketsHandled?: number
     lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -13200,8 +13188,6 @@ export namespace Prisma {
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
     credits?: IntFieldUpdateOperationsInput | number
-    energy?: IntFieldUpdateOperationsInput | number
-    maxEnergy?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -13211,6 +13197,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
     lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
     lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -13224,8 +13212,6 @@ export namespace Prisma {
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
     credits?: IntFieldUpdateOperationsInput | number
-    energy?: IntFieldUpdateOperationsInput | number
-    maxEnergy?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -13235,6 +13221,8 @@ export namespace Prisma {
     lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
     lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
     lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput

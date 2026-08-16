@@ -44,10 +44,6 @@ model Player {
   // Credits are effectively the player's health
   credits Int @default(1000)
 
-  // Action resource
-  energy    Int @default(20)
-  maxEnergy Int @default(20)
-
   // PvP
   kills        Int @default(0)
   bankruptcies Int @default(0)
@@ -62,8 +58,16 @@ model Player {
   lifetimeCreditsEarned  Int @default(0)
   lifetimeTicketsHandled Int @default(0)
 
-  // Used later to determine which career paths are actively playing
+  // Player activity
   lastActiveAt DateTime @default(now())
+
+  // Personal queue slowdown after bouncing work
+  // that the player could have resolved themselves
+  queuePenaltyUntil DateTime?
+
+  // Controls when this player is next eligible
+  // to receive an automatic system ticket
+  nextTicketAt DateTime?
 
   // Ticket relationships
   assignedTickets Ticket[] @relation("AssignedTickets")
@@ -79,7 +83,7 @@ model Ticket {
   title       String
   description String
 
-  // Hidden answer - never show this to the player
+  // Hidden answer - never show this directly to the player
   category TicketCategory
 
   status TicketStatus @default(OPEN)
@@ -91,8 +95,8 @@ model Ticket {
   assignedToId Int
   assignedTo   Player @relation("AssignedTickets", fields: [assignedToId], references: [id], onDelete: Cascade)
 
-  // Player who most recently bounced the ticket.
-  // Null means the game generated it.
+  // Player who most recently bounced/sent this ticket.
+  // Null means the ticket came from the game.
   lastSentById Int?
   lastSentBy   Player? @relation("SentTickets", fields: [lastSentById], references: [id], onDelete: SetNull)
 
@@ -116,7 +120,7 @@ model TicketTemplate {
   title       String
   description String
 
-  // Hidden correct owner
+  // Hidden correct resolver
   category TicketCategory
 
   difficulty Int @default(1)
