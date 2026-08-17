@@ -1,14 +1,54 @@
+name: it-wars
+
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: itwars-app
+
+    restart: unless-stopped
+
+    ports:
+      - "3000:3000"
+
+    env_file:
+      - .env
+
+    environment:
+      DATABASE_URL: postgresql://itwars:itwars_dev_password@postgres:5432/itwars
+
+    depends_on:
+      - postgres
+
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+    command:
+      - npm
+      - run
+      - dev
+      - --
+      - --hostname
+      - 0.0.0.0
+
   postgres:
     image: postgres:17
+
     container_name: itwars-postgres
+
     restart: unless-stopped
+
     environment:
       POSTGRES_USER: itwars
       POSTGRES_PASSWORD: itwars_dev_password
       POSTGRES_DB: itwars
+
     ports:
       - "5432:5432"
+
     volumes:
       - itwars_postgres_data:/var/lib/postgresql/data
 
