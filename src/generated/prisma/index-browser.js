@@ -148,12 +148,18 @@ exports.Prisma.TicketScalarFieldEnum = {
   title: 'title',
   description: 'description',
   category: 'category',
+  severity: 'severity',
+  difficulty: 'difficulty',
   status: 'status',
   maxValue: 'maxValue',
   baseXp: 'baseXp',
+  successMessage: 'successMessage',
+  failureMessage: 'failureMessage',
   assignedToId: 'assignedToId',
   lastSentById: 'lastSentById',
   bounceCount: 'bounceCount',
+  abandonmentPenaltyApplied: 'abandonmentPenaltyApplied',
+  abandonmentPenaltyAt: 'abandonmentPenaltyAt',
   resolvedAt: 'resolvedAt',
   expiredAt: 'expiredAt',
   createdAt: 'createdAt',
@@ -165,9 +171,12 @@ exports.Prisma.TicketTemplateScalarFieldEnum = {
   title: 'title',
   description: 'description',
   category: 'category',
+  severity: 'severity',
   difficulty: 'difficulty',
   maxValue: 'maxValue',
   baseXp: 'baseXp',
+  successMessage: 'successMessage',
+  failureMessage: 'failureMessage',
   active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -244,6 +253,13 @@ exports.TicketCategory = exports.$Enums.TicketCategory = {
   NETWORK: 'NETWORK',
   SYSTEMS: 'SYSTEMS',
   SECURITY: 'SECURITY'
+};
+
+exports.TicketSeverity = exports.$Enums.TicketSeverity = {
+  P1: 'P1',
+  P2: 'P2',
+  P3: 'P3',
+  P4: 'P4'
 };
 
 exports.TicketStatus = exports.$Enums.TicketStatus = {

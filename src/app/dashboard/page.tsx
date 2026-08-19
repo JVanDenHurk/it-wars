@@ -6,6 +6,9 @@ import ClearQueuePenaltyButton from "@/components/ClearQueuePenaltyButton";
 import SignOutButton from "@/components/SignOutButton";
 import TicketTimer from "@/components/TicketTimer";
 import { auth } from "@/lib/auth";
+import {
+  calculateLeaderboardScore,
+} from "@/lib/leaderboard";
 import { getRoleTitle } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
 
@@ -33,6 +36,13 @@ export default async function DashboardPage() {
     });
   }
 
+  const now = new Date();
+
+  /*
+   * ============================
+   * CURRENT PLAYER STATS
+   * ============================
+   */
   const openTickets = await prisma.ticket.count({
     where: {
       assignedToId: player.id,
@@ -47,19 +57,124 @@ export default async function DashboardPage() {
     },
   });
 
+  /*
+   * ============================
+   * ACTIVE PLAYERS
+   * ============================
+   *
+   * Uses the same rule as ticket
+   * generation:
+   *
+   * player must have an unexpired
+   * authentication session.
+   */
+  const activePlayers = await prisma.player.findMany({
+    where: {
+      user: {
+        sessions: {
+          some: {
+            expiresAt: {
+              gt: now,
+            },
+          },
+        },
+      },
+    },
+
+    select: {
+      id: true,
+    },
+  });
+
+  /*
+   * ============================
+   * LEADERBOARD
+   * ============================
+   */
+  const leaderboardPlayers =
+    await prisma.player.findMany({
+      select: {
+        username: true,
+
+        xp: true,
+
+        lifetimeCreditsEarned: true,
+
+        ticketsResolved: true,
+
+        correctBounces: true,
+
+        kills: true,
+
+        bankruptcies: true,
+      },
+    });
+
+  const leaderboard =
+    leaderboardPlayers
+      .map(
+        (
+          leaderboardPlayer
+        ) => ({
+          username:
+            leaderboardPlayer.username,
+
+          score:
+            calculateLeaderboardScore({
+              xp:
+                leaderboardPlayer.xp,
+
+              lifetimeCreditsEarned:
+                leaderboardPlayer
+                  .lifetimeCreditsEarned,
+
+              ticketsResolved:
+                leaderboardPlayer
+                  .ticketsResolved,
+
+              correctBounces:
+                leaderboardPlayer
+                  .correctBounces,
+
+              kills:
+                leaderboardPlayer.kills,
+
+              bankruptcies:
+                leaderboardPlayer
+                  .bankruptcies,
+            }),
+        })
+      )
+      .sort(
+        (a, b) =>
+          b.score - a.score
+      );
+
+  const leaderboardLeader =
+    leaderboard[0] ?? null;
+
+  /*
+   * ============================
+   * ROLE
+   * ============================
+   */
   const roleTitle = getRoleTitle(
     player.level,
     player.careerPath
   );
 
-  const now = new Date();
-
+  /*
+   * ============================
+   * QUEUE PENALTY
+   * ============================
+   */
   const queuePenaltyActive =
     player.queuePenaltyUntil !== null &&
     player.queuePenaltyUntil > now;
 
   const queuePenaltyMinutesRemaining =
-    queuePenaltyActive && player.queuePenaltyUntil
+    queuePenaltyActive &&
+    player.queuePenaltyUntil
       ? Math.max(
           1,
           Math.ceil(
@@ -76,8 +191,11 @@ export default async function DashboardPage() {
     <main className="min-h-screen bg-black p-8 text-white">
       <div className="mx-auto max-w-6xl">
 
-        {/* Header */}
+        {/* ============================
+            HEADER
+            ============================ */}
         <div className="flex items-start justify-between">
+
           <div>
             <h1 className="text-4xl font-black">
               IT WARS
@@ -93,12 +211,17 @@ export default async function DashboardPage() {
           </div>
 
           <SignOutButton />
+
         </div>
 
-        {/* Core Stats */}
+        {/* ============================
+            CORE STATS
+            ============================ */}
         <div className="mt-8 grid gap-4 md:grid-cols-4">
 
+          {/* Level */}
           <div className="border border-zinc-800 bg-zinc-950 p-5">
+
             <p className="text-xs uppercase tracking-wide text-zinc-500">
               Level
             </p>
@@ -106,9 +229,12 @@ export default async function DashboardPage() {
             <p className="mt-2 text-3xl font-bold">
               {player.level}
             </p>
+
           </div>
 
+          {/* Career XP */}
           <div className="border border-zinc-800 bg-zinc-950 p-5">
+
             <p className="text-xs uppercase tracking-wide text-zinc-500">
               Career XP
             </p>
@@ -116,9 +242,12 @@ export default async function DashboardPage() {
             <p className="mt-2 text-3xl font-bold">
               {player.xp}
             </p>
+
           </div>
 
+          {/* Credits */}
           <div className="border border-zinc-800 bg-zinc-950 p-5">
+
             <p className="text-xs uppercase tracking-wide text-zinc-500">
               Credits
             </p>
@@ -130,9 +259,12 @@ export default async function DashboardPage() {
             <p className="text-xs text-zinc-500">
               CR
             </p>
+
           </div>
 
+          {/* Open Tickets */}
           <div className="border border-zinc-800 bg-zinc-950 p-5">
+
             <p className="text-xs uppercase tracking-wide text-zinc-500">
               Open Tickets
             </p>
@@ -140,12 +272,17 @@ export default async function DashboardPage() {
             <p className="mt-2 text-3xl font-bold">
               {openTickets}
             </p>
+
           </div>
+
         </div>
 
-        {/* Ownership Warning */}
+        {/* ============================
+            OWNERSHIP WARNING
+            ============================ */}
         {queuePenaltyActive && (
           <div className="mt-4 border border-yellow-900 bg-yellow-950/20 p-6">
+
             <p className="text-xs uppercase tracking-wide text-yellow-500">
               Ownership Warning
             </p>
@@ -163,23 +300,33 @@ export default async function DashboardPage() {
             </p>
 
             <p className="mt-3 text-sm font-bold text-yellow-400">
-              Approximately {queuePenaltyMinutesRemaining} minute
-              {queuePenaltyMinutesRemaining === 1 ? "" : "s"} remaining.
+              Approximately{" "}
+              {queuePenaltyMinutesRemaining} minute
+              {queuePenaltyMinutesRemaining === 1
+                ? ""
+                : "s"}{" "}
+              remaining.
             </p>
 
             <ClearQueuePenaltyButton />
+
           </div>
         )}
 
-        {/* PvP */}
+        {/* ============================
+            PVP / PERFORMANCE
+            ============================ */}
         <div className="mt-4 grid gap-4 md:grid-cols-2">
 
+          {/* PvP */}
           <div className="border border-zinc-800 bg-zinc-950 p-6">
+
             <p className="text-xs uppercase tracking-wide text-zinc-500">
               PvP Record
             </p>
 
             <div className="mt-4 grid grid-cols-2 gap-4">
+
               <div>
                 <p className="text-sm text-zinc-500">
                   Kills
@@ -199,42 +346,168 @@ export default async function DashboardPage() {
                   {player.bankruptcies}
                 </p>
               </div>
+
             </div>
+
           </div>
 
+          {/* Ticket Performance */}
           <div className="border border-zinc-800 bg-zinc-950 p-6">
+
             <p className="text-xs uppercase tracking-wide text-zinc-500">
               Ticket Performance
             </p>
 
             <div className="mt-4 space-y-2">
+
               <p>
                 Resolved: {resolvedTickets}
               </p>
 
               <p>
-                Correct Bounces: {player.correctBounces}
+                Correct Bounces:{" "}
+                {player.correctBounces}
               </p>
 
               <p>
-                Incorrect Bounces: {player.incorrectBounces}
+                Incorrect Bounces:{" "}
+                {player.incorrectBounces}
               </p>
+
             </div>
+
           </div>
+
         </div>
 
-        {/* Queue */}
+        {/* ============================
+            PLAYERS / LEADERBOARD
+            ============================ */}
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+
+          {/* ============================
+              ACTIVE PLAYERS CARD
+              ============================ */}
+          <div className="border border-zinc-800 bg-zinc-950 p-6">
+
+            <div className="flex items-start justify-between gap-6">
+
+              <div>
+
+                <p className="text-xs uppercase tracking-wide text-zinc-500">
+                  Active Players
+                </p>
+
+                <div className="mt-3 flex items-center gap-3">
+
+                  <span className="h-3 w-3 rounded-full bg-green-400" />
+
+                  <p className="text-3xl font-black">
+                    {activePlayers.length}
+                  </p>
+
+                </div>
+
+                <p className="mt-1 text-sm text-zinc-500">
+                  Online now
+                </p>
+
+              </div>
+
+              <Link
+                href="/players"
+                className="border border-zinc-700 px-4 py-2 text-sm font-bold hover:bg-zinc-900"
+              >
+                View Players
+              </Link>
+
+            </div>
+
+            <p className="mt-5 border-t border-zinc-800 pt-4 text-xs text-zinc-600">
+              Online specialist players affect which ticket types can enter the global queue.
+            </p>
+
+          </div>
+
+          {/* ============================
+              LEADERBOARD CARD
+              ============================ */}
+          <div className="border border-zinc-800 bg-zinc-950 p-6">
+
+            <div className="flex items-start justify-between gap-6">
+
+              <div>
+
+                <p className="text-xs uppercase tracking-wide text-zinc-500">
+                  Leaderboard
+                </p>
+
+                {leaderboardLeader ? (
+                  <>
+                    <div className="mt-3 flex items-center gap-3">
+
+                      <span className="text-2xl font-black text-yellow-400">
+                        #1
+                      </span>
+
+                      <p className="text-2xl font-black">
+                        {
+                          leaderboardLeader.username
+                        }
+                      </p>
+
+                    </div>
+
+                    <p className="mt-2 text-sm text-zinc-500">
+                      {
+                        leaderboardLeader.score
+                      }{" "}
+                      Score
+                    </p>
+                  </>
+                ) : (
+                  <p className="mt-3 text-zinc-500">
+                    No rankings yet.
+                  </p>
+                )}
+
+              </div>
+
+              <Link
+                href="/leaderboard"
+                className="border border-zinc-700 px-4 py-2 text-sm font-bold hover:bg-zinc-900"
+              >
+                View Leaderboard
+              </Link>
+
+            </div>
+
+            <p className="mt-5 border-t border-zinc-800 pt-4 text-xs text-zinc-600">
+              Earn score from XP, resolved tickets, correct routing, credits and PvP.
+            </p>
+
+          </div>
+
+        </div>
+
+        {/* ============================
+            QUEUE
+            ============================ */}
         <div className="mt-4 border border-zinc-800 bg-zinc-950 p-6">
+
           <div className="flex items-start justify-between gap-6">
 
             <div>
+
               <p className="text-xs uppercase tracking-wide text-zinc-500">
                 Your Queue
               </p>
 
               <h2 className="mt-2 text-3xl font-bold">
                 {openTickets} Open Ticket
-                {openTickets === 1 ? "" : "s"}
+                {openTickets === 1
+                  ? ""
+                  : "s"}
               </h2>
 
               <p className="mt-2 text-zinc-400">
@@ -242,11 +515,18 @@ export default async function DashboardPage() {
               </p>
 
               <div className="mt-5 border-t border-zinc-800 pt-4">
+
                 <TicketTimer
-                  nextTicketAt={player.nextTicketAt}
-                  queuePenaltyActive={queuePenaltyActive}
+                  nextTicketAt={
+                    player.nextTicketAt
+                  }
+                  queuePenaltyActive={
+                    queuePenaltyActive
+                  }
                 />
+
               </div>
+
             </div>
 
             <Link
@@ -257,10 +537,14 @@ export default async function DashboardPage() {
             </Link>
 
           </div>
+
         </div>
 
-        {/* Career */}
+        {/* ============================
+            CAREER
+            ============================ */}
         <div className="mt-4 border border-zinc-800 bg-zinc-950 p-6">
+
           <p className="text-xs uppercase tracking-wide text-zinc-500">
             Career
           </p>
@@ -275,20 +559,24 @@ export default async function DashboardPage() {
             </p>
           )}
 
-          {player.level >= 4 && !player.careerPath && (
-            <div className="mt-4">
-              <p className="text-sm text-yellow-400">
-                Career specialisation available.
-              </p>
+          {player.level >= 4 &&
+            !player.careerPath && (
+              <div className="mt-4">
 
-              <Link
-                href="/choose-career"
-                className="mt-3 inline-block border border-zinc-700 px-4 py-2 font-bold hover:bg-zinc-900"
-              >
-                Choose Career Path
-              </Link>
-            </div>
-          )}
+                <p className="text-sm text-yellow-400">
+                  Career specialisation available.
+                </p>
+
+                <Link
+                  href="/choose-career"
+                  className="mt-3 inline-block border border-zinc-700 px-4 py-2 font-bold hover:bg-zinc-900"
+                >
+                  Choose Career Path
+                </Link>
+
+              </div>
+            )}
+
         </div>
 
       </div>

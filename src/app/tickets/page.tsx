@@ -9,6 +9,42 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateTicketValue } from "@/lib/ticket-value";
 
+function getAbandonmentMinutes(
+  severity: "P1" | "P2" | "P3" | "P4"
+) {
+  switch (severity) {
+    case "P1":
+      return 10;
+
+    case "P2":
+      return 20;
+
+    case "P3":
+      return 30;
+
+    case "P4":
+    default:
+      return 45;
+  }
+}
+
+function getSeverityClasses(
+  severity: "P1" | "P2" | "P3" | "P4"
+) {
+  switch (severity) {
+    case "P1":
+    case "P2":
+      return "border-red-700 bg-red-950/20 text-red-400";
+
+    case "P3":
+      return "border-yellow-700 bg-yellow-950/20 text-yellow-400";
+
+    case "P4":
+    default:
+      return "border-zinc-700 bg-zinc-900 text-zinc-300";
+  }
+}
+
 export default async function TicketsPage() {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -45,7 +81,7 @@ export default async function TicketsPage() {
     player.queuePenaltyUntil > now;
 
   return (
-    <main className="min-h-screen bg-black p-8 text-white">
+    <main className="min-h-screen bg-black px-4 py-8 text-white md:px-8">
       <div className="mx-auto max-w-5xl">
 
         {/* Header */}
@@ -69,7 +105,7 @@ export default async function TicketsPage() {
           </Link>
         </div>
 
-        {/* Ticket Timer */}
+        {/* Next Ticket Timer */}
         <div className="mt-8 border border-zinc-800 bg-zinc-950 p-5">
           <TicketTimer
             nextTicketAt={player.nextTicketAt}
@@ -77,10 +113,9 @@ export default async function TicketsPage() {
           />
         </div>
 
-        {/* Ticket Queue */}
+        {/* Queue */}
         <div className="mt-8 space-y-4">
 
-          {/* Empty Queue */}
           {tickets.length === 0 && (
             <div className="border border-zinc-800 bg-zinc-950 p-8 text-center">
               <h2 className="text-xl font-bold">
@@ -93,7 +128,6 @@ export default async function TicketsPage() {
             </div>
           )}
 
-          {/* Tickets */}
           {tickets.map((ticket) => {
             const value = calculateTicketValue(
               ticket.maxValue,
@@ -101,9 +135,24 @@ export default async function TicketsPage() {
             );
 
             const ageMinutes = Math.floor(
-              (Date.now() - ticket.createdAt.getTime()) /
+              (Date.now() -
+                ticket.createdAt.getTime()) /
                 60000
             );
+
+            const abandonmentMinutes =
+              getAbandonmentMinutes(
+                ticket.severity
+              );
+
+            /*
+             * Show BREACHING when the ticket
+             * enters the final 25% of its
+             * abandonment window.
+             */
+            const breachingSoon =
+              ageMinutes >=
+              abandonmentMinutes * 0.75;
 
             return (
               <div
@@ -111,29 +160,35 @@ export default async function TicketsPage() {
                 className="border border-zinc-800 bg-zinc-950 p-6"
               >
                 {/* Ticket Header */}
-                <div className="flex justify-between gap-4">
+                <div className="flex items-start justify-between gap-4">
+
                   <div>
-                    <p className="text-xs text-zinc-500">
+                    {/* Severity */}
+                    <span
+                      className={`inline-block border px-2 py-1 text-xs font-bold ${getSeverityClasses(
+                        ticket.severity
+                      )}`}
+                    >
+                      {ticket.severity}
+                    </span>
+
+                    {/* Incident Number */}
+                    <p className="mt-2 text-xs text-zinc-500">
                       INC
                       {ticket.id
                         .toString()
                         .padStart(5, "0")}
                     </p>
 
+                    {/* Title */}
                     <h2 className="mt-1 text-xl font-bold">
                       {ticket.title}
                     </h2>
                   </div>
 
                   {/* Current Value */}
-                  <div className="text-right">
-                    <p
-                      className={`text-xl font-bold ${
-                        value === 0
-                          ? "text-red-400"
-                          : ""
-                      }`}
-                    >
+                  <div className="shrink-0 text-right">
+                    <p className="text-xl font-bold">
                       {value} CR
                     </p>
 
@@ -143,21 +198,21 @@ export default async function TicketsPage() {
                   </div>
                 </div>
 
-                {/* Ticket Description */}
-                <p className="mt-4 text-zinc-300">
+                {/* Description */}
+                <p className="mt-5 leading-relaxed text-zinc-300">
                   {ticket.description}
                 </p>
 
-                {/* Ticket Information */}
-                <div className="mt-4 flex gap-4 text-sm text-zinc-500">
-                  <span>
+                {/* Age / Breaching */}
+                <div className="mt-5 flex items-center gap-3 text-sm">
+                  <p className="text-zinc-500">
                     Age: {ageMinutes}m
-                  </span>
+                  </p>
 
-                  {value === 0 && (
-                    <span className="font-bold text-red-400">
-                      No credit value remaining
-                    </span>
+                  {breachingSoon && (
+                    <p className="font-bold text-red-500">
+                      BREACHING
+                    </p>
                   )}
                 </div>
 
@@ -171,6 +226,7 @@ export default async function TicketsPage() {
                     ticketId={ticket.id}
                   />
                 </div>
+
               </div>
             );
           })}

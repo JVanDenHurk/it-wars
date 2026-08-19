@@ -23,13 +23,16 @@ type BounceResponse = {
   outcome?:
     | "CORRECT_BOUNCE"
     | "WRONG_BOUNCE"
-    | "OWNERSHIP_WARNING";
+    | "OWNERSHIP_WARNING"
+    | "SERVICE_DESK_HANDOFF";
 
   correct?: boolean;
   reward?: number;
   xp?: number;
   penalty?: number;
+  credits?: number;
   bankrupt?: boolean;
+  resetToServiceDesk?: boolean;
   target?: string;
 
   queuePenaltyUntil?: string;
@@ -40,12 +43,19 @@ type BounceResponse = {
   careerUnlocked?: boolean;
 };
 
+type WrongBounceInfo = {
+  target: string;
+  penalty: number;
+  message: string;
+} | null;
+
 export default function BounceTicketButton({
   ticketId,
 }: BounceTicketButtonProps) {
   const router = useRouter();
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] =
+    useState(false);
 
   const [players, setPlayers] =
     useState<PlayerOption[]>([]);
@@ -62,12 +72,16 @@ export default function BounceTicketButton({
   const [clearingPenalty, setClearingPenalty] =
     useState(false);
 
-  const [message, setMessage] = useState("");
+  const [message, setMessage] =
+    useState("");
 
   const [result, setResult] = useState<
     "success" | "error" | null
   >(null);
 
+  /*
+   * Ownership Warning
+   */
   const [ownershipWarning, setOwnershipWarning] =
     useState(false);
 
@@ -75,11 +89,57 @@ export default function BounceTicketButton({
     useState("");
 
   /*
-   * Load available players when the
-   * bounce menu is opened.
+   * Wrong Team popup
+   */
+  const [wrongBounce, setWrongBounce] =
+    useState<WrongBounceInfo>(null);
+
+  /*
+   * Bankruptcy / demotion popup
+   */
+  const [demoted, setDemoted] =
+    useState(false);
+
+  /*
+   * Global modal flag.
+   *
+   * Prevents TicketTimer from refreshing
+   * underneath one of these popups.
    */
   useEffect(() => {
-    if (!open || players.length > 0) {
+    const modalOpen =
+      ownershipWarning ||
+      wrongBounce !== null ||
+      demoted;
+
+    if (modalOpen) {
+      document.body.dataset.gameModalOpen =
+        "true";
+    } else {
+      delete document.body.dataset
+        .gameModalOpen;
+    }
+
+    return () => {
+      delete document.body.dataset
+        .gameModalOpen;
+    };
+  }, [
+    ownershipWarning,
+    wrongBounce,
+    demoted,
+  ]);
+
+  /*
+   * ============================
+   * LOAD PLAYERS
+   * ============================
+   */
+  useEffect(() => {
+    if (
+      !open ||
+      players.length > 0
+    ) {
       return;
     }
 
@@ -103,7 +163,10 @@ export default function BounceTicketButton({
 
         if (responseText) {
           try {
-            data = JSON.parse(responseText);
+            data =
+              JSON.parse(
+                responseText
+              );
           } catch {
             setResult("error");
 
@@ -126,7 +189,9 @@ export default function BounceTicketButton({
           return;
         }
 
-        setPlayers(data.players ?? []);
+        setPlayers(
+          data.players ?? []
+        );
       } catch (error) {
         console.error(
           "Unable to load players:",
@@ -144,15 +209,24 @@ export default function BounceTicketButton({
     }
 
     loadPlayers();
-  }, [open, players.length]);
+  }, [
+    open,
+    players.length,
+  ]);
 
   /*
-   * Transfer / bounce ticket.
+   * ============================
+   * BOUNCE TICKET
+   * ============================
    */
   async function bounceTicket() {
     if (!selectedPlayer) {
       setResult("error");
-      setMessage("Choose a player first.");
+
+      setMessage(
+        "Choose a player first."
+      );
+
       return;
     }
 
@@ -164,17 +238,19 @@ export default function BounceTicketButton({
       const response = await fetch(
         `/api/tickets/${ticketId}/bounce`,
         {
-          method: "POST",
+          method:
+            "POST",
 
           headers: {
             "Content-Type":
               "application/json",
           },
 
-          body: JSON.stringify({
-            targetPlayerId:
-              selectedPlayer,
-          }),
+          body:
+            JSON.stringify({
+              targetPlayerId:
+                selectedPlayer,
+            }),
         }
       );
 
@@ -185,7 +261,10 @@ export default function BounceTicketButton({
 
       if (responseText) {
         try {
-          data = JSON.parse(responseText);
+          data =
+            JSON.parse(
+              responseText
+            );
         } catch {
           setResult("error");
 
@@ -209,18 +288,55 @@ export default function BounceTicketButton({
       }
 
       /*
+       * ===========================
+       * SERVICE DESK HANDOFF
+       * ===========================
+       *
+       * Specialist sends a Service Desk
+       * ticket back to an SDA.
+       *
+       * No reward.
+       * No XP.
+       * No slowdown.
+       * No penalty.
+       */
+      if (
+        data.outcome ===
+        "SERVICE_DESK_HANDOFF"
+      ) {
+        setOpen(false);
+
+        setResult("success");
+
+        setMessage(
+          data.message ??
+            `Ticket handed back to ${
+              data.target ??
+              "Service Desk"
+            }.`
+        );
+
+        setSelectedPlayer(null);
+        setPlayers([]);
+
+        setTimeout(() => {
+          router.refresh();
+        }, 800);
+
+        return;
+      }
+
+      /*
+       * ===========================
        * OWNERSHIP WARNING
-       *
-       * Player transferred a ticket that
-       * they could have resolved themselves.
-       *
-       * The ticket has already moved.
+       * ===========================
        */
       if (
         data.outcome ===
         "OWNERSHIP_WARNING"
       ) {
         setOpen(false);
+
         setOwnershipError("");
         setOwnershipWarning(true);
 
@@ -228,19 +344,23 @@ export default function BounceTicketButton({
       }
 
       /*
-       * CORRECT BOUNCE
+       * ===========================
+       * CORRECT ESCALATION
+       * ===========================
        */
       if (
         data.outcome ===
-          "CORRECT_BOUNCE" ||
-        data.correct === true
+        "CORRECT_BOUNCE"
       ) {
         setResult("success");
 
         setMessage(
           `Correctly routed to ${
-            data.target ?? "player"
-          }! +${data.reward ?? 0} CR / +${
+            data.target ??
+            "player"
+          }! +${
+            data.reward ?? 0
+          } CR / +${
             data.xp ?? 0
           } XP`
         );
@@ -253,38 +373,61 @@ export default function BounceTicketButton({
       }
 
       /*
-       * WRONG BOUNCE
-       *
-       * Ticket still transfers to the
-       * selected player.
-       *
-       * Sender receives a credit penalty
-       * because the receiving team is
-       * annoyed about the incorrect routing.
+       * ===========================
+       * WRONG BOUNCE + BANKRUPTCY
+       * ===========================
+       */
+      if (
+        data.bankrupt === true ||
+        data.resetToServiceDesk === true
+      ) {
+        setOpen(false);
+
+        setOwnershipWarning(false);
+
+        setWrongBounce(null);
+
+        setDemoted(true);
+
+        return;
+      }
+
+      /*
+       * ===========================
+       * WRONG TEAM
+       * ===========================
+       */
+      if (
+        data.outcome ===
+        "WRONG_BOUNCE"
+      ) {
+        setOpen(false);
+
+        setWrongBounce({
+          target:
+            data.target ??
+            "the selected player",
+
+          penalty:
+            data.penalty ??
+            0,
+
+          message:
+            data.message ??
+            "The receiving team is not impressed.",
+        });
+
+        return;
+      }
+
+      /*
+       * Unexpected server outcome.
        */
       setResult("error");
 
-      if (data.bankrupt) {
-        setMessage(
-          `Wrong team! Ticket sent to ${
-            data.target ?? "player"
-          }. -${
-            data.penalty ?? 0
-          } CR — BANKRUPT`
-        );
-      } else {
-        setMessage(
-          `Wrong team! Ticket sent to ${
-            data.target ?? "player"
-          }. -${
-            data.penalty ?? 0
-          } CR`
-        );
-      }
-
-      setTimeout(() => {
-        router.refresh();
-      }, 1200);
+      setMessage(
+        "Unknown bounce result."
+      );
     } catch (error) {
       console.error(
         "Bounce request failed:",
@@ -302,8 +445,9 @@ export default function BounceTicketButton({
   }
 
   /*
-   * Pay 100 CR to immediately remove
-   * the personal queue slowdown.
+   * ============================
+   * BUY OUT QUEUE PENALTY
+   * ============================
    */
   async function clearQueuePenalty() {
     setClearingPenalty(true);
@@ -313,7 +457,8 @@ export default function BounceTicketButton({
       const response = await fetch(
         "/api/players/clear-queue-penalty",
         {
-          method: "POST",
+          method:
+            "POST",
         }
       );
 
@@ -325,11 +470,17 @@ export default function BounceTicketButton({
         success?: boolean;
         cost?: number;
         credits?: number;
+        bankrupt?: boolean;
+        resetToServiceDesk?: boolean;
+        message?: string;
       } = {};
 
       if (responseText) {
         try {
-          data = JSON.parse(responseText);
+          data =
+            JSON.parse(
+              responseText
+            );
         } catch {
           setOwnershipError(
             `Server returned an invalid response (${response.status}).`
@@ -349,11 +500,30 @@ export default function BounceTicketButton({
       }
 
       /*
-       * Penalty successfully removed.
+       * Buying out the penalty
+       * caused bankruptcy.
+       */
+      if (
+        data.bankrupt === true ||
+        data.resetToServiceDesk ===
+          true
+      ) {
+        setOwnershipWarning(false);
+
+        setDemoted(true);
+
+        return;
+      }
+
+      /*
+       * Normal successful buyout.
        */
       setOwnershipWarning(false);
+
       setSelectedPlayer(null);
+
       setPlayers([]);
+
       setOwnershipError("");
 
       router.refresh();
@@ -372,23 +542,46 @@ export default function BounceTicketButton({
   }
 
   /*
-   * Player accepts the 5 minute
-   * slowdown instead of buying it out.
+   * Accept ownership slowdown.
    */
   function acknowledgeOwnershipWarning() {
     setOwnershipWarning(false);
+
     setSelectedPlayer(null);
+
     setPlayers([]);
+
     setOwnershipError("");
 
     router.refresh();
   }
 
   /*
-   * Open / close bounce selector.
+   * Accept wrong-team penalty.
    */
+  function acknowledgeWrongBounce() {
+    setWrongBounce(null);
+
+    setSelectedPlayer(null);
+
+    setPlayers([]);
+
+    router.refresh();
+  }
+
+  /*
+   * Accept bankruptcy / demotion.
+   */
+  function acknowledgeDemotion() {
+    window.location.href =
+      "/dashboard";
+  }
+
   function toggleOpen() {
-    setOpen((current) => !current);
+    setOpen(
+      (current) =>
+        !current
+    );
 
     setMessage("");
     setResult(null);
@@ -396,16 +589,22 @@ export default function BounceTicketButton({
 
   return (
     <>
+      {/* Bounce Button */}
       <div>
         <button
           type="button"
-          onClick={toggleOpen}
-          disabled={submitting}
+          onClick={
+            toggleOpen
+          }
+          disabled={
+            submitting
+          }
           className="border border-zinc-700 px-4 py-2 font-bold hover:bg-zinc-900 disabled:opacity-50"
         >
           Bounce
         </button>
 
+        {/* Player Picker */}
         {open && (
           <div className="mt-3 w-80 border border-zinc-800 bg-black p-4">
 
@@ -414,8 +613,7 @@ export default function BounceTicketButton({
             </p>
 
             <p className="mt-1 text-xs text-zinc-500">
-              Pick carefully. The ticket
-              category is hidden.
+              Pick carefully. The ticket category is hidden.
             </p>
 
             {loadingPlayers && (
@@ -428,56 +626,65 @@ export default function BounceTicketButton({
               players.length === 0 &&
               !message && (
                 <p className="mt-4 text-sm text-zinc-500">
-                  No other players are
-                  currently available.
+                  No other players are currently available.
                 </p>
               )}
 
             <div className="mt-4 space-y-2">
-              {players.map((player) => (
-                <button
-                  key={player.id}
-                  type="button"
-                  onClick={() =>
-                    setSelectedPlayer(
+              {players.map(
+                (player) => (
+                  <button
+                    key={
                       player.id
-                    )
-                  }
-                  className={`w-full border p-3 text-left ${
-                    selectedPlayer ===
-                    player.id
-                      ? "border-white bg-zinc-900"
-                      : "border-zinc-800 hover:border-zinc-600"
-                  }`}
-                >
-                  <div className="flex justify-between gap-3">
+                    }
+                    type="button"
+                    onClick={() =>
+                      setSelectedPlayer(
+                        player.id
+                      )
+                    }
+                    className={`w-full border p-3 text-left ${
+                      selectedPlayer ===
+                      player.id
+                        ? "border-white bg-zinc-900"
+                        : "border-zinc-800 hover:border-zinc-600"
+                    }`}
+                  >
+                    <div className="flex justify-between gap-3">
 
-                    <span className="font-bold">
-                      {player.username}
-                    </span>
+                      <span className="font-bold">
+                        {
+                          player.username
+                        }
+                      </span>
 
-                    <span className="text-xs text-zinc-500">
-                      Queue:{" "}
-                      {player.queueSize}
-                    </span>
+                      <span className="text-xs text-zinc-500">
+                        Queue:{" "}
+                        {
+                          player.queueSize
+                        }
+                      </span>
 
-                  </div>
+                    </div>
 
-                  <p className="mt-1 text-xs text-zinc-500">
-                    {getRoleTitle(
-                      player.level,
-                      player.careerPath
-                    )}
-                  </p>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      {getRoleTitle(
+                        player.level,
+                        player.careerPath
+                      )}
+                    </p>
 
-                </button>
-              ))}
+                  </button>
+                )
+              )}
             </div>
 
             {players.length > 0 && (
               <button
                 type="button"
-                onClick={bounceTicket}
+                onClick={
+                  bounceTicket
+                }
                 disabled={
                   !selectedPlayer ||
                   submitting
@@ -493,7 +700,8 @@ export default function BounceTicketButton({
             {message && (
               <div
                 className={`mt-4 border p-3 text-sm ${
-                  result === "success"
+                  result ===
+                  "success"
                     ? "border-green-900 text-green-400"
                     : "border-red-900 text-red-400"
                 }`}
@@ -506,7 +714,9 @@ export default function BounceTicketButton({
         )}
       </div>
 
-      {/* Ownership Warning Modal */}
+      {/* ===========================
+          OWNERSHIP WARNING MODAL
+          =========================== */}
       {ownershipWarning && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4">
 
@@ -521,9 +731,7 @@ export default function BounceTicketButton({
             </h2>
 
             <p className="mt-4 text-zinc-400">
-              Service Desk analysts are
-              expected to take ownership
-              of tickets they can resolve.
+              You are expected to take ownership of work that belongs to your resolver group.
             </p>
 
             <div className="mt-6 border border-yellow-900/60 bg-yellow-950/20 p-4">
@@ -533,28 +741,31 @@ export default function BounceTicketButton({
               </p>
 
               <p className="mt-2 text-sm text-zinc-300">
-                Your personal ticket
-                intake will be slower for
-                the next 5 minutes.
+                Your personal ticket intake will be slower for the next 5 minutes.
               </p>
 
               <p className="mt-2 text-xs text-zinc-500">
-                This only affects your
-                queue.
+                This only affects your queue.
               </p>
 
             </div>
 
             {ownershipError && (
               <p className="mt-4 text-sm text-red-400">
-                {ownershipError}
+                {
+                  ownershipError
+                }
               </p>
             )}
 
             <button
               type="button"
-              onClick={clearQueuePenalty}
-              disabled={clearingPenalty}
+              onClick={
+                clearQueuePenalty
+              }
+              disabled={
+                clearingPenalty
+              }
               className="mt-6 w-full border border-yellow-700 px-5 py-3 font-bold text-yellow-300 hover:bg-yellow-950/30 disabled:opacity-50"
             >
               {clearingPenalty
@@ -567,14 +778,164 @@ export default function BounceTicketButton({
               onClick={
                 acknowledgeOwnershipWarning
               }
-              disabled={clearingPenalty}
+              disabled={
+                clearingPenalty
+              }
               className="mt-3 w-full bg-white px-5 py-3 font-bold text-black hover:bg-zinc-200 disabled:opacity-50"
             >
               Accept 5 Minute Slowdown
             </button>
 
           </div>
+        </div>
+      )}
 
+      {/* ===========================
+          WRONG TEAM MODAL
+          =========================== */}
+      {wrongBounce && (
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/85 px-4">
+
+          <div className="w-full max-w-md border border-red-900 bg-zinc-950 p-8 shadow-2xl">
+
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-500">
+              Routing Error
+            </p>
+
+            <h2 className="mt-3 text-3xl font-black text-white">
+              WRONG TEAM
+            </h2>
+
+            <p className="mt-5 text-zinc-300">
+              {
+                wrongBounce.message
+              }
+            </p>
+
+            <div className="mt-6 border border-red-900/70 bg-red-950/20 p-5">
+
+              <p className="text-xs font-bold uppercase tracking-wide text-red-400">
+                Routing Penalty
+              </p>
+
+              <p className="mt-2 text-3xl font-black text-red-400">
+                -
+                {
+                  wrongBounce.penalty
+                }{" "}
+                CR
+              </p>
+
+              <p className="mt-3 text-sm text-zinc-400">
+                The ticket has still been transferred to{" "}
+                <span className="font-bold text-white">
+                  {
+                    wrongBounce.target
+                  }
+                </span>
+                .
+              </p>
+
+            </div>
+
+            <button
+              type="button"
+              onClick={
+                acknowledgeWrongBounce
+              }
+              className="mt-6 w-full bg-white px-5 py-3 font-bold text-black hover:bg-zinc-200"
+            >
+              OK
+            </button>
+
+          </div>
+        </div>
+      )}
+
+      {/* ===========================
+          BANKRUPTCY / DEMOTION MODAL
+          =========================== */}
+      {demoted && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 px-4">
+
+          <div className="w-full max-w-md border border-red-800 bg-zinc-950 p-8 text-center shadow-2xl">
+
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-500">
+              Bankruptcy
+            </p>
+
+            <h2 className="mt-3 text-4xl font-black text-white">
+              YOU HAVE BEEN DEMOTED
+            </h2>
+
+            <p className="mt-5 text-zinc-300">
+              Your Credits reached 0.
+            </p>
+
+            <p className="mt-2 text-zinc-400">
+              Your career has been reset and you have been sent back to the Service Desk.
+            </p>
+
+            <div className="mt-6 border border-red-900 bg-red-950/20 p-5">
+
+              <p className="text-xs font-bold uppercase tracking-wide text-red-400">
+                New Position
+              </p>
+
+              <p className="mt-3 text-2xl font-black text-white">
+                Service Desk Analyst
+              </p>
+
+              <div className="mt-5 grid grid-cols-3 gap-3">
+
+                <div className="border border-zinc-800 bg-black p-3">
+                  <p className="text-xs text-zinc-500">
+                    Level
+                  </p>
+
+                  <p className="mt-1 text-xl font-bold">
+                    1
+                  </p>
+                </div>
+
+                <div className="border border-zinc-800 bg-black p-3">
+                  <p className="text-xs text-zinc-500">
+                    XP
+                  </p>
+
+                  <p className="mt-1 text-xl font-bold">
+                    0
+                  </p>
+                </div>
+
+                <div className="border border-zinc-800 bg-black p-3">
+                  <p className="text-xs text-zinc-500">
+                    Credits
+                  </p>
+
+                  <p className="mt-1 text-xl font-bold">
+                    1000
+                  </p>
+                </div>
+
+              </div>
+            </div>
+
+            <p className="mt-5 text-sm text-zinc-500">
+              Your lifetime statistics and bankruptcy count are retained.
+            </p>
+
+            <button
+              type="button"
+              onClick={
+                acknowledgeDemotion
+              }
+              className="mt-6 w-full bg-white px-5 py-3 font-bold text-black hover:bg-zinc-200"
+            >
+              OK
+            </button>
+
+          </div>
         </div>
       )}
     </>

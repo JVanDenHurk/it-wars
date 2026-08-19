@@ -1,65 +1,69 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 
+import ticketTemplates from "../src/data/ticket-templates.json";
+
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
 });
 
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient({
+  adapter,
+});
 
 async function main() {
+  console.log(
+    `Importing ${ticketTemplates.length} ticket templates...`
+  );
+
+  /*
+   * Remove existing ticket templates.
+   *
+   * This does NOT remove live tickets.
+   */
+  await prisma.ticketTemplate.deleteMany();
+
+  /*
+   * Import ticket templates from JSON.
+   */
   await prisma.ticketTemplate.createMany({
-    data: [
-      {
-        title: "Account Locked",
-        description:
-          "User entered the wrong password multiple times and cannot log in.",
-        category: "SERVICE_DESK",
-        maxValue: 100,
-        baseXp: 10,
-      },
-      {
-        title: "Outlook Won't Open",
-        description:
-          "Outlook crashes immediately after the user launches it.",
-        category: "SERVICE_DESK",
-        maxValue: 120,
-        baseXp: 12,
-      },
-      {
-        title: "Switch Port Errors",
-        description:
-          "A switch port is reporting excessive CRC errors and packet loss.",
-        category: "NETWORK",
-        maxValue: 180,
-        baseXp: 18,
-      },
-      {
-        title: "VLAN Connectivity Issue",
-        description:
-          "Devices on VLAN 30 cannot communicate with the default gateway.",
-        category: "NETWORK",
-        maxValue: 220,
-        baseXp: 22,
-      },
-      {
-        title: "Domain Controller Replication",
-        description:
-          "One domain controller has not replicated successfully for several hours.",
-        category: "SYSTEMS",
-        maxValue: 250,
-        baseXp: 25,
-      },
-      {
-        title: "Suspicious Login",
-        description:
-          "A user account logged in from an unusual country and location.",
-        category: "SECURITY",
-        maxValue: 250,
-        baseXp: 25,
-      },
-    ],
+    data: ticketTemplates.map((template) => ({
+      title: template.title,
+
+      description: template.description,
+
+      category: template.category as
+        | "SERVICE_DESK"
+        | "NETWORK"
+        | "SYSTEMS"
+        | "SECURITY",
+
+      severity: template.severity as
+        | "P1"
+        | "P2"
+        | "P3"
+        | "P4",
+
+      difficulty: template.difficulty,
+
+      maxValue: template.maxValue,
+
+      baseXp: template.baseXp,
+
+      /*
+       * Ticket-specific outcome messages.
+       */
+      successMessage: template.successMessage,
+
+      failureMessage: template.failureMessage,
+
+      active: template.active ?? true,
+    })),
   });
+
+  console.log(
+    `Imported ${ticketTemplates.length} ticket templates successfully.`
+  );
 }
 
 main()
@@ -67,7 +71,12 @@ main()
     await prisma.$disconnect();
   })
   .catch(async (error) => {
-    console.error(error);
+    console.error(
+      "Ticket template seed failed:",
+      error
+    );
+
     await prisma.$disconnect();
+
     process.exit(1);
   });

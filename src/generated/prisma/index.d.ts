@@ -72,6 +72,16 @@ export const TicketCategory: {
 export type TicketCategory = (typeof TicketCategory)[keyof typeof TicketCategory]
 
 
+export const TicketSeverity: {
+  P1: 'P1',
+  P2: 'P2',
+  P3: 'P3',
+  P4: 'P4'
+};
+
+export type TicketSeverity = (typeof TicketSeverity)[keyof typeof TicketSeverity]
+
+
 export const TicketStatus: {
   OPEN: 'OPEN',
   RESOLVED: 'RESOLVED',
@@ -91,6 +101,10 @@ export const CareerPath: typeof $Enums.CareerPath
 export type TicketCategory = $Enums.TicketCategory
 
 export const TicketCategory: typeof $Enums.TicketCategory
+
+export type TicketSeverity = $Enums.TicketSeverity
+
+export const TicketSeverity: typeof $Enums.TicketSeverity
 
 export type TicketStatus = $Enums.TicketStatus
 
@@ -2974,6 +2988,7 @@ export namespace Prisma {
 
   export type TicketAvgAggregateOutputType = {
     id: number | null
+    difficulty: number | null
     maxValue: number | null
     baseXp: number | null
     assignedToId: number | null
@@ -2983,6 +2998,7 @@ export namespace Prisma {
 
   export type TicketSumAggregateOutputType = {
     id: number | null
+    difficulty: number | null
     maxValue: number | null
     baseXp: number | null
     assignedToId: number | null
@@ -2995,12 +3011,18 @@ export namespace Prisma {
     title: string | null
     description: string | null
     category: $Enums.TicketCategory | null
+    severity: $Enums.TicketSeverity | null
+    difficulty: number | null
     status: $Enums.TicketStatus | null
     maxValue: number | null
     baseXp: number | null
+    successMessage: string | null
+    failureMessage: string | null
     assignedToId: number | null
     lastSentById: number | null
     bounceCount: number | null
+    abandonmentPenaltyApplied: boolean | null
+    abandonmentPenaltyAt: Date | null
     resolvedAt: Date | null
     expiredAt: Date | null
     createdAt: Date | null
@@ -3012,12 +3034,18 @@ export namespace Prisma {
     title: string | null
     description: string | null
     category: $Enums.TicketCategory | null
+    severity: $Enums.TicketSeverity | null
+    difficulty: number | null
     status: $Enums.TicketStatus | null
     maxValue: number | null
     baseXp: number | null
+    successMessage: string | null
+    failureMessage: string | null
     assignedToId: number | null
     lastSentById: number | null
     bounceCount: number | null
+    abandonmentPenaltyApplied: boolean | null
+    abandonmentPenaltyAt: Date | null
     resolvedAt: Date | null
     expiredAt: Date | null
     createdAt: Date | null
@@ -3029,12 +3057,18 @@ export namespace Prisma {
     title: number
     description: number
     category: number
+    severity: number
+    difficulty: number
     status: number
     maxValue: number
     baseXp: number
+    successMessage: number
+    failureMessage: number
     assignedToId: number
     lastSentById: number
     bounceCount: number
+    abandonmentPenaltyApplied: number
+    abandonmentPenaltyAt: number
     resolvedAt: number
     expiredAt: number
     createdAt: number
@@ -3045,6 +3079,7 @@ export namespace Prisma {
 
   export type TicketAvgAggregateInputType = {
     id?: true
+    difficulty?: true
     maxValue?: true
     baseXp?: true
     assignedToId?: true
@@ -3054,6 +3089,7 @@ export namespace Prisma {
 
   export type TicketSumAggregateInputType = {
     id?: true
+    difficulty?: true
     maxValue?: true
     baseXp?: true
     assignedToId?: true
@@ -3066,12 +3102,18 @@ export namespace Prisma {
     title?: true
     description?: true
     category?: true
+    severity?: true
+    difficulty?: true
     status?: true
     maxValue?: true
     baseXp?: true
+    successMessage?: true
+    failureMessage?: true
     assignedToId?: true
     lastSentById?: true
     bounceCount?: true
+    abandonmentPenaltyApplied?: true
+    abandonmentPenaltyAt?: true
     resolvedAt?: true
     expiredAt?: true
     createdAt?: true
@@ -3083,12 +3125,18 @@ export namespace Prisma {
     title?: true
     description?: true
     category?: true
+    severity?: true
+    difficulty?: true
     status?: true
     maxValue?: true
     baseXp?: true
+    successMessage?: true
+    failureMessage?: true
     assignedToId?: true
     lastSentById?: true
     bounceCount?: true
+    abandonmentPenaltyApplied?: true
+    abandonmentPenaltyAt?: true
     resolvedAt?: true
     expiredAt?: true
     createdAt?: true
@@ -3100,12 +3148,18 @@ export namespace Prisma {
     title?: true
     description?: true
     category?: true
+    severity?: true
+    difficulty?: true
     status?: true
     maxValue?: true
     baseXp?: true
+    successMessage?: true
+    failureMessage?: true
     assignedToId?: true
     lastSentById?: true
     bounceCount?: true
+    abandonmentPenaltyApplied?: true
+    abandonmentPenaltyAt?: true
     resolvedAt?: true
     expiredAt?: true
     createdAt?: true
@@ -3204,12 +3258,18 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity: $Enums.TicketSeverity
+    difficulty: number
     status: $Enums.TicketStatus
     maxValue: number
     baseXp: number
+    successMessage: string | null
+    failureMessage: string | null
     assignedToId: number
     lastSentById: number | null
     bounceCount: number
+    abandonmentPenaltyApplied: boolean
+    abandonmentPenaltyAt: Date | null
     resolvedAt: Date | null
     expiredAt: Date | null
     createdAt: Date
@@ -3240,12 +3300,18 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    severity?: boolean
+    difficulty?: boolean
     status?: boolean
     maxValue?: boolean
     baseXp?: boolean
+    successMessage?: boolean
+    failureMessage?: boolean
     assignedToId?: boolean
     lastSentById?: boolean
     bounceCount?: boolean
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: boolean
     resolvedAt?: boolean
     expiredAt?: boolean
     createdAt?: boolean
@@ -3259,12 +3325,18 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    severity?: boolean
+    difficulty?: boolean
     status?: boolean
     maxValue?: boolean
     baseXp?: boolean
+    successMessage?: boolean
+    failureMessage?: boolean
     assignedToId?: boolean
     lastSentById?: boolean
     bounceCount?: boolean
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: boolean
     resolvedAt?: boolean
     expiredAt?: boolean
     createdAt?: boolean
@@ -3278,12 +3350,18 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    severity?: boolean
+    difficulty?: boolean
     status?: boolean
     maxValue?: boolean
     baseXp?: boolean
+    successMessage?: boolean
+    failureMessage?: boolean
     assignedToId?: boolean
     lastSentById?: boolean
     bounceCount?: boolean
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: boolean
     resolvedAt?: boolean
     expiredAt?: boolean
     createdAt?: boolean
@@ -3297,19 +3375,25 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    severity?: boolean
+    difficulty?: boolean
     status?: boolean
     maxValue?: boolean
     baseXp?: boolean
+    successMessage?: boolean
+    failureMessage?: boolean
     assignedToId?: boolean
     lastSentById?: boolean
     bounceCount?: boolean
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: boolean
     resolvedAt?: boolean
     expiredAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "status" | "maxValue" | "baseXp" | "assignedToId" | "lastSentById" | "bounceCount" | "resolvedAt" | "expiredAt" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
+  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "severity" | "difficulty" | "status" | "maxValue" | "baseXp" | "successMessage" | "failureMessage" | "assignedToId" | "lastSentById" | "bounceCount" | "abandonmentPenaltyApplied" | "abandonmentPenaltyAt" | "resolvedAt" | "expiredAt" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
   export type TicketInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     assignedTo?: boolean | PlayerDefaultArgs<ExtArgs>
     lastSentBy?: boolean | Ticket$lastSentByArgs<ExtArgs>
@@ -3334,12 +3418,18 @@ export namespace Prisma {
       title: string
       description: string
       category: $Enums.TicketCategory
+      severity: $Enums.TicketSeverity
+      difficulty: number
       status: $Enums.TicketStatus
       maxValue: number
       baseXp: number
+      successMessage: string | null
+      failureMessage: string | null
       assignedToId: number
       lastSentById: number | null
       bounceCount: number
+      abandonmentPenaltyApplied: boolean
+      abandonmentPenaltyAt: Date | null
       resolvedAt: Date | null
       expiredAt: Date | null
       createdAt: Date
@@ -3773,12 +3863,18 @@ export namespace Prisma {
     readonly title: FieldRef<"Ticket", 'String'>
     readonly description: FieldRef<"Ticket", 'String'>
     readonly category: FieldRef<"Ticket", 'TicketCategory'>
+    readonly severity: FieldRef<"Ticket", 'TicketSeverity'>
+    readonly difficulty: FieldRef<"Ticket", 'Int'>
     readonly status: FieldRef<"Ticket", 'TicketStatus'>
     readonly maxValue: FieldRef<"Ticket", 'Int'>
     readonly baseXp: FieldRef<"Ticket", 'Int'>
+    readonly successMessage: FieldRef<"Ticket", 'String'>
+    readonly failureMessage: FieldRef<"Ticket", 'String'>
     readonly assignedToId: FieldRef<"Ticket", 'Int'>
     readonly lastSentById: FieldRef<"Ticket", 'Int'>
     readonly bounceCount: FieldRef<"Ticket", 'Int'>
+    readonly abandonmentPenaltyApplied: FieldRef<"Ticket", 'Boolean'>
+    readonly abandonmentPenaltyAt: FieldRef<"Ticket", 'DateTime'>
     readonly resolvedAt: FieldRef<"Ticket", 'DateTime'>
     readonly expiredAt: FieldRef<"Ticket", 'DateTime'>
     readonly createdAt: FieldRef<"Ticket", 'DateTime'>
@@ -4252,9 +4348,12 @@ export namespace Prisma {
     title: string | null
     description: string | null
     category: $Enums.TicketCategory | null
+    severity: $Enums.TicketSeverity | null
     difficulty: number | null
     maxValue: number | null
     baseXp: number | null
+    successMessage: string | null
+    failureMessage: string | null
     active: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -4265,9 +4364,12 @@ export namespace Prisma {
     title: string | null
     description: string | null
     category: $Enums.TicketCategory | null
+    severity: $Enums.TicketSeverity | null
     difficulty: number | null
     maxValue: number | null
     baseXp: number | null
+    successMessage: string | null
+    failureMessage: string | null
     active: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -4278,9 +4380,12 @@ export namespace Prisma {
     title: number
     description: number
     category: number
+    severity: number
     difficulty: number
     maxValue: number
     baseXp: number
+    successMessage: number
+    failureMessage: number
     active: number
     createdAt: number
     updatedAt: number
@@ -4307,9 +4412,12 @@ export namespace Prisma {
     title?: true
     description?: true
     category?: true
+    severity?: true
     difficulty?: true
     maxValue?: true
     baseXp?: true
+    successMessage?: true
+    failureMessage?: true
     active?: true
     createdAt?: true
     updatedAt?: true
@@ -4320,9 +4428,12 @@ export namespace Prisma {
     title?: true
     description?: true
     category?: true
+    severity?: true
     difficulty?: true
     maxValue?: true
     baseXp?: true
+    successMessage?: true
+    failureMessage?: true
     active?: true
     createdAt?: true
     updatedAt?: true
@@ -4333,9 +4444,12 @@ export namespace Prisma {
     title?: true
     description?: true
     category?: true
+    severity?: true
     difficulty?: true
     maxValue?: true
     baseXp?: true
+    successMessage?: true
+    failureMessage?: true
     active?: true
     createdAt?: true
     updatedAt?: true
@@ -4433,9 +4547,12 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity: $Enums.TicketSeverity
     difficulty: number
     maxValue: number
     baseXp: number
+    successMessage: string | null
+    failureMessage: string | null
     active: boolean
     createdAt: Date
     updatedAt: Date
@@ -4465,9 +4582,12 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    severity?: boolean
     difficulty?: boolean
     maxValue?: boolean
     baseXp?: boolean
+    successMessage?: boolean
+    failureMessage?: boolean
     active?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -4478,9 +4598,12 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    severity?: boolean
     difficulty?: boolean
     maxValue?: boolean
     baseXp?: boolean
+    successMessage?: boolean
+    failureMessage?: boolean
     active?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -4491,9 +4614,12 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    severity?: boolean
     difficulty?: boolean
     maxValue?: boolean
     baseXp?: boolean
+    successMessage?: boolean
+    failureMessage?: boolean
     active?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -4504,15 +4630,18 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    severity?: boolean
     difficulty?: boolean
     maxValue?: boolean
     baseXp?: boolean
+    successMessage?: boolean
+    failureMessage?: boolean
     active?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TicketTemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "difficulty" | "maxValue" | "baseXp" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["ticketTemplate"]>
+  export type TicketTemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "severity" | "difficulty" | "maxValue" | "baseXp" | "successMessage" | "failureMessage" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["ticketTemplate"]>
 
   export type $TicketTemplatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "TicketTemplate"
@@ -4522,9 +4651,12 @@ export namespace Prisma {
       title: string
       description: string
       category: $Enums.TicketCategory
+      severity: $Enums.TicketSeverity
       difficulty: number
       maxValue: number
       baseXp: number
+      successMessage: string | null
+      failureMessage: string | null
       active: boolean
       createdAt: Date
       updatedAt: Date
@@ -4955,9 +5087,12 @@ export namespace Prisma {
     readonly title: FieldRef<"TicketTemplate", 'String'>
     readonly description: FieldRef<"TicketTemplate", 'String'>
     readonly category: FieldRef<"TicketTemplate", 'TicketCategory'>
+    readonly severity: FieldRef<"TicketTemplate", 'TicketSeverity'>
     readonly difficulty: FieldRef<"TicketTemplate", 'Int'>
     readonly maxValue: FieldRef<"TicketTemplate", 'Int'>
     readonly baseXp: FieldRef<"TicketTemplate", 'Int'>
+    readonly successMessage: FieldRef<"TicketTemplate", 'String'>
+    readonly failureMessage: FieldRef<"TicketTemplate", 'String'>
     readonly active: FieldRef<"TicketTemplate", 'Boolean'>
     readonly createdAt: FieldRef<"TicketTemplate", 'DateTime'>
     readonly updatedAt: FieldRef<"TicketTemplate", 'DateTime'>
@@ -9811,12 +9946,18 @@ export namespace Prisma {
     title: 'title',
     description: 'description',
     category: 'category',
+    severity: 'severity',
+    difficulty: 'difficulty',
     status: 'status',
     maxValue: 'maxValue',
     baseXp: 'baseXp',
+    successMessage: 'successMessage',
+    failureMessage: 'failureMessage',
     assignedToId: 'assignedToId',
     lastSentById: 'lastSentById',
     bounceCount: 'bounceCount',
+    abandonmentPenaltyApplied: 'abandonmentPenaltyApplied',
+    abandonmentPenaltyAt: 'abandonmentPenaltyAt',
     resolvedAt: 'resolvedAt',
     expiredAt: 'expiredAt',
     createdAt: 'createdAt',
@@ -9831,9 +9972,12 @@ export namespace Prisma {
     title: 'title',
     description: 'description',
     category: 'category',
+    severity: 'severity',
     difficulty: 'difficulty',
     maxValue: 'maxValue',
     baseXp: 'baseXp',
+    successMessage: 'successMessage',
+    failureMessage: 'failureMessage',
     active: 'active',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -9996,6 +10140,20 @@ export namespace Prisma {
    * Reference to a field of type 'TicketCategory[]'
    */
   export type ListEnumTicketCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TicketCategory[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'TicketSeverity'
+   */
+  export type EnumTicketSeverityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TicketSeverity'>
+    
+
+
+  /**
+   * Reference to a field of type 'TicketSeverity[]'
+   */
+  export type ListEnumTicketSeverityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TicketSeverity[]'>
     
 
 
@@ -10183,12 +10341,18 @@ export namespace Prisma {
     title?: StringFilter<"Ticket"> | string
     description?: StringFilter<"Ticket"> | string
     category?: EnumTicketCategoryFilter<"Ticket"> | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFilter<"Ticket"> | $Enums.TicketSeverity
+    difficulty?: IntFilter<"Ticket"> | number
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
     maxValue?: IntFilter<"Ticket"> | number
     baseXp?: IntFilter<"Ticket"> | number
+    successMessage?: StringNullableFilter<"Ticket"> | string | null
+    failureMessage?: StringNullableFilter<"Ticket"> | string | null
     assignedToId?: IntFilter<"Ticket"> | number
     lastSentById?: IntNullableFilter<"Ticket"> | number | null
     bounceCount?: IntFilter<"Ticket"> | number
+    abandonmentPenaltyApplied?: BoolFilter<"Ticket"> | boolean
+    abandonmentPenaltyAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     resolvedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     expiredAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
@@ -10202,12 +10366,18 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    severity?: SortOrder
+    difficulty?: SortOrder
     status?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    successMessage?: SortOrderInput | SortOrder
+    failureMessage?: SortOrderInput | SortOrder
     assignedToId?: SortOrder
     lastSentById?: SortOrderInput | SortOrder
     bounceCount?: SortOrder
+    abandonmentPenaltyApplied?: SortOrder
+    abandonmentPenaltyAt?: SortOrderInput | SortOrder
     resolvedAt?: SortOrderInput | SortOrder
     expiredAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -10224,12 +10394,18 @@ export namespace Prisma {
     title?: StringFilter<"Ticket"> | string
     description?: StringFilter<"Ticket"> | string
     category?: EnumTicketCategoryFilter<"Ticket"> | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFilter<"Ticket"> | $Enums.TicketSeverity
+    difficulty?: IntFilter<"Ticket"> | number
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
     maxValue?: IntFilter<"Ticket"> | number
     baseXp?: IntFilter<"Ticket"> | number
+    successMessage?: StringNullableFilter<"Ticket"> | string | null
+    failureMessage?: StringNullableFilter<"Ticket"> | string | null
     assignedToId?: IntFilter<"Ticket"> | number
     lastSentById?: IntNullableFilter<"Ticket"> | number | null
     bounceCount?: IntFilter<"Ticket"> | number
+    abandonmentPenaltyApplied?: BoolFilter<"Ticket"> | boolean
+    abandonmentPenaltyAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     resolvedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     expiredAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
@@ -10243,12 +10419,18 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    severity?: SortOrder
+    difficulty?: SortOrder
     status?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    successMessage?: SortOrderInput | SortOrder
+    failureMessage?: SortOrderInput | SortOrder
     assignedToId?: SortOrder
     lastSentById?: SortOrderInput | SortOrder
     bounceCount?: SortOrder
+    abandonmentPenaltyApplied?: SortOrder
+    abandonmentPenaltyAt?: SortOrderInput | SortOrder
     resolvedAt?: SortOrderInput | SortOrder
     expiredAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -10268,12 +10450,18 @@ export namespace Prisma {
     title?: StringWithAggregatesFilter<"Ticket"> | string
     description?: StringWithAggregatesFilter<"Ticket"> | string
     category?: EnumTicketCategoryWithAggregatesFilter<"Ticket"> | $Enums.TicketCategory
+    severity?: EnumTicketSeverityWithAggregatesFilter<"Ticket"> | $Enums.TicketSeverity
+    difficulty?: IntWithAggregatesFilter<"Ticket"> | number
     status?: EnumTicketStatusWithAggregatesFilter<"Ticket"> | $Enums.TicketStatus
     maxValue?: IntWithAggregatesFilter<"Ticket"> | number
     baseXp?: IntWithAggregatesFilter<"Ticket"> | number
+    successMessage?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
+    failureMessage?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
     assignedToId?: IntWithAggregatesFilter<"Ticket"> | number
     lastSentById?: IntNullableWithAggregatesFilter<"Ticket"> | number | null
     bounceCount?: IntWithAggregatesFilter<"Ticket"> | number
+    abandonmentPenaltyApplied?: BoolWithAggregatesFilter<"Ticket"> | boolean
+    abandonmentPenaltyAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
     resolvedAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
     expiredAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Ticket"> | Date | string
@@ -10288,9 +10476,12 @@ export namespace Prisma {
     title?: StringFilter<"TicketTemplate"> | string
     description?: StringFilter<"TicketTemplate"> | string
     category?: EnumTicketCategoryFilter<"TicketTemplate"> | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFilter<"TicketTemplate"> | $Enums.TicketSeverity
     difficulty?: IntFilter<"TicketTemplate"> | number
     maxValue?: IntFilter<"TicketTemplate"> | number
     baseXp?: IntFilter<"TicketTemplate"> | number
+    successMessage?: StringNullableFilter<"TicketTemplate"> | string | null
+    failureMessage?: StringNullableFilter<"TicketTemplate"> | string | null
     active?: BoolFilter<"TicketTemplate"> | boolean
     createdAt?: DateTimeFilter<"TicketTemplate"> | Date | string
     updatedAt?: DateTimeFilter<"TicketTemplate"> | Date | string
@@ -10301,9 +10492,12 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    severity?: SortOrder
     difficulty?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    successMessage?: SortOrderInput | SortOrder
+    failureMessage?: SortOrderInput | SortOrder
     active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -10317,9 +10511,12 @@ export namespace Prisma {
     title?: StringFilter<"TicketTemplate"> | string
     description?: StringFilter<"TicketTemplate"> | string
     category?: EnumTicketCategoryFilter<"TicketTemplate"> | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFilter<"TicketTemplate"> | $Enums.TicketSeverity
     difficulty?: IntFilter<"TicketTemplate"> | number
     maxValue?: IntFilter<"TicketTemplate"> | number
     baseXp?: IntFilter<"TicketTemplate"> | number
+    successMessage?: StringNullableFilter<"TicketTemplate"> | string | null
+    failureMessage?: StringNullableFilter<"TicketTemplate"> | string | null
     active?: BoolFilter<"TicketTemplate"> | boolean
     createdAt?: DateTimeFilter<"TicketTemplate"> | Date | string
     updatedAt?: DateTimeFilter<"TicketTemplate"> | Date | string
@@ -10330,9 +10527,12 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    severity?: SortOrder
     difficulty?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    successMessage?: SortOrderInput | SortOrder
+    failureMessage?: SortOrderInput | SortOrder
     active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -10351,9 +10551,12 @@ export namespace Prisma {
     title?: StringWithAggregatesFilter<"TicketTemplate"> | string
     description?: StringWithAggregatesFilter<"TicketTemplate"> | string
     category?: EnumTicketCategoryWithAggregatesFilter<"TicketTemplate"> | $Enums.TicketCategory
+    severity?: EnumTicketSeverityWithAggregatesFilter<"TicketTemplate"> | $Enums.TicketSeverity
     difficulty?: IntWithAggregatesFilter<"TicketTemplate"> | number
     maxValue?: IntWithAggregatesFilter<"TicketTemplate"> | number
     baseXp?: IntWithAggregatesFilter<"TicketTemplate"> | number
+    successMessage?: StringNullableWithAggregatesFilter<"TicketTemplate"> | string | null
+    failureMessage?: StringNullableWithAggregatesFilter<"TicketTemplate"> | string | null
     active?: BoolWithAggregatesFilter<"TicketTemplate"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"TicketTemplate"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"TicketTemplate"> | Date | string
@@ -10821,10 +11024,16 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
     bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -10838,12 +11047,18 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
     assignedToId: number
     lastSentById?: number | null
     bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -10854,10 +11069,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10871,12 +11092,18 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
     lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
     bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10888,12 +11115,18 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
     assignedToId: number
     lastSentById?: number | null
     bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -10904,10 +11137,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10919,12 +11158,18 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
     lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
     bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10935,9 +11180,12 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
     difficulty?: number
     maxValue: number
     baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
     active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10948,9 +11196,12 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
     difficulty?: number
     maxValue: number
     baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
     active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10960,9 +11211,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
     difficulty?: IntFieldUpdateOperationsInput | number
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10973,9 +11227,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
     difficulty?: IntFieldUpdateOperationsInput | number
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10986,9 +11243,12 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
     difficulty?: number
     maxValue: number
     baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
     active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10998,9 +11258,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
     difficulty?: IntFieldUpdateOperationsInput | number
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11011,9 +11274,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
     difficulty?: IntFieldUpdateOperationsInput | number
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11604,11 +11870,33 @@ export namespace Prisma {
     not?: NestedEnumTicketCategoryFilter<$PrismaModel> | $Enums.TicketCategory
   }
 
+  export type EnumTicketSeverityFilter<$PrismaModel = never> = {
+    equals?: $Enums.TicketSeverity | EnumTicketSeverityFieldRefInput<$PrismaModel>
+    in?: $Enums.TicketSeverity[] | ListEnumTicketSeverityFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TicketSeverity[] | ListEnumTicketSeverityFieldRefInput<$PrismaModel>
+    not?: NestedEnumTicketSeverityFilter<$PrismaModel> | $Enums.TicketSeverity
+  }
+
   export type EnumTicketStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.TicketStatus | EnumTicketStatusFieldRefInput<$PrismaModel>
     in?: $Enums.TicketStatus[] | ListEnumTicketStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.TicketStatus[] | ListEnumTicketStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumTicketStatusFilter<$PrismaModel> | $Enums.TicketStatus
+  }
+
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
   export type IntNullableFilter<$PrismaModel = never> = {
@@ -11620,6 +11908,11 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type PlayerScalarRelationFilter = {
@@ -11637,12 +11930,18 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    severity?: SortOrder
+    difficulty?: SortOrder
     status?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    successMessage?: SortOrder
+    failureMessage?: SortOrder
     assignedToId?: SortOrder
     lastSentById?: SortOrder
     bounceCount?: SortOrder
+    abandonmentPenaltyApplied?: SortOrder
+    abandonmentPenaltyAt?: SortOrder
     resolvedAt?: SortOrder
     expiredAt?: SortOrder
     createdAt?: SortOrder
@@ -11651,6 +11950,7 @@ export namespace Prisma {
 
   export type TicketAvgOrderByAggregateInput = {
     id?: SortOrder
+    difficulty?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
     assignedToId?: SortOrder
@@ -11663,12 +11963,18 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    severity?: SortOrder
+    difficulty?: SortOrder
     status?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    successMessage?: SortOrder
+    failureMessage?: SortOrder
     assignedToId?: SortOrder
     lastSentById?: SortOrder
     bounceCount?: SortOrder
+    abandonmentPenaltyApplied?: SortOrder
+    abandonmentPenaltyAt?: SortOrder
     resolvedAt?: SortOrder
     expiredAt?: SortOrder
     createdAt?: SortOrder
@@ -11680,12 +11986,18 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    severity?: SortOrder
+    difficulty?: SortOrder
     status?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    successMessage?: SortOrder
+    failureMessage?: SortOrder
     assignedToId?: SortOrder
     lastSentById?: SortOrder
     bounceCount?: SortOrder
+    abandonmentPenaltyApplied?: SortOrder
+    abandonmentPenaltyAt?: SortOrder
     resolvedAt?: SortOrder
     expiredAt?: SortOrder
     createdAt?: SortOrder
@@ -11694,6 +12006,7 @@ export namespace Prisma {
 
   export type TicketSumOrderByAggregateInput = {
     id?: SortOrder
+    difficulty?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
     assignedToId?: SortOrder
@@ -11711,6 +12024,16 @@ export namespace Prisma {
     _max?: NestedEnumTicketCategoryFilter<$PrismaModel>
   }
 
+  export type EnumTicketSeverityWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TicketSeverity | EnumTicketSeverityFieldRefInput<$PrismaModel>
+    in?: $Enums.TicketSeverity[] | ListEnumTicketSeverityFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TicketSeverity[] | ListEnumTicketSeverityFieldRefInput<$PrismaModel>
+    not?: NestedEnumTicketSeverityWithAggregatesFilter<$PrismaModel> | $Enums.TicketSeverity
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTicketSeverityFilter<$PrismaModel>
+    _max?: NestedEnumTicketSeverityFilter<$PrismaModel>
+  }
+
   export type EnumTicketStatusWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.TicketStatus | EnumTicketStatusFieldRefInput<$PrismaModel>
     in?: $Enums.TicketStatus[] | ListEnumTicketStatusFieldRefInput<$PrismaModel>
@@ -11719,6 +12042,24 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumTicketStatusFilter<$PrismaModel>
     _max?: NestedEnumTicketStatusFilter<$PrismaModel>
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -11737,9 +12078,12 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type TicketTemplateCountOrderByAggregateInput = {
@@ -11747,9 +12091,12 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    severity?: SortOrder
     difficulty?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    successMessage?: SortOrder
+    failureMessage?: SortOrder
     active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -11767,9 +12114,12 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    severity?: SortOrder
     difficulty?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    successMessage?: SortOrder
+    failureMessage?: SortOrder
     active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -11780,9 +12130,12 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    severity?: SortOrder
     difficulty?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    successMessage?: SortOrder
+    failureMessage?: SortOrder
     active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -11793,29 +12146,6 @@ export namespace Prisma {
     difficulty?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
-  }
-
-  export type StringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
   export type SessionListRelationFilter = {
@@ -11866,24 +12196,6 @@ export namespace Prisma {
     image?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type SessionCountOrderByAggregateInput = {
@@ -12132,8 +12444,20 @@ export namespace Prisma {
     set?: $Enums.TicketCategory
   }
 
+  export type EnumTicketSeverityFieldUpdateOperationsInput = {
+    set?: $Enums.TicketSeverity
+  }
+
   export type EnumTicketStatusFieldUpdateOperationsInput = {
     set?: $Enums.TicketStatus
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
   }
 
   export type PlayerUpdateOneRequiredWithoutAssignedTicketsNestedInput = {
@@ -12160,10 +12484,6 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
-  }
-
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
   }
 
   export type SessionCreateNestedManyWithoutUserInput = {
@@ -12204,10 +12524,6 @@ export namespace Prisma {
     create?: XOR<PlayerCreateWithoutUserInput, PlayerUncheckedCreateWithoutUserInput>
     connectOrCreate?: PlayerCreateOrConnectWithoutUserInput
     connect?: PlayerWhereUniqueInput
-  }
-
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
   }
 
   export type SessionUpdateManyWithoutUserNestedInput = {
@@ -12468,11 +12784,37 @@ export namespace Prisma {
     not?: NestedEnumTicketCategoryFilter<$PrismaModel> | $Enums.TicketCategory
   }
 
+  export type NestedEnumTicketSeverityFilter<$PrismaModel = never> = {
+    equals?: $Enums.TicketSeverity | EnumTicketSeverityFieldRefInput<$PrismaModel>
+    in?: $Enums.TicketSeverity[] | ListEnumTicketSeverityFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TicketSeverity[] | ListEnumTicketSeverityFieldRefInput<$PrismaModel>
+    not?: NestedEnumTicketSeverityFilter<$PrismaModel> | $Enums.TicketSeverity
+  }
+
   export type NestedEnumTicketStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.TicketStatus | EnumTicketStatusFieldRefInput<$PrismaModel>
     in?: $Enums.TicketStatus[] | ListEnumTicketStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.TicketStatus[] | ListEnumTicketStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumTicketStatusFilter<$PrismaModel> | $Enums.TicketStatus
+  }
+
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type NestedEnumTicketCategoryWithAggregatesFilter<$PrismaModel = never> = {
@@ -12485,6 +12827,16 @@ export namespace Prisma {
     _max?: NestedEnumTicketCategoryFilter<$PrismaModel>
   }
 
+  export type NestedEnumTicketSeverityWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TicketSeverity | EnumTicketSeverityFieldRefInput<$PrismaModel>
+    in?: $Enums.TicketSeverity[] | ListEnumTicketSeverityFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TicketSeverity[] | ListEnumTicketSeverityFieldRefInput<$PrismaModel>
+    not?: NestedEnumTicketSeverityWithAggregatesFilter<$PrismaModel> | $Enums.TicketSeverity
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTicketSeverityFilter<$PrismaModel>
+    _max?: NestedEnumTicketSeverityFilter<$PrismaModel>
+  }
+
   export type NestedEnumTicketStatusWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.TicketStatus | EnumTicketStatusFieldRefInput<$PrismaModel>
     in?: $Enums.TicketStatus[] | ListEnumTicketStatusFieldRefInput<$PrismaModel>
@@ -12493,6 +12845,23 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumTicketStatusFilter<$PrismaModel>
     _max?: NestedEnumTicketStatusFilter<$PrismaModel>
+  }
+
+  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -12522,48 +12891,12 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
-  }
-
-  export type NestedStringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type UserCreateWithoutPlayerInput = {
@@ -12599,10 +12932,16 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
     bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -12615,11 +12954,17 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
     lastSentById?: number | null
     bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -12640,10 +12985,16 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
     bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -12656,11 +13007,17 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
     assignedToId: number
     bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -12736,12 +13093,18 @@ export namespace Prisma {
     title?: StringFilter<"Ticket"> | string
     description?: StringFilter<"Ticket"> | string
     category?: EnumTicketCategoryFilter<"Ticket"> | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFilter<"Ticket"> | $Enums.TicketSeverity
+    difficulty?: IntFilter<"Ticket"> | number
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
     maxValue?: IntFilter<"Ticket"> | number
     baseXp?: IntFilter<"Ticket"> | number
+    successMessage?: StringNullableFilter<"Ticket"> | string | null
+    failureMessage?: StringNullableFilter<"Ticket"> | string | null
     assignedToId?: IntFilter<"Ticket"> | number
     lastSentById?: IntNullableFilter<"Ticket"> | number | null
     bounceCount?: IntFilter<"Ticket"> | number
+    abandonmentPenaltyApplied?: BoolFilter<"Ticket"> | boolean
+    abandonmentPenaltyAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     resolvedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     expiredAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
@@ -13362,11 +13725,17 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
     lastSentById?: number | null
     bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -13378,11 +13747,17 @@ export namespace Prisma {
     title: string
     description: string
     category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
     assignedToId: number
     bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -13393,10 +13768,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13409,11 +13790,17 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
     bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13425,11 +13812,17 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
     bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13440,10 +13833,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13456,11 +13855,17 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
     bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13472,11 +13877,17 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
     bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

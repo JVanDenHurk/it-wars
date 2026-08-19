@@ -2,32 +2,66 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
+import { applyCreditPenalty } from "@/lib/player-bankruptcy";
 import { getLevelFromXp } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
 import { calculateTicketValue } from "@/lib/ticket-value";
 
-function getPlayerCategory(
+function canPlayerResolve(
   level: number,
-  careerPath: string | null
+  careerPath: string | null,
+  ticketCategory: string
 ) {
-  // Levels 1-3 are Service Desk.
-  if (level < 4) {
-    return "SERVICE_DESK";
+  /*
+   * Everyone can resolve
+   * Service Desk tickets.
+   */
+  if (
+    ticketCategory ===
+    "SERVICE_DESK"
+  ) {
+    return true;
   }
 
-  if (careerPath === "NETWORK") {
-    return "NETWORK";
+  /*
+   * Players who have not yet
+   * selected a specialist path
+   * cannot resolve specialist work.
+   */
+  if (
+    level < 4 ||
+    !careerPath
+  ) {
+    return false;
   }
 
-  if (careerPath === "SYSTEMS") {
-    return "SYSTEMS";
+  /*
+   * Specialists can resolve
+   * tickets belonging to their
+   * own career path.
+   */
+  if (
+    careerPath === "NETWORK" &&
+    ticketCategory === "NETWORK"
+  ) {
+    return true;
   }
 
-  if (careerPath === "SECURITY") {
-    return "SECURITY";
+  if (
+    careerPath === "SYSTEMS" &&
+    ticketCategory === "SYSTEMS"
+  ) {
+    return true;
   }
 
-  return null;
+  if (
+    careerPath === "SECURITY" &&
+    ticketCategory === "SECURITY"
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 export async function POST(
@@ -38,7 +72,9 @@ export async function POST(
 ) {
   try {
     /*
-     * Authentication
+     * ============================
+     * AUTHENTICATION
+     * ============================
      */
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -46,26 +82,39 @@ export async function POST(
 
     if (!session) {
       return NextResponse.json(
-        { error: "Not authenticated." },
-        { status: 401 }
+        {
+          error: "Not authenticated.",
+        },
+        {
+          status: 401,
+        }
       );
     }
 
     /*
-     * Ticket ID
+     * ============================
+     * TICKET ID
+     * ============================
      */
     const { id } = await context.params;
+
     const ticketId = Number(id);
 
     if (!Number.isInteger(ticketId)) {
       return NextResponse.json(
-        { error: "Invalid ticket ID." },
-        { status: 400 }
+        {
+          error: "Invalid ticket ID.",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
     /*
-     * Current player
+     * ============================
+     * CURRENT PLAYER
+     * ============================
      */
     const player = await prisma.player.findUnique({
       where: {
@@ -75,13 +124,19 @@ export async function POST(
 
     if (!player) {
       return NextResponse.json(
-        { error: "Player not found." },
-        { status: 404 }
+        {
+          error: "Player not found.",
+        },
+        {
+          status: 404,
+        }
       );
     }
 
     /*
-     * Ticket
+     * ============================
+     * TICKET
+     * ============================
      */
     const ticket = await prisma.ticket.findUnique({
       where: {
@@ -91,19 +146,28 @@ export async function POST(
 
     if (!ticket) {
       return NextResponse.json(
-        { error: "Ticket does not exist." },
-        { status: 404 }
+        {
+          error: "Ticket does not exist.",
+        },
+        {
+          status: 404,
+        }
       );
     }
 
     /*
-     * Make sure the ticket belongs
-     * to the current player.
+     * Ticket must belong to
+     * the current player.
      */
     if (ticket.assignedToId !== player.id) {
       return NextResponse.json(
-        { error: "Ticket belongs to another player." },
-        { status: 403 }
+        {
+          error:
+            "Ticket belongs to another player.",
+        },
+        {
+          status: 403,
+        }
       );
     }
 
@@ -115,21 +179,47 @@ export async function POST(
         {
           error: `Ticket is ${ticket.status}, not OPEN.`,
         },
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
 
     /*
-     * Determine which ticket category
-     * this player can resolve.
+     * ============================
+     * RESOLVER CHECK
+     * ============================
+     *
+     * Service Desk:
+     *   SERVICE_DESK
+     *
+     * Network:
+     *   SERVICE_DESK
+     *   NETWORK
+     *
+     * Systems:
+     *   SERVICE_DESK
+     *   SYSTEMS
+     *
+     * Security:
+     *   SERVICE_DESK
+     *   SECURITY
      */
-    const playerCategory = getPlayerCategory(
-      player.level,
-      player.careerPath
-    );
-
     const correct =
-      playerCategory === ticket.category;
+      canPlayerResolve(
+        player.level,
+        player.careerPath,
+        ticket.category
+      );
+
+    /*
+     * Friendly incident number used
+     * by both success and failure popups.
+     */
+    const ticketNumber =
+      `INC${ticket.id
+        .toString()
+        .padStart(5, "0")}`;
 
     /*
      * ============================
@@ -137,27 +227,27 @@ export async function POST(
      * ============================
      */
     if (correct) {
-      /*
-       * Shared ticket-value calculation.
-       *
-       * Ticket value can now decay
-       * all the way down to 0 CR.
-       */
-      const reward = calculateTicketValue(
-        ticket.maxValue,
-        ticket.createdAt
-      );
+      const reward =
+        calculateTicketValue(
+          ticket.maxValue,
+          ticket.createdAt
+        );
 
-      const xpReward = ticket.baseXp;
+      const xpReward =
+        ticket.baseXp;
 
       const newXp =
-        player.xp + xpReward;
+        player.xp +
+        xpReward;
 
       const newLevel =
-        getLevelFromXp(newXp);
+        getLevelFromXp(
+          newXp
+        );
 
       const levelledUp =
-        newLevel > player.level;
+        newLevel >
+        player.level;
 
       const careerUnlocked =
         player.level < 4 &&
@@ -166,15 +256,19 @@ export async function POST(
 
       await prisma.$transaction([
         /*
-         * Close ticket.
+         * Close ticket successfully.
          */
         prisma.ticket.update({
           where: {
             id: ticket.id,
           },
+
           data: {
-            status: "RESOLVED",
-            resolvedAt: new Date(),
+            status:
+              "RESOLVED",
+
+            resolvedAt:
+              new Date(),
           },
         }),
 
@@ -185,14 +279,18 @@ export async function POST(
           where: {
             id: player.id,
           },
+
           data: {
             credits: {
-              increment: reward,
+              increment:
+                reward,
             },
 
-            xp: newXp,
+            xp:
+              newXp,
 
-            level: newLevel,
+            level:
+              newLevel,
 
             ticketsResolved: {
               increment: 1,
@@ -203,27 +301,57 @@ export async function POST(
             },
 
             lifetimeCreditsEarned: {
-              increment: reward,
+              increment:
+                reward,
             },
 
-            lastActiveAt: new Date(),
+            lastActiveAt:
+              new Date(),
           },
         }),
       ]);
 
+      /*
+       * ============================
+       * SUCCESS RESPONSE
+       * ============================
+       */
       return NextResponse.json({
         success: true,
         correct: true,
 
+        ticketId:
+          ticket.id,
+
+        ticketNumber,
+
+        ticketTitle:
+          ticket.title,
+
+        ticketCategory:
+          ticket.category,
+
+        severity:
+          ticket.severity,
+
         reward,
 
-        xp: xpReward,
-        totalXp: newXp,
+        xp:
+          xpReward,
 
-        level: newLevel,
+        totalXp:
+          newXp,
+
+        level:
+          newLevel,
+
         levelledUp,
 
         careerUnlocked,
+
+        successMessage:
+          ticket.successMessage ??
+          `${ticket.title} resolved successfully. The user has confirmed the issue is fixed.`,
       });
     }
 
@@ -235,18 +363,46 @@ export async function POST(
 
     const penalty = 100;
 
-    const newCredits = Math.max(
-      0,
-      player.credits - penalty
-    );
+    const failureMessage =
+      ticket.failureMessage ??
+      `${ticket.title} was not resolved successfully. Somehow the situation is now worse.`;
 
+    /*
+     * Close the ticket as FAILED.
+     */
+    await prisma.ticket.update({
+      where: {
+        id: ticket.id,
+      },
+
+      data: {
+        status:
+          "FAILED",
+      },
+    });
+
+    /*
+     * Apply credit penalty.
+     *
+     * Bankruptcy helper handles
+     * demotion back to Service Desk.
+     */
+    const penaltyResult =
+      await applyCreditPenalty(
+        player.id,
+        player.credits,
+        penalty
+      );
+
+    /*
+     * Record failed resolution.
+     */
     await prisma.player.update({
       where: {
         id: player.id,
       },
-      data: {
-        credits: newCredits,
 
+      data: {
         incorrectResolves: {
           increment: 1,
         },
@@ -255,20 +411,48 @@ export async function POST(
           increment: 1,
         },
 
-        lastActiveAt: new Date(),
+        lastActiveAt:
+          new Date(),
       },
     });
 
+    /*
+     * ============================
+     * FAILURE RESPONSE
+     * ============================
+     */
     return NextResponse.json({
       success: true,
       correct: false,
+      failed: true,
+
+      ticketId:
+        ticket.id,
+
+      ticketNumber,
+
+      ticketTitle:
+        ticket.title,
+
+      ticketCategory:
+        ticket.category,
+
+      severity:
+        ticket.severity,
 
       penalty,
 
-      credits: newCredits,
+      credits:
+        penaltyResult.player
+          .credits,
+
+      failureMessage,
 
       bankrupt:
-        newCredits === 0,
+        penaltyResult.bankrupt,
+
+      resetToServiceDesk:
+        penaltyResult.bankrupt,
     });
   } catch (error) {
     console.error(
@@ -278,7 +462,8 @@ export async function POST(
 
     return NextResponse.json(
       {
-        error: "Internal server error.",
+        error:
+          "Internal server error.",
       },
       {
         status: 500,

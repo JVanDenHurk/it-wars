@@ -10,54 +10,15 @@ type ResolvableCategory =
   | "SYSTEMS"
   | "SECURITY";
 
-function getResolvableCategories(
-  players: {
-    level: number;
-    careerPath: string | null;
-  }[]
-): ResolvableCategory[] {
-  const categories = new Set<ResolvableCategory>();
+type PlayerCareerInfo = {
+  level: number;
+  careerPath: string | null;
+};
 
-  // Levels 1-3 count as Service Desk.
-  if (players.some((player) => player.level < 4)) {
-    categories.add("SERVICE_DESK");
-  }
-
-  // Level 4+ specialist paths.
-  if (
-    players.some(
-      (player) =>
-        player.level >= 4 &&
-        player.careerPath === "NETWORK"
-    )
-  ) {
-    categories.add("NETWORK");
-  }
-
-  if (
-    players.some(
-      (player) =>
-        player.level >= 4 &&
-        player.careerPath === "SYSTEMS"
-    )
-  ) {
-    categories.add("SYSTEMS");
-  }
-
-  if (
-    players.some(
-      (player) =>
-        player.level >= 4 &&
-        player.careerPath === "SECURITY"
-    )
-  ) {
-    categories.add("SECURITY");
-  }
-
-  return Array.from(categories);
-}
-
-function randomSeconds(min: number, max: number) {
+function randomSeconds(
+  min: number,
+  max: number
+) {
   return Math.floor(
     Math.random() * (max - min + 1) + min
   );
@@ -82,19 +43,150 @@ function getNextTicketTime(
   );
 }
 
+/*
+ * ============================
+ * TEAM COUNTS
+ * ============================
+ *
+ * Players without a specialist
+ * career are still Service Desk.
+ */
+function getTeamCounts(
+  players: PlayerCareerInfo[]
+) {
+  return {
+    SERVICE_DESK:
+      players.filter(
+        (player) =>
+          player.level < 4 ||
+          !player.careerPath
+      ).length,
+
+    NETWORK:
+      players.filter(
+        (player) =>
+          player.level >= 4 &&
+          player.careerPath === "NETWORK"
+      ).length,
+
+    SYSTEMS:
+      players.filter(
+        (player) =>
+          player.level >= 4 &&
+          player.careerPath === "SYSTEMS"
+      ).length,
+
+    SECURITY:
+      players.filter(
+        (player) =>
+          player.level >= 4 &&
+          player.careerPath === "SECURITY"
+      ).length,
+  };
+}
+
+/*
+ * ============================
+ * CATEGORY WEIGHTS
+ * ============================
+ *
+ * Demand scales with the number
+ * of currently logged-in players
+ * in each team.
+ *
+ * Service Desk gets +2 baseline
+ * weight so it remains the main
+ * intake category.
+ */
+function getCategoryWeights(
+  players: PlayerCareerInfo[]
+): Record<ResolvableCategory, number> {
+  const counts =
+    getTeamCounts(players);
+
+  return {
+    SERVICE_DESK:
+      counts.SERVICE_DESK + 2,
+
+    NETWORK:
+      counts.NETWORK,
+
+    SYSTEMS:
+      counts.SYSTEMS,
+
+    SECURITY:
+      counts.SECURITY,
+  };
+}
+
+/*
+ * ============================
+ * WEIGHTED CATEGORY PICK
+ * ============================
+ */
+function chooseWeightedCategory(
+  weights: Record<
+    ResolvableCategory,
+    number
+  >
+): ResolvableCategory | null {
+  const entries =
+    Object.entries(weights).filter(
+      ([, weight]) =>
+        weight > 0
+    ) as [
+      ResolvableCategory,
+      number,
+    ][];
+
+  if (entries.length === 0) {
+    return null;
+  }
+
+  const totalWeight =
+    entries.reduce(
+      (sum, [, weight]) =>
+        sum + weight,
+      0
+    );
+
+  let roll =
+    Math.random() *
+    totalWeight;
+
+  for (const [
+    category,
+    weight,
+  ] of entries) {
+    roll -= weight;
+
+    if (roll < 0) {
+      return category;
+    }
+  }
+
+  return entries[
+    entries.length - 1
+  ][0];
+}
+
 export async function POST() {
   try {
     /*
-     * Authentication
+     * ============================
+     * AUTHENTICATION
+     * ============================
      */
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session =
+      await auth.api.getSession({
+        headers: await headers(),
+      });
 
     if (!session) {
       return NextResponse.json(
         {
-          error: "Not authenticated.",
+          error:
+            "Not authenticated.",
         },
         {
           status: 401,
@@ -103,19 +195,23 @@ export async function POST() {
     }
 
     /*
-     * Current player
+     * ============================
+     * CURRENT PLAYER
+     * ============================
      */
     const player =
       await prisma.player.findUnique({
         where: {
-          userId: session.user.id,
+          userId:
+            session.user.id,
         },
       });
 
     if (!player) {
       return NextResponse.json(
         {
-          error: "Player not found.",
+          error:
+            "Player not found.",
         },
         {
           status: 404,
@@ -123,11 +219,13 @@ export async function POST() {
       );
     }
 
-    const now = new Date();
+    const now =
+      new Date();
 
     /*
-     * If the player is not due a new
-     * ticket yet, don't generate one.
+     * ============================
+     * TICKET TIMER
+     * ============================
      */
     if (
       player.nextTicketAt &&
@@ -142,27 +240,38 @@ export async function POST() {
     }
 
     /*
-     * Check whether THIS PLAYER has
-     * an active queue penalty.
-     *
-     * It does not affect other players.
+     * ============================
+     * OWNERSHIP PENALTY
+     * ============================
      */
     const queuePenaltyActive =
       player.queuePenaltyUntil !== null &&
       player.queuePenaltyUntil > now;
 
     /*
-     * Find all non-bankrupt players.
+     * ============================
+     * CURRENTLY LOGGED-IN PLAYERS
+     * ============================
      *
-     * Their roles determine which
-     * ticket categories are allowed
-     * to exist in the game.
+     * Only players with at least one
+     * unexpired authentication session
+     * contribute to the ticket pool.
      */
-    const availablePlayers =
+    const activePlayers =
       await prisma.player.findMany({
         where: {
           credits: {
             gt: 0,
+          },
+
+          user: {
+            sessions: {
+              some: {
+                expiresAt: {
+                  gt: now,
+                },
+              },
+            },
           },
         },
 
@@ -172,18 +281,19 @@ export async function POST() {
         },
       });
 
-    const resolvableCategories =
-      getResolvableCategories(
-        availablePlayers
-      );
-
+    /*
+     * Current player should normally be
+     * included because they are authenticated.
+     *
+     * This is just a safety check.
+     */
     if (
-      resolvableCategories.length === 0
+      activePlayers.length === 0
     ) {
       return NextResponse.json(
         {
           error:
-            "No resolver teams are currently available.",
+            "No active players are currently available.",
         },
         {
           status: 400,
@@ -192,25 +302,89 @@ export async function POST() {
     }
 
     /*
-     * Only load templates that somebody
-     * in the game can eventually resolve.
+     * ============================
+     * SCALED TICKET POOL
+     * ============================
      */
-    const templates =
+    const categoryWeights =
+      getCategoryWeights(
+        activePlayers
+      );
+
+    const selectedCategory =
+      chooseWeightedCategory(
+        categoryWeights
+      );
+
+    if (!selectedCategory) {
+      return NextResponse.json(
+        {
+          error:
+            "No ticket categories are currently available.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    /*
+     * ============================
+     * LOAD TEMPLATES
+     * ============================
+     *
+     * Category is chosen BEFORE
+     * the template.
+     *
+     * That prevents categories with
+     * more JSON templates from being
+     * artificially more common.
+     */
+    let templates =
       await prisma.ticketTemplate.findMany({
         where: {
           active: true,
 
-          category: {
-            in: resolvableCategories,
-          },
+          category:
+            selectedCategory,
         },
       });
 
-    if (templates.length === 0) {
+    let finalCategory =
+      selectedCategory;
+
+    /*
+     * Safety fallback.
+     *
+     * If a category somehow has no
+     * active templates, use Service Desk.
+     */
+    if (
+      templates.length === 0 &&
+      selectedCategory !==
+        "SERVICE_DESK"
+    ) {
+      finalCategory =
+        "SERVICE_DESK";
+
+      templates =
+        await prisma.ticketTemplate.findMany({
+          where: {
+            active: true,
+
+            category:
+              "SERVICE_DESK",
+          },
+        });
+    }
+
+    if (
+      templates.length === 0
+    ) {
       return NextResponse.json(
         {
           error:
-            "No ticket templates are available for the current resolver teams.",
+            "No ticket templates are available.",
         },
         {
           status: 404,
@@ -219,7 +393,9 @@ export async function POST() {
     }
 
     /*
-     * Pick a random valid ticket template.
+     * ============================
+     * RANDOM TEMPLATE
+     * ============================
      */
     const template =
       templates[
@@ -230,8 +406,9 @@ export async function POST() {
       ];
 
     /*
-     * Calculate this player's next
-     * allowed system-ticket time.
+     * ============================
+     * NEXT TICKET TIME
+     * ============================
      */
     const nextTicketAt =
       getNextTicketTime(
@@ -239,8 +416,9 @@ export async function POST() {
       );
 
     /*
-     * Create the ticket and update
-     * the player's timer together.
+     * ============================
+     * CREATE LIVE TICKET
+     * ============================
      */
     const [ticket] =
       await prisma.$transaction([
@@ -255,23 +433,47 @@ export async function POST() {
             category:
               template.category,
 
+            severity:
+              template.severity,
+
+            difficulty:
+              template.difficulty,
+
             maxValue:
               template.maxValue,
 
             baseXp:
               template.baseXp,
 
+            successMessage:
+              template.successMessage,
+
+            failureMessage:
+              template.failureMessage,
+
+            /*
+             * Ticket always enters
+             * the current player's queue.
+             *
+             * If it belongs to another
+             * resolver team they need
+             * to bounce/escalate it.
+             */
             assignedToId:
               player.id,
 
             /*
-             * null means this came from
-             * the game, not another player.
+             * null means system-generated.
              */
-            lastSentById: null,
+            lastSentById:
+              null,
           },
         }),
 
+        /*
+         * Start current player's
+         * next ticket countdown.
+         */
         prisma.player.update({
           where: {
             id: player.id,
@@ -279,17 +481,45 @@ export async function POST() {
 
           data: {
             nextTicketAt,
-            lastActiveAt: now,
+
+            lastActiveAt:
+              now,
           },
         }),
       ]);
 
+    /*
+     * ============================
+     * RESPONSE
+     * ============================
+     */
     return NextResponse.json({
       success: true,
       generated: true,
-      ticketId: ticket.id,
+
+      ticketId:
+        ticket.id,
+
+      severity:
+        ticket.severity,
+
+      /*
+       * Useful for development/testing.
+       *
+       * The frontend does not need to
+       * display this to the player.
+       */
+      generatedCategory:
+        finalCategory,
+
       nextTicketAt,
+
       queuePenaltyActive,
+
+      categoryWeights,
+
+      activePlayerCount:
+        activePlayers.length,
     });
   } catch (error) {
     console.error(

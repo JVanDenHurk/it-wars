@@ -20,6 +20,13 @@ enum TicketCategory {
   SECURITY
 }
 
+enum TicketSeverity {
+  P1
+  P2
+  P3
+  P4
+}
+
 enum TicketStatus {
   OPEN
   RESOLVED
@@ -83,24 +90,43 @@ model Ticket {
   title       String
   description String
 
-  // Hidden answer - never show this directly to the player
+  // Hidden correct resolver
   category TicketCategory
+
+  // Visible urgency
+  severity TicketSeverity @default(P4)
+
+  // Hidden internal difficulty
+  // 1 = Easy
+  // 2 = Standard
+  // 3 = Hard
+  // 4 = Expert
+  // 5 = Nightmare
+  difficulty Int @default(1)
 
   status TicketStatus @default(OPEN)
 
   maxValue Int
   baseXp   Int @default(10)
 
+  // Optional ticket-specific outcome messages
+  successMessage String?
+  failureMessage String?
+
   // Player who currently has the ticket
   assignedToId Int
   assignedTo   Player @relation("AssignedTickets", fields: [assignedToId], references: [id], onDelete: Cascade)
 
-  // Player who most recently bounced/sent this ticket.
-  // Null means the ticket came from the game.
+  // Player who most recently bounced/sent this ticket
+  // Null means the ticket came from the game
   lastSentById Int?
   lastSentBy   Player? @relation("SentTickets", fields: [lastSentById], references: [id], onDelete: SetNull)
 
   bounceCount Int @default(0)
+
+  // Abandonment / SLA tracking
+  abandonmentPenaltyApplied Boolean   @default(false)
+  abandonmentPenaltyAt      DateTime?
 
   resolvedAt DateTime?
   expiredAt  DateTime?
@@ -112,6 +138,9 @@ model Ticket {
   @@index([lastSentById])
   @@index([status])
   @@index([category])
+  @@index([severity])
+  @@index([difficulty])
+  @@index([abandonmentPenaltyApplied])
 }
 
 model TicketTemplate {
@@ -123,10 +152,23 @@ model TicketTemplate {
   // Hidden correct resolver
   category TicketCategory
 
+  // Visible urgency
+  severity TicketSeverity @default(P4)
+
+  // Hidden internal difficulty
+  // 1 = Easy
+  // 2 = Standard
+  // 3 = Hard
+  // 4 = Expert
+  // 5 = Nightmare
   difficulty Int @default(1)
 
   maxValue Int
   baseXp   Int @default(10)
+
+  // Optional ticket-specific outcome messages
+  successMessage String?
+  failureMessage String?
 
   active Boolean @default(true)
 
@@ -134,6 +176,8 @@ model TicketTemplate {
   updatedAt DateTime @updatedAt
 
   @@index([category])
+  @@index([severity])
+  @@index([difficulty])
   @@index([active])
 }
 
