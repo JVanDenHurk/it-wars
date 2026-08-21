@@ -40,7 +40,8 @@ function getAbandonmentMessage(
   title: string,
   category: string
 ) {
-  const lowerTitle = title.toLowerCase();
+  const lowerTitle =
+    title.toLowerCase();
 
   if (
     lowerTitle.includes("phishing") ||
@@ -97,84 +98,148 @@ function getAbandonmentMessage(
 
 export async function POST() {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    /*
+     * ============================
+     * AUTHENTICATION
+     * ============================
+     */
+    const session =
+      await auth.api.getSession({
+        headers: await headers(),
+      });
 
     if (!session) {
       return NextResponse.json(
-        { error: "Not authenticated." },
-        { status: 401 }
+        {
+          error:
+            "Not authenticated.",
+        },
+        {
+          status: 401,
+        }
       );
     }
 
-    const player = await prisma.player.findUnique({
-      where: {
-        userId: session.user.id,
-      },
-    });
+    /*
+     * ============================
+     * CURRENT PLAYER
+     * ============================
+     */
+    const player =
+      await prisma.player.findUnique({
+        where: {
+          userId:
+            session.user.id,
+        },
+      });
 
     if (!player) {
       return NextResponse.json(
-        { error: "Player not found." },
-        { status: 404 }
+        {
+          error:
+            "Player not found.",
+        },
+        {
+          status: 404,
+        }
       );
     }
 
-    const openTickets = await prisma.ticket.findMany({
-      where: {
-        assignedToId: player.id,
-        status: "OPEN",
-        abandonmentPenaltyApplied: false,
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-    });
+    /*
+     * ============================
+     * OPEN TICKETS
+     * ============================
+     *
+     * Only load tickets where an
+     * abandonment penalty has not
+     * already been applied.
+     */
+    const openTickets =
+      await prisma.ticket.findMany({
+        where: {
+          assignedToId:
+            player.id,
 
-    if (openTickets.length === 0) {
+          status:
+            "OPEN",
+
+          abandonmentPenaltyApplied:
+            false,
+        },
+
+        orderBy: {
+          createdAt:
+            "asc",
+        },
+      });
+
+    if (
+      openTickets.length === 0
+    ) {
       return NextResponse.json({
-        success: true,
-        abandoned: false,
+        success:
+          true,
+
+        abandoned:
+          false,
       });
     }
 
-    const now = Date.now();
+    const now =
+      Date.now();
 
     /*
-     * Only process ONE abandoned ticket per call.
+     * ============================
+     * FIND ONE ABANDONED TICKET
+     * ============================
      *
-     * This makes the UI much easier because
-     * the player gets one popup at a time.
+     * Only process ONE ticket per call.
+     *
+     * This means the player sees one
+     * abandonment popup at a time.
      */
-    const abandonedTicket = openTickets.find(
-      (ticket) => {
-        const rule = getAbandonmentRule(
-          ticket.severity
-        );
+    const abandonedTicket =
+      openTickets.find(
+        (ticket) => {
+          const rule =
+            getAbandonmentRule(
+              ticket.severity
+            );
 
-        const ageMs =
-          now - ticket.createdAt.getTime();
+          const ageMs =
+            now -
+            ticket.createdAt.getTime();
 
-        const ageMinutes =
-          ageMs / 60000;
+          const ageMinutes =
+            ageMs /
+            60000;
 
-        return (
-          ageMinutes >= rule.minutes
-        );
-      }
-    );
+          return (
+            ageMinutes >=
+            rule.minutes
+          );
+        }
+      );
 
     if (!abandonedTicket) {
       return NextResponse.json({
-        success: true,
-        abandoned: false,
+        success:
+          true,
+
+        abandoned:
+          false,
       });
     }
 
-    const rule = getAbandonmentRule(
-      abandonedTicket.severity
-    );
+    /*
+     * ============================
+     * ABANDONMENT RULE
+     * ============================
+     */
+    const rule =
+      getAbandonmentRule(
+        abandonedTicket.severity
+      );
 
     const failureMessage =
       getAbandonmentMessage(
@@ -182,39 +247,86 @@ export async function POST() {
         abandonedTicket.category
       );
 
+    const abandonmentTime =
+      new Date();
+
     /*
-     * Mark it first so the penalty
-     * can never be applied twice.
+     * ============================
+     * CLOSE ABANDONED TICKET
+     * ============================
+     *
+     * Mark the ticket first so this
+     * penalty can never be processed
+     * twice.
      */
     await prisma.ticket.update({
       where: {
-        id: abandonedTicket.id,
+        id:
+          abandonedTicket.id,
       },
-      data: {
-        status: "EXPIRED",
 
-        abandonmentPenaltyApplied: true,
-        abandonmentPenaltyAt: new Date(),
-        expiredAt: new Date(),
+      data: {
+        status:
+          "EXPIRED",
+
+        abandonmentPenaltyApplied:
+          true,
+
+        abandonmentPenaltyAt:
+          abandonmentTime,
+
+        expiredAt:
+          abandonmentTime,
       },
     });
 
     /*
-     * Apply severity-based credit loss.
+     * ============================
+     * APPLY CREDIT PENALTY
+     * ============================
      *
-     * If this wipes them out, the shared
-     * bankruptcy helper demotes them.
+     * PvP information is passed into
+     * the shared bankruptcy helper.
+     *
+     * Normal system tickets have:
+     *
+     * attackSourcePlayerId = null
+     * pvpAttackId = null
+     *
+     * so they behave exactly as before.
+     *
+     * PvP tickets retain the ID of the
+     * original attacker even if the
+     * ticket has been bounced between
+     * several players.
      */
     const penaltyResult =
       await applyCreditPenalty(
         player.id,
         player.credits,
-        rule.penalty
+        rule.penalty,
+        {
+          attackSourcePlayerId:
+            abandonedTicket
+              .attackSourcePlayerId,
+
+          pvpAttackId:
+            abandonedTicket
+              .pvpAttackId,
+        }
       );
 
+    /*
+     * ============================
+     * RESPONSE
+     * ============================
+     */
     return NextResponse.json({
-      success: true,
-      abandoned: true,
+      success:
+        true,
+
+      abandoned:
+        true,
 
       ticketId:
         abandonedTicket.id,
@@ -222,7 +334,10 @@ export async function POST() {
       ticketNumber:
         `INC${abandonedTicket.id
           .toString()
-          .padStart(5, "0")}`,
+          .padStart(
+            5,
+            "0"
+          )}`,
 
       ticketTitle:
         abandonedTicket.title,
@@ -234,7 +349,8 @@ export async function POST() {
         rule.penalty,
 
       credits:
-        penaltyResult.player.credits,
+        penaltyResult.player
+          .credits,
 
       failureMessage,
 
@@ -243,6 +359,23 @@ export async function POST() {
 
       resetToServiceDesk:
         penaltyResult.bankrupt,
+
+      /*
+       * PvP information.
+       *
+       * Frontend does not have to
+       * display this yet.
+       */
+      killAwarded:
+        penaltyResult.killAwarded,
+
+      attackSourcePlayerId:
+        abandonedTicket
+          .attackSourcePlayerId,
+
+      pvpAttackId:
+        abandonedTicket
+          .pvpAttackId,
     });
   } catch (error) {
     console.error(

@@ -35,6 +35,21 @@ enum TicketStatus {
   EXPIRED
 }
 
+enum PvPAttackType {
+  PASSWORD_RESET_FLOOD
+  NETWORK_OUTAGE
+  FAILED_DEPLOYMENT
+  PHISHING_CAMPAIGN
+  TICKET_STORM
+  MAJOR_INCIDENT
+}
+
+enum PvPAttackStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
 model Player {
   id Int @id @default(autoincrement())
 
@@ -55,6 +70,13 @@ model Player {
   kills        Int @default(0)
   bankruptcies Int @default(0)
 
+  // PvP attack relationships
+  attacksSent     PvPAttack[] @relation("AttacksSent")
+  attacksReceived PvPAttack[] @relation("AttacksReceived")
+
+  // Tickets originally created by this player as PvP attacks
+  attackTickets Ticket[] @relation("AttackTickets")
+
   // Ticket performance
   ticketsResolved   Int @default(0)
   correctBounces    Int @default(0)
@@ -68,12 +90,10 @@ model Player {
   // Player activity
   lastActiveAt DateTime @default(now())
 
-  // Personal queue slowdown after bouncing work
-  // that the player could have resolved themselves
+  // Personal queue slowdown
   queuePenaltyUntil DateTime?
 
-  // Controls when this player is next eligible
-  // to receive an automatic system ticket
+  // Controls next automatic ticket
   nextTicketAt DateTime?
 
   // Ticket relationships
@@ -97,11 +117,6 @@ model Ticket {
   severity TicketSeverity @default(P4)
 
   // Hidden internal difficulty
-  // 1 = Easy
-  // 2 = Standard
-  // 3 = Hard
-  // 4 = Expert
-  // 5 = Nightmare
   difficulty Int @default(1)
 
   status TicketStatus @default(OPEN)
@@ -117,10 +132,17 @@ model Ticket {
   assignedToId Int
   assignedTo   Player @relation("AssignedTickets", fields: [assignedToId], references: [id], onDelete: Cascade)
 
-  // Player who most recently bounced/sent this ticket
-  // Null means the ticket came from the game
+  // Most recent player who bounced/transferred the ticket
   lastSentById Int?
   lastSentBy   Player? @relation("SentTickets", fields: [lastSentById], references: [id], onDelete: SetNull)
+
+  // Original PvP attacker
+  attackSourcePlayerId Int?
+  attackSourcePlayer   Player? @relation("AttackTickets", fields: [attackSourcePlayerId], references: [id], onDelete: SetNull)
+
+  // PvP attack event that created this ticket
+  pvpAttackId Int?
+  pvpAttack   PvPAttack? @relation(fields: [pvpAttackId], references: [id], onDelete: SetNull)
 
   bounceCount Int @default(0)
 
@@ -136,6 +158,8 @@ model Ticket {
 
   @@index([assignedToId])
   @@index([lastSentById])
+  @@index([attackSourcePlayerId])
+  @@index([pvpAttackId])
   @@index([status])
   @@index([category])
   @@index([severity])
@@ -156,11 +180,6 @@ model TicketTemplate {
   severity TicketSeverity @default(P4)
 
   // Hidden internal difficulty
-  // 1 = Easy
-  // 2 = Standard
-  // 3 = Hard
-  // 4 = Expert
-  // 5 = Nightmare
   difficulty Int @default(1)
 
   maxValue Int
@@ -179,6 +198,41 @@ model TicketTemplate {
   @@index([severity])
   @@index([difficulty])
   @@index([active])
+}
+
+model PvPAttack {
+  id Int @id @default(autoincrement())
+
+  type   PvPAttackType
+  status PvPAttackStatus @default(ACTIVE)
+
+  // Credits paid by attacker
+  cost Int
+
+  // Player who purchased the attack
+  attackerId Int
+  attacker   Player @relation("AttacksSent", fields: [attackerId], references: [id], onDelete: Cascade)
+
+  // Original victim
+  targetId Int
+  target   Player @relation("AttacksReceived", fields: [targetId], references: [id], onDelete: Cascade)
+
+  // Tickets created by this attack
+  tickets Ticket[]
+
+  // True if this attack caused bankruptcy
+  causedBankruptcy Boolean @default(false)
+
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([attackerId])
+  @@index([targetId])
+  @@index([type])
+  @@index([status])
+  @@index([causedBankruptcy])
 }
 
 model User {

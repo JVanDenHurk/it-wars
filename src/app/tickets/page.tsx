@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import BounceTicketButton from "@/components/BounceTicketButton";
+import PlayerHeartbeat from "@/components/PlayerHeartbeat";
 import ResolveTicketButton from "@/components/ResolveTicketButton";
 import TicketTimer from "@/components/TicketTimer";
 import { auth } from "@/lib/auth";
@@ -69,6 +70,7 @@ export default async function TicketsPage() {
       assignedToId: player.id,
       status: "OPEN",
     },
+
     orderBy: {
       createdAt: "asc",
     },
@@ -82,10 +84,21 @@ export default async function TicketsPage() {
 
   return (
     <main className="min-h-screen bg-black px-4 py-8 text-white md:px-8">
+
+      {/*
+       * Keep the player marked active
+       * while they are working inside
+       * their ticket queue.
+       */}
+      <PlayerHeartbeat />
+
       <div className="mx-auto max-w-5xl">
 
-        {/* Header */}
+        {/* ============================
+            HEADER
+            ============================ */}
         <div className="flex items-start justify-between gap-4">
+
           <div>
             <h1 className="text-4xl font-black">
               Ticket Queue
@@ -93,7 +106,9 @@ export default async function TicketsPage() {
 
             <p className="mt-2 text-zinc-400">
               {tickets.length} open ticket
-              {tickets.length === 1 ? "" : "s"}
+              {tickets.length === 1
+                ? ""
+                : "s"}
             </p>
           </div>
 
@@ -103,21 +118,33 @@ export default async function TicketsPage() {
           >
             Dashboard
           </Link>
+
         </div>
 
-        {/* Next Ticket Timer */}
+        {/* ============================
+            NEXT TICKET TIMER
+            ============================ */}
         <div className="mt-8 border border-zinc-800 bg-zinc-950 p-5">
+
           <TicketTimer
-            nextTicketAt={player.nextTicketAt}
-            queuePenaltyActive={queuePenaltyActive}
+            nextTicketAt={
+              player.nextTicketAt
+            }
+            queuePenaltyActive={
+              queuePenaltyActive
+            }
           />
+
         </div>
 
-        {/* Queue */}
+        {/* ============================
+            QUEUE
+            ============================ */}
         <div className="mt-8 space-y-4">
 
           {tickets.length === 0 && (
             <div className="border border-zinc-800 bg-zinc-950 p-8 text-center">
+
               <h2 className="text-xl font-bold">
                 Queue Empty
               </h2>
@@ -125,20 +152,25 @@ export default async function TicketsPage() {
               <p className="mt-2 text-zinc-400">
                 Waiting for your next ticket...
               </p>
+
             </div>
           )}
 
           {tickets.map((ticket) => {
-            const value = calculateTicketValue(
-              ticket.maxValue,
-              ticket.createdAt
-            );
+            const value =
+              calculateTicketValue(
+                ticket.maxValue,
+                ticket.createdAt
+              );
 
-            const ageMinutes = Math.floor(
-              (Date.now() -
-                ticket.createdAt.getTime()) /
-                60000
-            );
+            const ageMinutes =
+              Math.floor(
+                (
+                  Date.now() -
+                  ticket.createdAt.getTime()
+                ) /
+                  60000
+              );
 
             const abandonmentMinutes =
               getAbandonmentMinutes(
@@ -146,30 +178,38 @@ export default async function TicketsPage() {
               );
 
             /*
-             * Show BREACHING when the ticket
-             * enters the final 25% of its
-             * abandonment window.
+             * Show BREACHING when the
+             * ticket enters the final
+             * 25% of its abandonment
+             * window.
              */
             const breachingSoon =
               ageMinutes >=
-              abandonmentMinutes * 0.75;
+              abandonmentMinutes *
+                0.75;
 
             return (
               <div
                 key={ticket.id}
                 className="border border-zinc-800 bg-zinc-950 p-6"
               >
-                {/* Ticket Header */}
+
+                {/* ============================
+                    TICKET HEADER
+                    ============================ */}
                 <div className="flex items-start justify-between gap-4">
 
                   <div>
+
                     {/* Severity */}
                     <span
                       className={`inline-block border px-2 py-1 text-xs font-bold ${getSeverityClasses(
                         ticket.severity
                       )}`}
                     >
-                      {ticket.severity}
+                      {
+                        ticket.severity
+                      }
                     </span>
 
                     {/* Incident Number */}
@@ -177,36 +217,57 @@ export default async function TicketsPage() {
                       INC
                       {ticket.id
                         .toString()
-                        .padStart(5, "0")}
+                        .padStart(
+                          5,
+                          "0"
+                        )}
                     </p>
 
                     {/* Title */}
                     <h2 className="mt-1 text-xl font-bold">
-                      {ticket.title}
+                      {
+                        ticket.title
+                      }
                     </h2>
+
                   </div>
 
                   {/* Current Value */}
                   <div className="shrink-0 text-right">
+
                     <p className="text-xl font-bold">
                       {value} CR
                     </p>
 
                     <p className="text-xs text-zinc-500">
-                      Max {ticket.maxValue} CR
+                      Max{" "}
+                      {
+                        ticket.maxValue
+                      }{" "}
+                      CR
                     </p>
+
                   </div>
+
                 </div>
 
-                {/* Description */}
+                {/* ============================
+                    DESCRIPTION
+                    ============================ */}
                 <p className="mt-5 leading-relaxed text-zinc-300">
-                  {ticket.description}
+                  {
+                    ticket.description
+                  }
                 </p>
 
-                {/* Age / Breaching */}
+                {/* ============================
+                    AGE / BREACHING
+                    ============================ */}
                 <div className="mt-5 flex items-center gap-3 text-sm">
+
                   <p className="text-zinc-500">
-                    Age: {ageMinutes}m
+                    Age:{" "}
+                    {ageMinutes}m
                   </p>
 
                   {breachingSoon && (
@@ -214,23 +275,34 @@ export default async function TicketsPage() {
                       BREACHING
                     </p>
                   )}
+
                 </div>
 
-                {/* Actions */}
+                {/* ============================
+                    ACTIONS
+                    ============================ */}
                 <div className="mt-6 flex items-start gap-3">
+
                   <ResolveTicketButton
-                    ticketId={ticket.id}
+                    ticketId={
+                      ticket.id
+                    }
                   />
 
                   <BounceTicketButton
-                    ticketId={ticket.id}
+                    ticketId={
+                      ticket.id
+                    }
                   />
+
                 </div>
 
               </div>
             );
           })}
+
         </div>
+
       </div>
     </main>
   );

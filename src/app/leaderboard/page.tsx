@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import PlayerHeartbeat from "@/components/PlayerHeartbeat";
 import { auth } from "@/lib/auth";
 import {
   calculateLeaderboardScore,
@@ -20,6 +21,16 @@ export default async function LeaderboardPage() {
 
   const now = new Date();
 
+  /*
+   * Player is considered online if
+   * they have been active within
+   * the last 2 minutes.
+   */
+  const activeCutoff = new Date(
+    now.getTime() -
+      2 * 60 * 1000
+  );
+
   const players =
     await prisma.player.findMany({
       select: {
@@ -32,6 +43,8 @@ export default async function LeaderboardPage() {
         careerPath: true,
 
         credits: true,
+
+        lastActiveAt: true,
 
         ticketsResolved: true,
         correctBounces: true,
@@ -77,36 +90,46 @@ export default async function LeaderboardPage() {
    */
   const leaderboard =
     players
-      .map((player) => ({
-        ...player,
+      .map((player) => {
+        const hasValidSession =
+          player.user.sessions.length > 0;
 
-        score:
-          calculateLeaderboardScore({
-            xp:
-              player.xp,
+        const recentlyActive =
+          player.lastActiveAt >
+          activeCutoff;
 
-            lifetimeCreditsEarned:
-              player.lifetimeCreditsEarned,
+        return {
+          ...player,
 
-            ticketsResolved:
-              player.ticketsResolved,
+          score:
+            calculateLeaderboardScore({
+              xp:
+                player.xp,
 
-            correctBounces:
-              player.correctBounces,
+              lifetimeCreditsEarned:
+                player.lifetimeCreditsEarned,
 
-            kills:
-              player.kills,
+              ticketsResolved:
+                player.ticketsResolved,
 
-            bankruptcies:
-              player.bankruptcies,
-          }),
+              correctBounces:
+                player.correctBounces,
 
-        online:
-          player.user.sessions.length > 0,
+              kills:
+                player.kills,
 
-        queueSize:
-          player.assignedTickets.length,
-      }))
+              bankruptcies:
+                player.bankruptcies,
+            }),
+
+          online:
+            hasValidSession &&
+            recentlyActive,
+
+          queueSize:
+            player.assignedTickets.length,
+        };
+      })
       .sort((a, b) => {
         /*
          * Primary ranking:
@@ -136,11 +159,20 @@ export default async function LeaderboardPage() {
 
   const onlineCount =
     leaderboard.filter(
-      (player) => player.online
+      (player) =>
+        player.online
     ).length;
 
   return (
     <main className="min-h-screen bg-black p-8 text-white">
+
+      {/*
+       * Keeps this player marked active
+       * while they are viewing the
+       * leaderboard.
+       */}
+      <PlayerHeartbeat />
+
       <div className="mx-auto max-w-6xl">
 
         {/* ============================
@@ -258,7 +290,10 @@ export default async function LeaderboardPage() {
           <div className="divide-y divide-zinc-800">
 
             {leaderboard.map(
-              (rankedPlayer, index) => {
+              (
+                rankedPlayer,
+                index
+              ) => {
                 const rank =
                   index + 1;
 
@@ -274,7 +309,9 @@ export default async function LeaderboardPage() {
 
                 return (
                   <div
-                    key={rankedPlayer.id}
+                    key={
+                      rankedPlayer.id
+                    }
                     className={`p-5 ${
                       isCurrentPlayer
                         ? "bg-zinc-900/60"
@@ -317,7 +354,9 @@ export default async function LeaderboardPage() {
                           />
 
                           <p className="truncate text-lg font-bold">
-                            {rankedPlayer.username}
+                            {
+                              rankedPlayer.username
+                            }
                           </p>
 
                           {isCurrentPlayer && (
@@ -330,7 +369,9 @@ export default async function LeaderboardPage() {
 
                         <p className="mt-1 text-sm text-zinc-500">
                           {role} · Level{" "}
-                          {rankedPlayer.level}
+                          {
+                            rankedPlayer.level
+                          }
                         </p>
 
                       </div>
@@ -351,7 +392,9 @@ export default async function LeaderboardPage() {
                                 : "text-zinc-300"
                           }`}
                         >
-                          {rankedPlayer.queueSize}
+                          {
+                            rankedPlayer.queueSize
+                          }
                         </p>
 
                       </div>
@@ -370,7 +413,10 @@ export default async function LeaderboardPage() {
                               : "text-zinc-300"
                           }`}
                         >
-                          {rankedPlayer.credits} CR
+                          {
+                            rankedPlayer.credits
+                          }{" "}
+                          CR
                         </p>
 
                       </div>
@@ -383,7 +429,9 @@ export default async function LeaderboardPage() {
                         </p>
 
                         <p className="mt-1 text-xl font-black">
-                          {rankedPlayer.score}
+                          {
+                            rankedPlayer.score
+                          }
                         </p>
 
                       </div>
@@ -399,7 +447,9 @@ export default async function LeaderboardPage() {
                         </p>
 
                         <p className="font-bold text-zinc-300">
-                          {rankedPlayer.ticketsResolved}
+                          {
+                            rankedPlayer.ticketsResolved
+                          }
                         </p>
                       </div>
 
@@ -409,7 +459,9 @@ export default async function LeaderboardPage() {
                         </p>
 
                         <p className="font-bold text-zinc-300">
-                          {rankedPlayer.correctBounces}
+                          {
+                            rankedPlayer.correctBounces
+                          }
                         </p>
                       </div>
 
@@ -419,7 +471,9 @@ export default async function LeaderboardPage() {
                         </p>
 
                         <p className="font-bold text-zinc-300">
-                          {rankedPlayer.incorrectBounces}
+                          {
+                            rankedPlayer.incorrectBounces
+                          }
                         </p>
                       </div>
 
@@ -429,7 +483,9 @@ export default async function LeaderboardPage() {
                         </p>
 
                         <p className="font-bold text-zinc-300">
-                          {rankedPlayer.kills}
+                          {
+                            rankedPlayer.kills
+                          }
                         </p>
                       </div>
 
@@ -439,7 +495,9 @@ export default async function LeaderboardPage() {
                         </p>
 
                         <p className="font-bold text-zinc-300">
-                          {rankedPlayer.bankruptcies}
+                          {
+                            rankedPlayer.bankruptcies
+                          }
                         </p>
                       </div>
 

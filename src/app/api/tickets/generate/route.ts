@@ -91,8 +91,8 @@ function getTeamCounts(
  * ============================
  *
  * Demand scales with the number
- * of currently logged-in players
- * in each team.
+ * of currently active players
+ * in each resolver team.
  *
  * Service Desk gets +2 baseline
  * weight so it remains the main
@@ -223,6 +223,17 @@ export async function POST() {
       new Date();
 
     /*
+     * Player is considered active if
+     * they have sent a heartbeat within
+     * the last 2 minutes.
+     */
+    const activeCutoff =
+      new Date(
+        now.getTime() -
+          2 * 60 * 1000
+      );
+
+    /*
      * ============================
      * TICKET TIMER
      * ============================
@@ -250,18 +261,26 @@ export async function POST() {
 
     /*
      * ============================
-     * CURRENTLY LOGGED-IN PLAYERS
+     * CURRENTLY ACTIVE PLAYERS
      * ============================
      *
-     * Only players with at least one
-     * unexpired authentication session
-     * contribute to the ticket pool.
+     * A player only contributes to
+     * the global ticket pool when:
+     *
+     * 1. They still have Credits
+     * 2. They have a valid auth session
+     * 3. Their heartbeat was received
+     *    within the last 2 minutes
      */
     const activePlayers =
       await prisma.player.findMany({
         where: {
           credits: {
             gt: 0,
+          },
+
+          lastActiveAt: {
+            gt: activeCutoff,
           },
 
           user: {
@@ -282,10 +301,11 @@ export async function POST() {
       });
 
     /*
-     * Current player should normally be
-     * included because they are authenticated.
+     * The current player should normally
+     * be included because their heartbeat
+     * is running while playing.
      *
-     * This is just a safety check.
+     * This remains as a safety check.
      */
     if (
       activePlayers.length === 0
@@ -336,9 +356,9 @@ export async function POST() {
      * Category is chosen BEFORE
      * the template.
      *
-     * That prevents categories with
-     * more JSON templates from being
-     * artificially more common.
+     * This stops categories with
+     * more templates from receiving
+     * an accidental spawn advantage.
      */
     let templates =
       await prisma.ticketTemplate.findMany({
@@ -356,8 +376,9 @@ export async function POST() {
     /*
      * Safety fallback.
      *
-     * If a category somehow has no
-     * active templates, use Service Desk.
+     * If the chosen specialist
+     * category has no templates,
+     * fall back to Service Desk.
      */
     if (
       templates.length === 0 &&
@@ -452,18 +473,19 @@ export async function POST() {
               template.failureMessage,
 
             /*
-             * Ticket always enters
+             * System ticket enters
              * the current player's queue.
              *
-             * If it belongs to another
-             * resolver team they need
-             * to bounce/escalate it.
+             * The player then decides
+             * whether to resolve it
+             * or route it elsewhere.
              */
             assignedToId:
               player.id,
 
             /*
-             * null means system-generated.
+             * null means generated
+             * by the game.
              */
             lastSentById:
               null,
@@ -471,12 +493,13 @@ export async function POST() {
         }),
 
         /*
-         * Start current player's
-         * next ticket countdown.
+         * Start the next timer and
+         * also refresh activity.
          */
         prisma.player.update({
           where: {
-            id: player.id,
+            id:
+              player.id,
           },
 
           data: {
@@ -504,10 +527,10 @@ export async function POST() {
         ticket.severity,
 
       /*
-       * Useful for development/testing.
+       * Development/testing info.
        *
-       * The frontend does not need to
-       * display this to the player.
+       * This does not need to be
+       * shown to the player.
        */
       generatedCategory:
         finalCategory,

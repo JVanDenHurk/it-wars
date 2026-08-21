@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import ClearQueuePenaltyButton from "@/components/ClearQueuePenaltyButton";
+import PlayerHeartbeat from "@/components/PlayerHeartbeat";
 import SignOutButton from "@/components/SignOutButton";
 import TicketTimer from "@/components/TicketTimer";
 import { auth } from "@/lib/auth";
@@ -39,6 +40,16 @@ export default async function DashboardPage() {
   const now = new Date();
 
   /*
+   * Player is considered online if
+   * they have been active within
+   * the last 2 minutes.
+   */
+  const activeCutoff = new Date(
+    now.getTime() -
+      2 * 60 * 1000
+  );
+
+  /*
    * ============================
    * CURRENT PLAYER STATS
    * ============================
@@ -62,29 +73,34 @@ export default async function DashboardPage() {
    * ACTIVE PLAYERS
    * ============================
    *
-   * Uses the same rule as ticket
-   * generation:
+   * Online requires:
    *
-   * player must have an unexpired
-   * authentication session.
+   * 1. Valid authentication session
+   * 2. Heartbeat/activity within
+   *    the last 2 minutes
    */
-  const activePlayers = await prisma.player.findMany({
-    where: {
-      user: {
-        sessions: {
-          some: {
-            expiresAt: {
-              gt: now,
+  const activePlayers =
+    await prisma.player.findMany({
+      where: {
+        lastActiveAt: {
+          gt: activeCutoff,
+        },
+
+        user: {
+          sessions: {
+            some: {
+              expiresAt: {
+                gt: now,
+              },
             },
           },
         },
       },
-    },
 
-    select: {
-      id: true,
-    },
-  });
+      select: {
+        id: true,
+      },
+    });
 
   /*
    * ============================
@@ -189,6 +205,14 @@ export default async function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-black p-8 text-white">
+
+      {/*
+       * Sends a heartbeat immediately,
+       * then every 60 seconds while
+       * this dashboard is open.
+       */}
+      <PlayerHeartbeat />
+
       <div className="mx-auto max-w-6xl">
 
         {/* ============================
@@ -219,7 +243,6 @@ export default async function DashboardPage() {
             ============================ */}
         <div className="mt-8 grid gap-4 md:grid-cols-4">
 
-          {/* Level */}
           <div className="border border-zinc-800 bg-zinc-950 p-5">
 
             <p className="text-xs uppercase tracking-wide text-zinc-500">
@@ -232,7 +255,6 @@ export default async function DashboardPage() {
 
           </div>
 
-          {/* Career XP */}
           <div className="border border-zinc-800 bg-zinc-950 p-5">
 
             <p className="text-xs uppercase tracking-wide text-zinc-500">
@@ -245,7 +267,6 @@ export default async function DashboardPage() {
 
           </div>
 
-          {/* Credits */}
           <div className="border border-zinc-800 bg-zinc-950 p-5">
 
             <p className="text-xs uppercase tracking-wide text-zinc-500">
@@ -262,7 +283,6 @@ export default async function DashboardPage() {
 
           </div>
 
-          {/* Open Tickets */}
           <div className="border border-zinc-800 bg-zinc-950 p-5">
 
             <p className="text-xs uppercase tracking-wide text-zinc-500">
@@ -318,7 +338,6 @@ export default async function DashboardPage() {
             ============================ */}
         <div className="mt-4 grid gap-4 md:grid-cols-2">
 
-          {/* PvP */}
           <div className="border border-zinc-800 bg-zinc-950 p-6">
 
             <p className="text-xs uppercase tracking-wide text-zinc-500">
@@ -351,7 +370,6 @@ export default async function DashboardPage() {
 
           </div>
 
-          {/* Ticket Performance */}
           <div className="border border-zinc-800 bg-zinc-950 p-6">
 
             <p className="text-xs uppercase tracking-wide text-zinc-500">
@@ -385,9 +403,7 @@ export default async function DashboardPage() {
             ============================ */}
         <div className="mt-4 grid gap-4 md:grid-cols-2">
 
-          {/* ============================
-              ACTIVE PLAYERS CARD
-              ============================ */}
+          {/* Active Players */}
           <div className="border border-zinc-800 bg-zinc-950 p-6">
 
             <div className="flex items-start justify-between gap-6">
@@ -429,9 +445,7 @@ export default async function DashboardPage() {
 
           </div>
 
-          {/* ============================
-              LEADERBOARD CARD
-              ============================ */}
+          {/* Leaderboard */}
           <div className="border border-zinc-800 bg-zinc-950 p-6">
 
             <div className="flex items-start justify-between gap-6">

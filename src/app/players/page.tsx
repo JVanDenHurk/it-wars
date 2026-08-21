@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import PlayerHeartbeat from "@/components/PlayerHeartbeat";
 import { auth } from "@/lib/auth";
 import { getRoleTitle } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
@@ -17,6 +18,16 @@ export default async function PlayersPage() {
 
   const now = new Date();
 
+  /*
+   * Player is considered online if
+   * they have been active within
+   * the last 2 minutes.
+   */
+  const activeCutoff = new Date(
+    now.getTime() -
+      2 * 60 * 1000
+  );
+
   const players = await prisma.player.findMany({
     select: {
       id: true,
@@ -28,6 +39,8 @@ export default async function PlayersPage() {
 
       credits: true,
       xp: true,
+
+      lastActiveAt: true,
 
       ticketsResolved: true,
       correctBounces: true,
@@ -62,15 +75,31 @@ export default async function PlayersPage() {
   });
 
   const playerList = players
-    .map((player) => ({
-      ...player,
+    .map((player) => {
+      /*
+       * Online requires:
+       *
+       * 1. Valid authentication session
+       * 2. Recent heartbeat/activity
+       */
+      const hasValidSession =
+        player.user.sessions.length > 0;
 
-      online:
-        player.user.sessions.length > 0,
+      const recentlyActive =
+        player.lastActiveAt >
+        activeCutoff;
 
-      queueSize:
-        player.assignedTickets.length,
-    }))
+      return {
+        ...player,
+
+        online:
+          hasValidSession &&
+          recentlyActive,
+
+        queueSize:
+          player.assignedTickets.length,
+      };
+    })
     .sort((a, b) => {
       /*
        * Online players first.
@@ -89,11 +118,19 @@ export default async function PlayersPage() {
 
   const onlineCount =
     playerList.filter(
-      (player) => player.online
+      (player) =>
+        player.online
     ).length;
 
   return (
     <main className="min-h-screen bg-black p-8 text-white">
+
+      {/*
+       * Keep the current player active
+       * while they are on this page too.
+       */}
+      <PlayerHeartbeat />
+
       <div className="mx-auto max-w-6xl">
 
         {/* ============================
@@ -167,7 +204,10 @@ export default async function PlayersPage() {
             </p>
 
             <p className="mt-2 text-3xl font-black">
-              {playerList.length - onlineCount}
+              {
+                playerList.length -
+                onlineCount
+              }
             </p>
 
           </div>
@@ -199,182 +239,204 @@ export default async function PlayersPage() {
 
           <div className="divide-y divide-zinc-800">
 
-            {playerList.map((listedPlayer) => {
-              const role = getRoleTitle(
-                listedPlayer.level,
-                listedPlayer.careerPath
-              );
+            {playerList.map(
+              (listedPlayer) => {
+                const role =
+                  getRoleTitle(
+                    listedPlayer.level,
+                    listedPlayer.careerPath
+                  );
 
-              const isCurrentPlayer =
-                listedPlayer.userId ===
-                session.user.id;
+                const isCurrentPlayer =
+                  listedPlayer.userId ===
+                  session.user.id;
 
-              return (
-                <div
-                  key={listedPlayer.id}
-                  className={`p-5 ${
-                    isCurrentPlayer
-                      ? "bg-zinc-900/60"
-                      : ""
-                  }`}
-                >
+                return (
+                  <div
+                    key={
+                      listedPlayer.id
+                    }
+                    className={`p-5 ${
+                      isCurrentPlayer
+                        ? "bg-zinc-900/60"
+                        : ""
+                    }`}
+                  >
 
-                  <div className="flex flex-col gap-5 md:flex-row md:items-center">
+                    <div className="flex flex-col gap-5 md:flex-row md:items-center">
 
-                    {/* PLAYER */}
-                    <div className="min-w-0 flex-1">
+                      {/* PLAYER */}
+                      <div className="min-w-0 flex-1">
 
-                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3">
 
-                        <span
-                          className={`h-2.5 w-2.5 shrink-0 rounded-full ${
-                            listedPlayer.online
-                              ? "bg-green-400"
-                              : "bg-zinc-700"
-                          }`}
-                        />
+                          <span
+                            className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                              listedPlayer.online
+                                ? "bg-green-400"
+                                : "bg-zinc-700"
+                            }`}
+                          />
 
-                        <p className="truncate text-lg font-bold">
-                          {listedPlayer.username}
+                          <p className="truncate text-lg font-bold">
+                            {
+                              listedPlayer.username
+                            }
+                          </p>
+
+                          {isCurrentPlayer && (
+                            <span className="text-xs font-bold uppercase tracking-wide text-zinc-600">
+                              You
+                            </span>
+                          )}
+
+                        </div>
+
+                        <p className="mt-1 text-sm text-zinc-500">
+                          {role}
                         </p>
-
-                        {isCurrentPlayer && (
-                          <span className="text-xs font-bold uppercase tracking-wide text-zinc-600">
-                            You
-                          </span>
-                        )}
 
                       </div>
 
-                      <p className="mt-1 text-sm text-zinc-500">
-                        {role}
-                      </p>
+                      {/* LEVEL */}
+                      <div className="min-w-20">
 
-                    </div>
+                        <p className="text-xs uppercase tracking-wide text-zinc-600">
+                          Level
+                        </p>
 
-                    {/* LEVEL */}
-                    <div className="min-w-20">
+                        <p className="mt-1 font-bold">
+                          {
+                            listedPlayer.level
+                          }
+                        </p>
 
-                      <p className="text-xs uppercase tracking-wide text-zinc-600">
-                        Level
-                      </p>
+                      </div>
 
-                      <p className="mt-1 font-bold">
-                        {listedPlayer.level}
-                      </p>
+                      {/* XP */}
+                      <div className="min-w-24">
 
-                    </div>
+                        <p className="text-xs uppercase tracking-wide text-zinc-600">
+                          XP
+                        </p>
 
-                    {/* XP */}
-                    <div className="min-w-24">
+                        <p className="mt-1 font-bold">
+                          {
+                            listedPlayer.xp
+                          }
+                        </p>
 
-                      <p className="text-xs uppercase tracking-wide text-zinc-600">
-                        XP
-                      </p>
+                      </div>
 
-                      <p className="mt-1 font-bold">
-                        {listedPlayer.xp}
-                      </p>
+                      {/* QUEUE */}
+                      <div className="min-w-24">
 
-                    </div>
+                        <p className="text-xs uppercase tracking-wide text-zinc-600">
+                          Queue
+                        </p>
 
-                    {/* QUEUE */}
-                    <div className="min-w-24">
+                        <p
+                          className={`mt-1 font-bold ${
+                            listedPlayer.queueSize >= 10
+                              ? "text-red-400"
+                              : listedPlayer.queueSize >= 5
+                                ? "text-yellow-400"
+                                : "text-zinc-300"
+                          }`}
+                        >
+                          {
+                            listedPlayer.queueSize
+                          }
+                        </p>
 
-                      <p className="text-xs uppercase tracking-wide text-zinc-600">
-                        Queue
-                      </p>
+                      </div>
 
-                      <p
-                        className={`mt-1 font-bold ${
-                          listedPlayer.queueSize >= 10
-                            ? "text-red-400"
-                            : listedPlayer.queueSize >= 5
-                              ? "text-yellow-400"
+                      {/* CREDITS */}
+                      <div className="min-w-28">
+
+                        <p className="text-xs uppercase tracking-wide text-zinc-600">
+                          Credits
+                        </p>
+
+                        <p
+                          className={`mt-1 font-bold ${
+                            listedPlayer.credits <= 250
+                              ? "text-red-400"
                               : "text-zinc-300"
-                        }`}
-                      >
-                        {listedPlayer.queueSize}
-                      </p>
+                          }`}
+                        >
+                          {
+                            listedPlayer.credits
+                          }{" "}
+                          CR
+                        </p>
+
+                      </div>
+
+                      {/* STATUS */}
+                      <div className="min-w-24 text-right">
+
+                        <span
+                          className={`inline-block border px-3 py-1 text-xs font-bold ${
+                            listedPlayer.online
+                              ? "border-green-900 bg-green-950/20 text-green-400"
+                              : "border-zinc-800 bg-black text-zinc-600"
+                          }`}
+                        >
+                          {listedPlayer.online
+                            ? "ONLINE"
+                            : "OFFLINE"}
+                        </span>
+
+                      </div>
 
                     </div>
 
-                    {/* CREDITS */}
-                    <div className="min-w-28">
+                    {/* EXTRA STATS */}
+                    <div className="mt-4 grid grid-cols-3 gap-3 border-t border-zinc-900 pt-4 text-sm">
 
-                      <p className="text-xs uppercase tracking-wide text-zinc-600">
-                        Credits
-                      </p>
+                      <div>
+                        <p className="text-xs text-zinc-600">
+                          Resolved
+                        </p>
 
-                      <p
-                        className={`mt-1 font-bold ${
-                          listedPlayer.credits <= 250
-                            ? "text-red-400"
-                            : "text-zinc-300"
-                        }`}
-                      >
-                        {listedPlayer.credits} CR
-                      </p>
+                        <p className="font-bold text-zinc-300">
+                          {
+                            listedPlayer.ticketsResolved
+                          }
+                        </p>
+                      </div>
 
-                    </div>
+                      <div>
+                        <p className="text-xs text-zinc-600">
+                          Correct Routes
+                        </p>
 
-                    {/* STATUS */}
-                    <div className="min-w-24 text-right">
+                        <p className="font-bold text-zinc-300">
+                          {
+                            listedPlayer.correctBounces
+                          }
+                        </p>
+                      </div>
 
-                      <span
-                        className={`inline-block border px-3 py-1 text-xs font-bold ${
-                          listedPlayer.online
-                            ? "border-green-900 bg-green-950/20 text-green-400"
-                            : "border-zinc-800 bg-black text-zinc-600"
-                        }`}
-                      >
-                        {listedPlayer.online
-                          ? "ONLINE"
-                          : "OFFLINE"}
-                      </span>
+                      <div>
+                        <p className="text-xs text-zinc-600">
+                          Bad Routes
+                        </p>
 
-                    </div>
+                        <p className="font-bold text-zinc-300">
+                          {
+                            listedPlayer.incorrectBounces
+                          }
+                        </p>
+                      </div>
 
-                  </div>
-
-                  {/* EXTRA STATS */}
-                  <div className="mt-4 grid grid-cols-3 gap-3 border-t border-zinc-900 pt-4 text-sm">
-
-                    <div>
-                      <p className="text-xs text-zinc-600">
-                        Resolved
-                      </p>
-
-                      <p className="font-bold text-zinc-300">
-                        {listedPlayer.ticketsResolved}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-xs text-zinc-600">
-                        Correct Routes
-                      </p>
-
-                      <p className="font-bold text-zinc-300">
-                        {listedPlayer.correctBounces}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-xs text-zinc-600">
-                        Bad Routes
-                      </p>
-
-                      <p className="font-bold text-zinc-300">
-                        {listedPlayer.incorrectBounces}
-                      </p>
                     </div>
 
                   </div>
-
-                </div>
-              );
-            })}
+                );
+              }
+            )}
 
           </div>
 

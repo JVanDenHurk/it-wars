@@ -29,6 +29,11 @@ export type Ticket = $Result.DefaultSelection<Prisma.$TicketPayload>
  */
 export type TicketTemplate = $Result.DefaultSelection<Prisma.$TicketTemplatePayload>
 /**
+ * Model PvPAttack
+ * 
+ */
+export type PvPAttack = $Result.DefaultSelection<Prisma.$PvPAttackPayload>
+/**
  * Model User
  * 
  */
@@ -92,6 +97,27 @@ export const TicketStatus: {
 
 export type TicketStatus = (typeof TicketStatus)[keyof typeof TicketStatus]
 
+
+export const PvPAttackType: {
+  PASSWORD_RESET_FLOOD: 'PASSWORD_RESET_FLOOD',
+  NETWORK_OUTAGE: 'NETWORK_OUTAGE',
+  FAILED_DEPLOYMENT: 'FAILED_DEPLOYMENT',
+  PHISHING_CAMPAIGN: 'PHISHING_CAMPAIGN',
+  TICKET_STORM: 'TICKET_STORM',
+  MAJOR_INCIDENT: 'MAJOR_INCIDENT'
+};
+
+export type PvPAttackType = (typeof PvPAttackType)[keyof typeof PvPAttackType]
+
+
+export const PvPAttackStatus: {
+  ACTIVE: 'ACTIVE',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+};
+
+export type PvPAttackStatus = (typeof PvPAttackStatus)[keyof typeof PvPAttackStatus]
+
 }
 
 export type CareerPath = $Enums.CareerPath
@@ -109,6 +135,14 @@ export const TicketSeverity: typeof $Enums.TicketSeverity
 export type TicketStatus = $Enums.TicketStatus
 
 export const TicketStatus: typeof $Enums.TicketStatus
+
+export type PvPAttackType = $Enums.PvPAttackType
+
+export const PvPAttackType: typeof $Enums.PvPAttackType
+
+export type PvPAttackStatus = $Enums.PvPAttackStatus
+
+export const PvPAttackStatus: typeof $Enums.PvPAttackStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -260,6 +294,16 @@ export class PrismaClient<
     * ```
     */
   get ticketTemplate(): Prisma.TicketTemplateDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.pvPAttack`: Exposes CRUD operations for the **PvPAttack** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PvPAttacks
+    * const pvPAttacks = await prisma.pvPAttack.findMany()
+    * ```
+    */
+  get pvPAttack(): Prisma.PvPAttackDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.user`: Exposes CRUD operations for the **User** model.
@@ -750,6 +794,7 @@ export namespace Prisma {
     Player: 'Player',
     Ticket: 'Ticket',
     TicketTemplate: 'TicketTemplate',
+    PvPAttack: 'PvPAttack',
     User: 'User',
     Session: 'Session',
     Account: 'Account',
@@ -769,7 +814,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "player" | "ticket" | "ticketTemplate" | "user" | "session" | "account" | "verification"
+      modelProps: "player" | "ticket" | "ticketTemplate" | "pvPAttack" | "user" | "session" | "account" | "verification"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -992,6 +1037,80 @@ export namespace Prisma {
           count: {
             args: Prisma.TicketTemplateCountArgs<ExtArgs>
             result: $Utils.Optional<TicketTemplateCountAggregateOutputType> | number
+          }
+        }
+      }
+      PvPAttack: {
+        payload: Prisma.$PvPAttackPayload<ExtArgs>
+        fields: Prisma.PvPAttackFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PvPAttackFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PvPAttackPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PvPAttackFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PvPAttackPayload>
+          }
+          findFirst: {
+            args: Prisma.PvPAttackFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PvPAttackPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PvPAttackFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PvPAttackPayload>
+          }
+          findMany: {
+            args: Prisma.PvPAttackFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PvPAttackPayload>[]
+          }
+          create: {
+            args: Prisma.PvPAttackCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PvPAttackPayload>
+          }
+          createMany: {
+            args: Prisma.PvPAttackCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PvPAttackCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PvPAttackPayload>[]
+          }
+          delete: {
+            args: Prisma.PvPAttackDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PvPAttackPayload>
+          }
+          update: {
+            args: Prisma.PvPAttackUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PvPAttackPayload>
+          }
+          deleteMany: {
+            args: Prisma.PvPAttackDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PvPAttackUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PvPAttackUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PvPAttackPayload>[]
+          }
+          upsert: {
+            args: Prisma.PvPAttackUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PvPAttackPayload>
+          }
+          aggregate: {
+            args: Prisma.PvPAttackAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePvPAttack>
+          }
+          groupBy: {
+            args: Prisma.PvPAttackGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PvPAttackGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PvPAttackCountArgs<ExtArgs>
+            result: $Utils.Optional<PvPAttackCountAggregateOutputType> | number
           }
         }
       }
@@ -1417,6 +1536,7 @@ export namespace Prisma {
     player?: PlayerOmit
     ticket?: TicketOmit
     ticketTemplate?: TicketTemplateOmit
+    pvPAttack?: PvPAttackOmit
     user?: UserOmit
     session?: SessionOmit
     account?: AccountOmit
@@ -1501,11 +1621,17 @@ export namespace Prisma {
    */
 
   export type PlayerCountOutputType = {
+    attacksSent: number
+    attacksReceived: number
+    attackTickets: number
     assignedTickets: number
     sentTickets: number
   }
 
   export type PlayerCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    attacksSent?: boolean | PlayerCountOutputTypeCountAttacksSentArgs
+    attacksReceived?: boolean | PlayerCountOutputTypeCountAttacksReceivedArgs
+    attackTickets?: boolean | PlayerCountOutputTypeCountAttackTicketsArgs
     assignedTickets?: boolean | PlayerCountOutputTypeCountAssignedTicketsArgs
     sentTickets?: boolean | PlayerCountOutputTypeCountSentTicketsArgs
   }
@@ -1524,6 +1650,27 @@ export namespace Prisma {
   /**
    * PlayerCountOutputType without action
    */
+  export type PlayerCountOutputTypeCountAttacksSentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PvPAttackWhereInput
+  }
+
+  /**
+   * PlayerCountOutputType without action
+   */
+  export type PlayerCountOutputTypeCountAttacksReceivedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PvPAttackWhereInput
+  }
+
+  /**
+   * PlayerCountOutputType without action
+   */
+  export type PlayerCountOutputTypeCountAttackTicketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TicketWhereInput
+  }
+
+  /**
+   * PlayerCountOutputType without action
+   */
   export type PlayerCountOutputTypeCountAssignedTicketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TicketWhereInput
   }
@@ -1532,6 +1679,37 @@ export namespace Prisma {
    * PlayerCountOutputType without action
    */
   export type PlayerCountOutputTypeCountSentTicketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TicketWhereInput
+  }
+
+
+  /**
+   * Count Type PvPAttackCountOutputType
+   */
+
+  export type PvPAttackCountOutputType = {
+    tickets: number
+  }
+
+  export type PvPAttackCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tickets?: boolean | PvPAttackCountOutputTypeCountTicketsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * PvPAttackCountOutputType without action
+   */
+  export type PvPAttackCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttackCountOutputType
+     */
+    select?: PvPAttackCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * PvPAttackCountOutputType without action
+   */
+  export type PvPAttackCountOutputTypeCountTicketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TicketWhereInput
   }
 
@@ -1943,6 +2121,9 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    attacksSent?: boolean | Player$attacksSentArgs<ExtArgs>
+    attacksReceived?: boolean | Player$attacksReceivedArgs<ExtArgs>
+    attackTickets?: boolean | Player$attackTicketsArgs<ExtArgs>
     assignedTickets?: boolean | Player$assignedTicketsArgs<ExtArgs>
     sentTickets?: boolean | Player$sentTicketsArgs<ExtArgs>
     _count?: boolean | PlayerCountOutputTypeDefaultArgs<ExtArgs>
@@ -2022,6 +2203,9 @@ export namespace Prisma {
   export type PlayerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "username" | "level" | "xp" | "careerPath" | "credits" | "kills" | "bankruptcies" | "ticketsResolved" | "correctBounces" | "incorrectBounces" | "incorrectResolves" | "lifetimeCreditsEarned" | "lifetimeTicketsHandled" | "lastActiveAt" | "queuePenaltyUntil" | "nextTicketAt" | "createdAt" | "updatedAt", ExtArgs["result"]["player"]>
   export type PlayerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    attacksSent?: boolean | Player$attacksSentArgs<ExtArgs>
+    attacksReceived?: boolean | Player$attacksReceivedArgs<ExtArgs>
+    attackTickets?: boolean | Player$attackTicketsArgs<ExtArgs>
     assignedTickets?: boolean | Player$assignedTicketsArgs<ExtArgs>
     sentTickets?: boolean | Player$sentTicketsArgs<ExtArgs>
     _count?: boolean | PlayerCountOutputTypeDefaultArgs<ExtArgs>
@@ -2037,6 +2221,9 @@ export namespace Prisma {
     name: "Player"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
+      attacksSent: Prisma.$PvPAttackPayload<ExtArgs>[]
+      attacksReceived: Prisma.$PvPAttackPayload<ExtArgs>[]
+      attackTickets: Prisma.$TicketPayload<ExtArgs>[]
       assignedTickets: Prisma.$TicketPayload<ExtArgs>[]
       sentTickets: Prisma.$TicketPayload<ExtArgs>[]
     }
@@ -2456,6 +2643,9 @@ export namespace Prisma {
   export interface Prisma__PlayerClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    attacksSent<T extends Player$attacksSentArgs<ExtArgs> = {}>(args?: Subset<T, Player$attacksSentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    attacksReceived<T extends Player$attacksReceivedArgs<ExtArgs> = {}>(args?: Subset<T, Player$attacksReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    attackTickets<T extends Player$attackTicketsArgs<ExtArgs> = {}>(args?: Subset<T, Player$attackTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     assignedTickets<T extends Player$assignedTicketsArgs<ExtArgs> = {}>(args?: Subset<T, Player$assignedTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sentTickets<T extends Player$sentTicketsArgs<ExtArgs> = {}>(args?: Subset<T, Player$sentTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -2908,6 +3098,78 @@ export namespace Prisma {
   }
 
   /**
+   * Player.attacksSent
+   */
+  export type Player$attacksSentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackInclude<ExtArgs> | null
+    where?: PvPAttackWhereInput
+    orderBy?: PvPAttackOrderByWithRelationInput | PvPAttackOrderByWithRelationInput[]
+    cursor?: PvPAttackWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PvPAttackScalarFieldEnum | PvPAttackScalarFieldEnum[]
+  }
+
+  /**
+   * Player.attacksReceived
+   */
+  export type Player$attacksReceivedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackInclude<ExtArgs> | null
+    where?: PvPAttackWhereInput
+    orderBy?: PvPAttackOrderByWithRelationInput | PvPAttackOrderByWithRelationInput[]
+    cursor?: PvPAttackWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PvPAttackScalarFieldEnum | PvPAttackScalarFieldEnum[]
+  }
+
+  /**
+   * Player.attackTickets
+   */
+  export type Player$attackTicketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Ticket
+     */
+    select?: TicketSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Ticket
+     */
+    omit?: TicketOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TicketInclude<ExtArgs> | null
+    where?: TicketWhereInput
+    orderBy?: TicketOrderByWithRelationInput | TicketOrderByWithRelationInput[]
+    cursor?: TicketWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TicketScalarFieldEnum | TicketScalarFieldEnum[]
+  }
+
+  /**
    * Player.assignedTickets
    */
   export type Player$assignedTicketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2993,6 +3255,8 @@ export namespace Prisma {
     baseXp: number | null
     assignedToId: number | null
     lastSentById: number | null
+    attackSourcePlayerId: number | null
+    pvpAttackId: number | null
     bounceCount: number | null
   }
 
@@ -3003,6 +3267,8 @@ export namespace Prisma {
     baseXp: number | null
     assignedToId: number | null
     lastSentById: number | null
+    attackSourcePlayerId: number | null
+    pvpAttackId: number | null
     bounceCount: number | null
   }
 
@@ -3020,6 +3286,8 @@ export namespace Prisma {
     failureMessage: string | null
     assignedToId: number | null
     lastSentById: number | null
+    attackSourcePlayerId: number | null
+    pvpAttackId: number | null
     bounceCount: number | null
     abandonmentPenaltyApplied: boolean | null
     abandonmentPenaltyAt: Date | null
@@ -3043,6 +3311,8 @@ export namespace Prisma {
     failureMessage: string | null
     assignedToId: number | null
     lastSentById: number | null
+    attackSourcePlayerId: number | null
+    pvpAttackId: number | null
     bounceCount: number | null
     abandonmentPenaltyApplied: boolean | null
     abandonmentPenaltyAt: Date | null
@@ -3066,6 +3336,8 @@ export namespace Prisma {
     failureMessage: number
     assignedToId: number
     lastSentById: number
+    attackSourcePlayerId: number
+    pvpAttackId: number
     bounceCount: number
     abandonmentPenaltyApplied: number
     abandonmentPenaltyAt: number
@@ -3084,6 +3356,8 @@ export namespace Prisma {
     baseXp?: true
     assignedToId?: true
     lastSentById?: true
+    attackSourcePlayerId?: true
+    pvpAttackId?: true
     bounceCount?: true
   }
 
@@ -3094,6 +3368,8 @@ export namespace Prisma {
     baseXp?: true
     assignedToId?: true
     lastSentById?: true
+    attackSourcePlayerId?: true
+    pvpAttackId?: true
     bounceCount?: true
   }
 
@@ -3111,6 +3387,8 @@ export namespace Prisma {
     failureMessage?: true
     assignedToId?: true
     lastSentById?: true
+    attackSourcePlayerId?: true
+    pvpAttackId?: true
     bounceCount?: true
     abandonmentPenaltyApplied?: true
     abandonmentPenaltyAt?: true
@@ -3134,6 +3412,8 @@ export namespace Prisma {
     failureMessage?: true
     assignedToId?: true
     lastSentById?: true
+    attackSourcePlayerId?: true
+    pvpAttackId?: true
     bounceCount?: true
     abandonmentPenaltyApplied?: true
     abandonmentPenaltyAt?: true
@@ -3157,6 +3437,8 @@ export namespace Prisma {
     failureMessage?: true
     assignedToId?: true
     lastSentById?: true
+    attackSourcePlayerId?: true
+    pvpAttackId?: true
     bounceCount?: true
     abandonmentPenaltyApplied?: true
     abandonmentPenaltyAt?: true
@@ -3267,6 +3549,8 @@ export namespace Prisma {
     failureMessage: string | null
     assignedToId: number
     lastSentById: number | null
+    attackSourcePlayerId: number | null
+    pvpAttackId: number | null
     bounceCount: number
     abandonmentPenaltyApplied: boolean
     abandonmentPenaltyAt: Date | null
@@ -3309,6 +3593,8 @@ export namespace Prisma {
     failureMessage?: boolean
     assignedToId?: boolean
     lastSentById?: boolean
+    attackSourcePlayerId?: boolean
+    pvpAttackId?: boolean
     bounceCount?: boolean
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: boolean
@@ -3318,6 +3604,8 @@ export namespace Prisma {
     updatedAt?: boolean
     assignedTo?: boolean | PlayerDefaultArgs<ExtArgs>
     lastSentBy?: boolean | Ticket$lastSentByArgs<ExtArgs>
+    attackSourcePlayer?: boolean | Ticket$attackSourcePlayerArgs<ExtArgs>
+    pvpAttack?: boolean | Ticket$pvpAttackArgs<ExtArgs>
   }, ExtArgs["result"]["ticket"]>
 
   export type TicketSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3334,6 +3622,8 @@ export namespace Prisma {
     failureMessage?: boolean
     assignedToId?: boolean
     lastSentById?: boolean
+    attackSourcePlayerId?: boolean
+    pvpAttackId?: boolean
     bounceCount?: boolean
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: boolean
@@ -3343,6 +3633,8 @@ export namespace Prisma {
     updatedAt?: boolean
     assignedTo?: boolean | PlayerDefaultArgs<ExtArgs>
     lastSentBy?: boolean | Ticket$lastSentByArgs<ExtArgs>
+    attackSourcePlayer?: boolean | Ticket$attackSourcePlayerArgs<ExtArgs>
+    pvpAttack?: boolean | Ticket$pvpAttackArgs<ExtArgs>
   }, ExtArgs["result"]["ticket"]>
 
   export type TicketSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3359,6 +3651,8 @@ export namespace Prisma {
     failureMessage?: boolean
     assignedToId?: boolean
     lastSentById?: boolean
+    attackSourcePlayerId?: boolean
+    pvpAttackId?: boolean
     bounceCount?: boolean
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: boolean
@@ -3368,6 +3662,8 @@ export namespace Prisma {
     updatedAt?: boolean
     assignedTo?: boolean | PlayerDefaultArgs<ExtArgs>
     lastSentBy?: boolean | Ticket$lastSentByArgs<ExtArgs>
+    attackSourcePlayer?: boolean | Ticket$attackSourcePlayerArgs<ExtArgs>
+    pvpAttack?: boolean | Ticket$pvpAttackArgs<ExtArgs>
   }, ExtArgs["result"]["ticket"]>
 
   export type TicketSelectScalar = {
@@ -3384,6 +3680,8 @@ export namespace Prisma {
     failureMessage?: boolean
     assignedToId?: boolean
     lastSentById?: boolean
+    attackSourcePlayerId?: boolean
+    pvpAttackId?: boolean
     bounceCount?: boolean
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: boolean
@@ -3393,18 +3691,24 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "severity" | "difficulty" | "status" | "maxValue" | "baseXp" | "successMessage" | "failureMessage" | "assignedToId" | "lastSentById" | "bounceCount" | "abandonmentPenaltyApplied" | "abandonmentPenaltyAt" | "resolvedAt" | "expiredAt" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
+  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "severity" | "difficulty" | "status" | "maxValue" | "baseXp" | "successMessage" | "failureMessage" | "assignedToId" | "lastSentById" | "attackSourcePlayerId" | "pvpAttackId" | "bounceCount" | "abandonmentPenaltyApplied" | "abandonmentPenaltyAt" | "resolvedAt" | "expiredAt" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
   export type TicketInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     assignedTo?: boolean | PlayerDefaultArgs<ExtArgs>
     lastSentBy?: boolean | Ticket$lastSentByArgs<ExtArgs>
+    attackSourcePlayer?: boolean | Ticket$attackSourcePlayerArgs<ExtArgs>
+    pvpAttack?: boolean | Ticket$pvpAttackArgs<ExtArgs>
   }
   export type TicketIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     assignedTo?: boolean | PlayerDefaultArgs<ExtArgs>
     lastSentBy?: boolean | Ticket$lastSentByArgs<ExtArgs>
+    attackSourcePlayer?: boolean | Ticket$attackSourcePlayerArgs<ExtArgs>
+    pvpAttack?: boolean | Ticket$pvpAttackArgs<ExtArgs>
   }
   export type TicketIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     assignedTo?: boolean | PlayerDefaultArgs<ExtArgs>
     lastSentBy?: boolean | Ticket$lastSentByArgs<ExtArgs>
+    attackSourcePlayer?: boolean | Ticket$attackSourcePlayerArgs<ExtArgs>
+    pvpAttack?: boolean | Ticket$pvpAttackArgs<ExtArgs>
   }
 
   export type $TicketPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3412,6 +3716,8 @@ export namespace Prisma {
     objects: {
       assignedTo: Prisma.$PlayerPayload<ExtArgs>
       lastSentBy: Prisma.$PlayerPayload<ExtArgs> | null
+      attackSourcePlayer: Prisma.$PlayerPayload<ExtArgs> | null
+      pvpAttack: Prisma.$PvPAttackPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -3427,6 +3733,8 @@ export namespace Prisma {
       failureMessage: string | null
       assignedToId: number
       lastSentById: number | null
+      attackSourcePlayerId: number | null
+      pvpAttackId: number | null
       bounceCount: number
       abandonmentPenaltyApplied: boolean
       abandonmentPenaltyAt: Date | null
@@ -3830,6 +4138,8 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     assignedTo<T extends PlayerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PlayerDefaultArgs<ExtArgs>>): Prisma__PlayerClient<$Result.GetResult<Prisma.$PlayerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     lastSentBy<T extends Ticket$lastSentByArgs<ExtArgs> = {}>(args?: Subset<T, Ticket$lastSentByArgs<ExtArgs>>): Prisma__PlayerClient<$Result.GetResult<Prisma.$PlayerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    attackSourcePlayer<T extends Ticket$attackSourcePlayerArgs<ExtArgs> = {}>(args?: Subset<T, Ticket$attackSourcePlayerArgs<ExtArgs>>): Prisma__PlayerClient<$Result.GetResult<Prisma.$PlayerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    pvpAttack<T extends Ticket$pvpAttackArgs<ExtArgs> = {}>(args?: Subset<T, Ticket$pvpAttackArgs<ExtArgs>>): Prisma__PvPAttackClient<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3872,6 +4182,8 @@ export namespace Prisma {
     readonly failureMessage: FieldRef<"Ticket", 'String'>
     readonly assignedToId: FieldRef<"Ticket", 'Int'>
     readonly lastSentById: FieldRef<"Ticket", 'Int'>
+    readonly attackSourcePlayerId: FieldRef<"Ticket", 'Int'>
+    readonly pvpAttackId: FieldRef<"Ticket", 'Int'>
     readonly bounceCount: FieldRef<"Ticket", 'Int'>
     readonly abandonmentPenaltyApplied: FieldRef<"Ticket", 'Boolean'>
     readonly abandonmentPenaltyAt: FieldRef<"Ticket", 'DateTime'>
@@ -4296,6 +4608,44 @@ export namespace Prisma {
      */
     include?: PlayerInclude<ExtArgs> | null
     where?: PlayerWhereInput
+  }
+
+  /**
+   * Ticket.attackSourcePlayer
+   */
+  export type Ticket$attackSourcePlayerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Player
+     */
+    select?: PlayerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Player
+     */
+    omit?: PlayerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PlayerInclude<ExtArgs> | null
+    where?: PlayerWhereInput
+  }
+
+  /**
+   * Ticket.pvpAttack
+   */
+  export type Ticket$pvpAttackArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackInclude<ExtArgs> | null
+    where?: PvPAttackWhereInput
   }
 
   /**
@@ -5464,6 +5814,1218 @@ export namespace Prisma {
      * Omit specific fields from the TicketTemplate
      */
     omit?: TicketTemplateOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PvPAttack
+   */
+
+  export type AggregatePvPAttack = {
+    _count: PvPAttackCountAggregateOutputType | null
+    _avg: PvPAttackAvgAggregateOutputType | null
+    _sum: PvPAttackSumAggregateOutputType | null
+    _min: PvPAttackMinAggregateOutputType | null
+    _max: PvPAttackMaxAggregateOutputType | null
+  }
+
+  export type PvPAttackAvgAggregateOutputType = {
+    id: number | null
+    cost: number | null
+    attackerId: number | null
+    targetId: number | null
+  }
+
+  export type PvPAttackSumAggregateOutputType = {
+    id: number | null
+    cost: number | null
+    attackerId: number | null
+    targetId: number | null
+  }
+
+  export type PvPAttackMinAggregateOutputType = {
+    id: number | null
+    type: $Enums.PvPAttackType | null
+    status: $Enums.PvPAttackStatus | null
+    cost: number | null
+    attackerId: number | null
+    targetId: number | null
+    causedBankruptcy: boolean | null
+    completedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PvPAttackMaxAggregateOutputType = {
+    id: number | null
+    type: $Enums.PvPAttackType | null
+    status: $Enums.PvPAttackStatus | null
+    cost: number | null
+    attackerId: number | null
+    targetId: number | null
+    causedBankruptcy: boolean | null
+    completedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PvPAttackCountAggregateOutputType = {
+    id: number
+    type: number
+    status: number
+    cost: number
+    attackerId: number
+    targetId: number
+    causedBankruptcy: number
+    completedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PvPAttackAvgAggregateInputType = {
+    id?: true
+    cost?: true
+    attackerId?: true
+    targetId?: true
+  }
+
+  export type PvPAttackSumAggregateInputType = {
+    id?: true
+    cost?: true
+    attackerId?: true
+    targetId?: true
+  }
+
+  export type PvPAttackMinAggregateInputType = {
+    id?: true
+    type?: true
+    status?: true
+    cost?: true
+    attackerId?: true
+    targetId?: true
+    causedBankruptcy?: true
+    completedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PvPAttackMaxAggregateInputType = {
+    id?: true
+    type?: true
+    status?: true
+    cost?: true
+    attackerId?: true
+    targetId?: true
+    causedBankruptcy?: true
+    completedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PvPAttackCountAggregateInputType = {
+    id?: true
+    type?: true
+    status?: true
+    cost?: true
+    attackerId?: true
+    targetId?: true
+    causedBankruptcy?: true
+    completedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PvPAttackAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PvPAttack to aggregate.
+     */
+    where?: PvPAttackWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PvPAttacks to fetch.
+     */
+    orderBy?: PvPAttackOrderByWithRelationInput | PvPAttackOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PvPAttackWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PvPAttacks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PvPAttacks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PvPAttacks
+    **/
+    _count?: true | PvPAttackCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PvPAttackAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PvPAttackSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PvPAttackMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PvPAttackMaxAggregateInputType
+  }
+
+  export type GetPvPAttackAggregateType<T extends PvPAttackAggregateArgs> = {
+        [P in keyof T & keyof AggregatePvPAttack]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePvPAttack[P]>
+      : GetScalarType<T[P], AggregatePvPAttack[P]>
+  }
+
+
+
+
+  export type PvPAttackGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PvPAttackWhereInput
+    orderBy?: PvPAttackOrderByWithAggregationInput | PvPAttackOrderByWithAggregationInput[]
+    by: PvPAttackScalarFieldEnum[] | PvPAttackScalarFieldEnum
+    having?: PvPAttackScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PvPAttackCountAggregateInputType | true
+    _avg?: PvPAttackAvgAggregateInputType
+    _sum?: PvPAttackSumAggregateInputType
+    _min?: PvPAttackMinAggregateInputType
+    _max?: PvPAttackMaxAggregateInputType
+  }
+
+  export type PvPAttackGroupByOutputType = {
+    id: number
+    type: $Enums.PvPAttackType
+    status: $Enums.PvPAttackStatus
+    cost: number
+    attackerId: number
+    targetId: number
+    causedBankruptcy: boolean
+    completedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: PvPAttackCountAggregateOutputType | null
+    _avg: PvPAttackAvgAggregateOutputType | null
+    _sum: PvPAttackSumAggregateOutputType | null
+    _min: PvPAttackMinAggregateOutputType | null
+    _max: PvPAttackMaxAggregateOutputType | null
+  }
+
+  type GetPvPAttackGroupByPayload<T extends PvPAttackGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PvPAttackGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PvPAttackGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PvPAttackGroupByOutputType[P]>
+            : GetScalarType<T[P], PvPAttackGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PvPAttackSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    status?: boolean
+    cost?: boolean
+    attackerId?: boolean
+    targetId?: boolean
+    causedBankruptcy?: boolean
+    completedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    attacker?: boolean | PlayerDefaultArgs<ExtArgs>
+    target?: boolean | PlayerDefaultArgs<ExtArgs>
+    tickets?: boolean | PvPAttack$ticketsArgs<ExtArgs>
+    _count?: boolean | PvPAttackCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["pvPAttack"]>
+
+  export type PvPAttackSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    status?: boolean
+    cost?: boolean
+    attackerId?: boolean
+    targetId?: boolean
+    causedBankruptcy?: boolean
+    completedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    attacker?: boolean | PlayerDefaultArgs<ExtArgs>
+    target?: boolean | PlayerDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["pvPAttack"]>
+
+  export type PvPAttackSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    status?: boolean
+    cost?: boolean
+    attackerId?: boolean
+    targetId?: boolean
+    causedBankruptcy?: boolean
+    completedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    attacker?: boolean | PlayerDefaultArgs<ExtArgs>
+    target?: boolean | PlayerDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["pvPAttack"]>
+
+  export type PvPAttackSelectScalar = {
+    id?: boolean
+    type?: boolean
+    status?: boolean
+    cost?: boolean
+    attackerId?: boolean
+    targetId?: boolean
+    causedBankruptcy?: boolean
+    completedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PvPAttackOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "status" | "cost" | "attackerId" | "targetId" | "causedBankruptcy" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["pvPAttack"]>
+  export type PvPAttackInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    attacker?: boolean | PlayerDefaultArgs<ExtArgs>
+    target?: boolean | PlayerDefaultArgs<ExtArgs>
+    tickets?: boolean | PvPAttack$ticketsArgs<ExtArgs>
+    _count?: boolean | PvPAttackCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type PvPAttackIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    attacker?: boolean | PlayerDefaultArgs<ExtArgs>
+    target?: boolean | PlayerDefaultArgs<ExtArgs>
+  }
+  export type PvPAttackIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    attacker?: boolean | PlayerDefaultArgs<ExtArgs>
+    target?: boolean | PlayerDefaultArgs<ExtArgs>
+  }
+
+  export type $PvPAttackPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PvPAttack"
+    objects: {
+      attacker: Prisma.$PlayerPayload<ExtArgs>
+      target: Prisma.$PlayerPayload<ExtArgs>
+      tickets: Prisma.$TicketPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      type: $Enums.PvPAttackType
+      status: $Enums.PvPAttackStatus
+      cost: number
+      attackerId: number
+      targetId: number
+      causedBankruptcy: boolean
+      completedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["pvPAttack"]>
+    composites: {}
+  }
+
+  type PvPAttackGetPayload<S extends boolean | null | undefined | PvPAttackDefaultArgs> = $Result.GetResult<Prisma.$PvPAttackPayload, S>
+
+  type PvPAttackCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PvPAttackFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PvPAttackCountAggregateInputType | true
+    }
+
+  export interface PvPAttackDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PvPAttack'], meta: { name: 'PvPAttack' } }
+    /**
+     * Find zero or one PvPAttack that matches the filter.
+     * @param {PvPAttackFindUniqueArgs} args - Arguments to find a PvPAttack
+     * @example
+     * // Get one PvPAttack
+     * const pvPAttack = await prisma.pvPAttack.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PvPAttackFindUniqueArgs>(args: SelectSubset<T, PvPAttackFindUniqueArgs<ExtArgs>>): Prisma__PvPAttackClient<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PvPAttack that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PvPAttackFindUniqueOrThrowArgs} args - Arguments to find a PvPAttack
+     * @example
+     * // Get one PvPAttack
+     * const pvPAttack = await prisma.pvPAttack.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PvPAttackFindUniqueOrThrowArgs>(args: SelectSubset<T, PvPAttackFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PvPAttackClient<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PvPAttack that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PvPAttackFindFirstArgs} args - Arguments to find a PvPAttack
+     * @example
+     * // Get one PvPAttack
+     * const pvPAttack = await prisma.pvPAttack.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PvPAttackFindFirstArgs>(args?: SelectSubset<T, PvPAttackFindFirstArgs<ExtArgs>>): Prisma__PvPAttackClient<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PvPAttack that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PvPAttackFindFirstOrThrowArgs} args - Arguments to find a PvPAttack
+     * @example
+     * // Get one PvPAttack
+     * const pvPAttack = await prisma.pvPAttack.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PvPAttackFindFirstOrThrowArgs>(args?: SelectSubset<T, PvPAttackFindFirstOrThrowArgs<ExtArgs>>): Prisma__PvPAttackClient<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PvPAttacks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PvPAttackFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PvPAttacks
+     * const pvPAttacks = await prisma.pvPAttack.findMany()
+     * 
+     * // Get first 10 PvPAttacks
+     * const pvPAttacks = await prisma.pvPAttack.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const pvPAttackWithIdOnly = await prisma.pvPAttack.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PvPAttackFindManyArgs>(args?: SelectSubset<T, PvPAttackFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PvPAttack.
+     * @param {PvPAttackCreateArgs} args - Arguments to create a PvPAttack.
+     * @example
+     * // Create one PvPAttack
+     * const PvPAttack = await prisma.pvPAttack.create({
+     *   data: {
+     *     // ... data to create a PvPAttack
+     *   }
+     * })
+     * 
+     */
+    create<T extends PvPAttackCreateArgs>(args: SelectSubset<T, PvPAttackCreateArgs<ExtArgs>>): Prisma__PvPAttackClient<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PvPAttacks.
+     * @param {PvPAttackCreateManyArgs} args - Arguments to create many PvPAttacks.
+     * @example
+     * // Create many PvPAttacks
+     * const pvPAttack = await prisma.pvPAttack.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PvPAttackCreateManyArgs>(args?: SelectSubset<T, PvPAttackCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PvPAttacks and returns the data saved in the database.
+     * @param {PvPAttackCreateManyAndReturnArgs} args - Arguments to create many PvPAttacks.
+     * @example
+     * // Create many PvPAttacks
+     * const pvPAttack = await prisma.pvPAttack.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PvPAttacks and only return the `id`
+     * const pvPAttackWithIdOnly = await prisma.pvPAttack.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PvPAttackCreateManyAndReturnArgs>(args?: SelectSubset<T, PvPAttackCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PvPAttack.
+     * @param {PvPAttackDeleteArgs} args - Arguments to delete one PvPAttack.
+     * @example
+     * // Delete one PvPAttack
+     * const PvPAttack = await prisma.pvPAttack.delete({
+     *   where: {
+     *     // ... filter to delete one PvPAttack
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PvPAttackDeleteArgs>(args: SelectSubset<T, PvPAttackDeleteArgs<ExtArgs>>): Prisma__PvPAttackClient<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PvPAttack.
+     * @param {PvPAttackUpdateArgs} args - Arguments to update one PvPAttack.
+     * @example
+     * // Update one PvPAttack
+     * const pvPAttack = await prisma.pvPAttack.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PvPAttackUpdateArgs>(args: SelectSubset<T, PvPAttackUpdateArgs<ExtArgs>>): Prisma__PvPAttackClient<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PvPAttacks.
+     * @param {PvPAttackDeleteManyArgs} args - Arguments to filter PvPAttacks to delete.
+     * @example
+     * // Delete a few PvPAttacks
+     * const { count } = await prisma.pvPAttack.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PvPAttackDeleteManyArgs>(args?: SelectSubset<T, PvPAttackDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PvPAttacks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PvPAttackUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PvPAttacks
+     * const pvPAttack = await prisma.pvPAttack.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PvPAttackUpdateManyArgs>(args: SelectSubset<T, PvPAttackUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PvPAttacks and returns the data updated in the database.
+     * @param {PvPAttackUpdateManyAndReturnArgs} args - Arguments to update many PvPAttacks.
+     * @example
+     * // Update many PvPAttacks
+     * const pvPAttack = await prisma.pvPAttack.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PvPAttacks and only return the `id`
+     * const pvPAttackWithIdOnly = await prisma.pvPAttack.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PvPAttackUpdateManyAndReturnArgs>(args: SelectSubset<T, PvPAttackUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PvPAttack.
+     * @param {PvPAttackUpsertArgs} args - Arguments to update or create a PvPAttack.
+     * @example
+     * // Update or create a PvPAttack
+     * const pvPAttack = await prisma.pvPAttack.upsert({
+     *   create: {
+     *     // ... data to create a PvPAttack
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PvPAttack we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PvPAttackUpsertArgs>(args: SelectSubset<T, PvPAttackUpsertArgs<ExtArgs>>): Prisma__PvPAttackClient<$Result.GetResult<Prisma.$PvPAttackPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PvPAttacks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PvPAttackCountArgs} args - Arguments to filter PvPAttacks to count.
+     * @example
+     * // Count the number of PvPAttacks
+     * const count = await prisma.pvPAttack.count({
+     *   where: {
+     *     // ... the filter for the PvPAttacks we want to count
+     *   }
+     * })
+    **/
+    count<T extends PvPAttackCountArgs>(
+      args?: Subset<T, PvPAttackCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PvPAttackCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PvPAttack.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PvPAttackAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PvPAttackAggregateArgs>(args: Subset<T, PvPAttackAggregateArgs>): Prisma.PrismaPromise<GetPvPAttackAggregateType<T>>
+
+    /**
+     * Group by PvPAttack.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PvPAttackGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PvPAttackGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PvPAttackGroupByArgs['orderBy'] }
+        : { orderBy?: PvPAttackGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PvPAttackGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPvPAttackGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PvPAttack model
+   */
+  readonly fields: PvPAttackFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PvPAttack.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PvPAttackClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    attacker<T extends PlayerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PlayerDefaultArgs<ExtArgs>>): Prisma__PlayerClient<$Result.GetResult<Prisma.$PlayerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    target<T extends PlayerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PlayerDefaultArgs<ExtArgs>>): Prisma__PlayerClient<$Result.GetResult<Prisma.$PlayerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    tickets<T extends PvPAttack$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, PvPAttack$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PvPAttack model
+   */
+  interface PvPAttackFieldRefs {
+    readonly id: FieldRef<"PvPAttack", 'Int'>
+    readonly type: FieldRef<"PvPAttack", 'PvPAttackType'>
+    readonly status: FieldRef<"PvPAttack", 'PvPAttackStatus'>
+    readonly cost: FieldRef<"PvPAttack", 'Int'>
+    readonly attackerId: FieldRef<"PvPAttack", 'Int'>
+    readonly targetId: FieldRef<"PvPAttack", 'Int'>
+    readonly causedBankruptcy: FieldRef<"PvPAttack", 'Boolean'>
+    readonly completedAt: FieldRef<"PvPAttack", 'DateTime'>
+    readonly createdAt: FieldRef<"PvPAttack", 'DateTime'>
+    readonly updatedAt: FieldRef<"PvPAttack", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PvPAttack findUnique
+   */
+  export type PvPAttackFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackInclude<ExtArgs> | null
+    /**
+     * Filter, which PvPAttack to fetch.
+     */
+    where: PvPAttackWhereUniqueInput
+  }
+
+  /**
+   * PvPAttack findUniqueOrThrow
+   */
+  export type PvPAttackFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackInclude<ExtArgs> | null
+    /**
+     * Filter, which PvPAttack to fetch.
+     */
+    where: PvPAttackWhereUniqueInput
+  }
+
+  /**
+   * PvPAttack findFirst
+   */
+  export type PvPAttackFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackInclude<ExtArgs> | null
+    /**
+     * Filter, which PvPAttack to fetch.
+     */
+    where?: PvPAttackWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PvPAttacks to fetch.
+     */
+    orderBy?: PvPAttackOrderByWithRelationInput | PvPAttackOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PvPAttacks.
+     */
+    cursor?: PvPAttackWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PvPAttacks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PvPAttacks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PvPAttacks.
+     */
+    distinct?: PvPAttackScalarFieldEnum | PvPAttackScalarFieldEnum[]
+  }
+
+  /**
+   * PvPAttack findFirstOrThrow
+   */
+  export type PvPAttackFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackInclude<ExtArgs> | null
+    /**
+     * Filter, which PvPAttack to fetch.
+     */
+    where?: PvPAttackWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PvPAttacks to fetch.
+     */
+    orderBy?: PvPAttackOrderByWithRelationInput | PvPAttackOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PvPAttacks.
+     */
+    cursor?: PvPAttackWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PvPAttacks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PvPAttacks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PvPAttacks.
+     */
+    distinct?: PvPAttackScalarFieldEnum | PvPAttackScalarFieldEnum[]
+  }
+
+  /**
+   * PvPAttack findMany
+   */
+  export type PvPAttackFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackInclude<ExtArgs> | null
+    /**
+     * Filter, which PvPAttacks to fetch.
+     */
+    where?: PvPAttackWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PvPAttacks to fetch.
+     */
+    orderBy?: PvPAttackOrderByWithRelationInput | PvPAttackOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PvPAttacks.
+     */
+    cursor?: PvPAttackWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PvPAttacks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PvPAttacks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PvPAttacks.
+     */
+    distinct?: PvPAttackScalarFieldEnum | PvPAttackScalarFieldEnum[]
+  }
+
+  /**
+   * PvPAttack create
+   */
+  export type PvPAttackCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PvPAttack.
+     */
+    data: XOR<PvPAttackCreateInput, PvPAttackUncheckedCreateInput>
+  }
+
+  /**
+   * PvPAttack createMany
+   */
+  export type PvPAttackCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PvPAttacks.
+     */
+    data: PvPAttackCreateManyInput | PvPAttackCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PvPAttack createManyAndReturn
+   */
+  export type PvPAttackCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * The data used to create many PvPAttacks.
+     */
+    data: PvPAttackCreateManyInput | PvPAttackCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PvPAttack update
+   */
+  export type PvPAttackUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PvPAttack.
+     */
+    data: XOR<PvPAttackUpdateInput, PvPAttackUncheckedUpdateInput>
+    /**
+     * Choose, which PvPAttack to update.
+     */
+    where: PvPAttackWhereUniqueInput
+  }
+
+  /**
+   * PvPAttack updateMany
+   */
+  export type PvPAttackUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PvPAttacks.
+     */
+    data: XOR<PvPAttackUpdateManyMutationInput, PvPAttackUncheckedUpdateManyInput>
+    /**
+     * Filter which PvPAttacks to update
+     */
+    where?: PvPAttackWhereInput
+    /**
+     * Limit how many PvPAttacks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PvPAttack updateManyAndReturn
+   */
+  export type PvPAttackUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * The data used to update PvPAttacks.
+     */
+    data: XOR<PvPAttackUpdateManyMutationInput, PvPAttackUncheckedUpdateManyInput>
+    /**
+     * Filter which PvPAttacks to update
+     */
+    where?: PvPAttackWhereInput
+    /**
+     * Limit how many PvPAttacks to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PvPAttack upsert
+   */
+  export type PvPAttackUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PvPAttack to update in case it exists.
+     */
+    where: PvPAttackWhereUniqueInput
+    /**
+     * In case the PvPAttack found by the `where` argument doesn't exist, create a new PvPAttack with this data.
+     */
+    create: XOR<PvPAttackCreateInput, PvPAttackUncheckedCreateInput>
+    /**
+     * In case the PvPAttack was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PvPAttackUpdateInput, PvPAttackUncheckedUpdateInput>
+  }
+
+  /**
+   * PvPAttack delete
+   */
+  export type PvPAttackDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackInclude<ExtArgs> | null
+    /**
+     * Filter which PvPAttack to delete.
+     */
+    where: PvPAttackWhereUniqueInput
+  }
+
+  /**
+   * PvPAttack deleteMany
+   */
+  export type PvPAttackDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PvPAttacks to delete
+     */
+    where?: PvPAttackWhereInput
+    /**
+     * Limit how many PvPAttacks to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PvPAttack.tickets
+   */
+  export type PvPAttack$ticketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Ticket
+     */
+    select?: TicketSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Ticket
+     */
+    omit?: TicketOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TicketInclude<ExtArgs> | null
+    where?: TicketWhereInput
+    orderBy?: TicketOrderByWithRelationInput | TicketOrderByWithRelationInput[]
+    cursor?: TicketWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TicketScalarFieldEnum | TicketScalarFieldEnum[]
+  }
+
+  /**
+   * PvPAttack without action
+   */
+  export type PvPAttackDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PvPAttack
+     */
+    select?: PvPAttackSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PvPAttack
+     */
+    omit?: PvPAttackOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PvPAttackInclude<ExtArgs> | null
   }
 
 
@@ -9955,6 +11517,8 @@ export namespace Prisma {
     failureMessage: 'failureMessage',
     assignedToId: 'assignedToId',
     lastSentById: 'lastSentById',
+    attackSourcePlayerId: 'attackSourcePlayerId',
+    pvpAttackId: 'pvpAttackId',
     bounceCount: 'bounceCount',
     abandonmentPenaltyApplied: 'abandonmentPenaltyApplied',
     abandonmentPenaltyAt: 'abandonmentPenaltyAt',
@@ -9984,6 +11548,22 @@ export namespace Prisma {
   };
 
   export type TicketTemplateScalarFieldEnum = (typeof TicketTemplateScalarFieldEnum)[keyof typeof TicketTemplateScalarFieldEnum]
+
+
+  export const PvPAttackScalarFieldEnum: {
+    id: 'id',
+    type: 'type',
+    status: 'status',
+    cost: 'cost',
+    attackerId: 'attackerId',
+    targetId: 'targetId',
+    causedBankruptcy: 'causedBankruptcy',
+    completedAt: 'completedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PvPAttackScalarFieldEnum = (typeof PvPAttackScalarFieldEnum)[keyof typeof PvPAttackScalarFieldEnum]
 
 
   export const UserScalarFieldEnum: {
@@ -10179,6 +11759,34 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'PvPAttackType'
+   */
+  export type EnumPvPAttackTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PvPAttackType'>
+    
+
+
+  /**
+   * Reference to a field of type 'PvPAttackType[]'
+   */
+  export type ListEnumPvPAttackTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PvPAttackType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'PvPAttackStatus'
+   */
+  export type EnumPvPAttackStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PvPAttackStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'PvPAttackStatus[]'
+   */
+  export type ListEnumPvPAttackStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PvPAttackStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -10220,6 +11828,9 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Player"> | Date | string
     updatedAt?: DateTimeFilter<"Player"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    attacksSent?: PvPAttackListRelationFilter
+    attacksReceived?: PvPAttackListRelationFilter
+    attackTickets?: TicketListRelationFilter
     assignedTickets?: TicketListRelationFilter
     sentTickets?: TicketListRelationFilter
   }
@@ -10246,6 +11857,9 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    attacksSent?: PvPAttackOrderByRelationAggregateInput
+    attacksReceived?: PvPAttackOrderByRelationAggregateInput
+    attackTickets?: TicketOrderByRelationAggregateInput
     assignedTickets?: TicketOrderByRelationAggregateInput
     sentTickets?: TicketOrderByRelationAggregateInput
   }
@@ -10275,6 +11889,9 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Player"> | Date | string
     updatedAt?: DateTimeFilter<"Player"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    attacksSent?: PvPAttackListRelationFilter
+    attacksReceived?: PvPAttackListRelationFilter
+    attackTickets?: TicketListRelationFilter
     assignedTickets?: TicketListRelationFilter
     sentTickets?: TicketListRelationFilter
   }, "id" | "userId" | "username">
@@ -10350,6 +11967,8 @@ export namespace Prisma {
     failureMessage?: StringNullableFilter<"Ticket"> | string | null
     assignedToId?: IntFilter<"Ticket"> | number
     lastSentById?: IntNullableFilter<"Ticket"> | number | null
+    attackSourcePlayerId?: IntNullableFilter<"Ticket"> | number | null
+    pvpAttackId?: IntNullableFilter<"Ticket"> | number | null
     bounceCount?: IntFilter<"Ticket"> | number
     abandonmentPenaltyApplied?: BoolFilter<"Ticket"> | boolean
     abandonmentPenaltyAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
@@ -10359,6 +11978,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Ticket"> | Date | string
     assignedTo?: XOR<PlayerScalarRelationFilter, PlayerWhereInput>
     lastSentBy?: XOR<PlayerNullableScalarRelationFilter, PlayerWhereInput> | null
+    attackSourcePlayer?: XOR<PlayerNullableScalarRelationFilter, PlayerWhereInput> | null
+    pvpAttack?: XOR<PvPAttackNullableScalarRelationFilter, PvPAttackWhereInput> | null
   }
 
   export type TicketOrderByWithRelationInput = {
@@ -10375,6 +11996,8 @@ export namespace Prisma {
     failureMessage?: SortOrderInput | SortOrder
     assignedToId?: SortOrder
     lastSentById?: SortOrderInput | SortOrder
+    attackSourcePlayerId?: SortOrderInput | SortOrder
+    pvpAttackId?: SortOrderInput | SortOrder
     bounceCount?: SortOrder
     abandonmentPenaltyApplied?: SortOrder
     abandonmentPenaltyAt?: SortOrderInput | SortOrder
@@ -10384,6 +12007,8 @@ export namespace Prisma {
     updatedAt?: SortOrder
     assignedTo?: PlayerOrderByWithRelationInput
     lastSentBy?: PlayerOrderByWithRelationInput
+    attackSourcePlayer?: PlayerOrderByWithRelationInput
+    pvpAttack?: PvPAttackOrderByWithRelationInput
   }
 
   export type TicketWhereUniqueInput = Prisma.AtLeast<{
@@ -10403,6 +12028,8 @@ export namespace Prisma {
     failureMessage?: StringNullableFilter<"Ticket"> | string | null
     assignedToId?: IntFilter<"Ticket"> | number
     lastSentById?: IntNullableFilter<"Ticket"> | number | null
+    attackSourcePlayerId?: IntNullableFilter<"Ticket"> | number | null
+    pvpAttackId?: IntNullableFilter<"Ticket"> | number | null
     bounceCount?: IntFilter<"Ticket"> | number
     abandonmentPenaltyApplied?: BoolFilter<"Ticket"> | boolean
     abandonmentPenaltyAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
@@ -10412,6 +12039,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Ticket"> | Date | string
     assignedTo?: XOR<PlayerScalarRelationFilter, PlayerWhereInput>
     lastSentBy?: XOR<PlayerNullableScalarRelationFilter, PlayerWhereInput> | null
+    attackSourcePlayer?: XOR<PlayerNullableScalarRelationFilter, PlayerWhereInput> | null
+    pvpAttack?: XOR<PvPAttackNullableScalarRelationFilter, PvPAttackWhereInput> | null
   }, "id">
 
   export type TicketOrderByWithAggregationInput = {
@@ -10428,6 +12057,8 @@ export namespace Prisma {
     failureMessage?: SortOrderInput | SortOrder
     assignedToId?: SortOrder
     lastSentById?: SortOrderInput | SortOrder
+    attackSourcePlayerId?: SortOrderInput | SortOrder
+    pvpAttackId?: SortOrderInput | SortOrder
     bounceCount?: SortOrder
     abandonmentPenaltyApplied?: SortOrder
     abandonmentPenaltyAt?: SortOrderInput | SortOrder
@@ -10459,6 +12090,8 @@ export namespace Prisma {
     failureMessage?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
     assignedToId?: IntWithAggregatesFilter<"Ticket"> | number
     lastSentById?: IntNullableWithAggregatesFilter<"Ticket"> | number | null
+    attackSourcePlayerId?: IntNullableWithAggregatesFilter<"Ticket"> | number | null
+    pvpAttackId?: IntNullableWithAggregatesFilter<"Ticket"> | number | null
     bounceCount?: IntWithAggregatesFilter<"Ticket"> | number
     abandonmentPenaltyApplied?: BoolWithAggregatesFilter<"Ticket"> | boolean
     abandonmentPenaltyAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
@@ -10560,6 +12193,94 @@ export namespace Prisma {
     active?: BoolWithAggregatesFilter<"TicketTemplate"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"TicketTemplate"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"TicketTemplate"> | Date | string
+  }
+
+  export type PvPAttackWhereInput = {
+    AND?: PvPAttackWhereInput | PvPAttackWhereInput[]
+    OR?: PvPAttackWhereInput[]
+    NOT?: PvPAttackWhereInput | PvPAttackWhereInput[]
+    id?: IntFilter<"PvPAttack"> | number
+    type?: EnumPvPAttackTypeFilter<"PvPAttack"> | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFilter<"PvPAttack"> | $Enums.PvPAttackStatus
+    cost?: IntFilter<"PvPAttack"> | number
+    attackerId?: IntFilter<"PvPAttack"> | number
+    targetId?: IntFilter<"PvPAttack"> | number
+    causedBankruptcy?: BoolFilter<"PvPAttack"> | boolean
+    completedAt?: DateTimeNullableFilter<"PvPAttack"> | Date | string | null
+    createdAt?: DateTimeFilter<"PvPAttack"> | Date | string
+    updatedAt?: DateTimeFilter<"PvPAttack"> | Date | string
+    attacker?: XOR<PlayerScalarRelationFilter, PlayerWhereInput>
+    target?: XOR<PlayerScalarRelationFilter, PlayerWhereInput>
+    tickets?: TicketListRelationFilter
+  }
+
+  export type PvPAttackOrderByWithRelationInput = {
+    id?: SortOrder
+    type?: SortOrder
+    status?: SortOrder
+    cost?: SortOrder
+    attackerId?: SortOrder
+    targetId?: SortOrder
+    causedBankruptcy?: SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    attacker?: PlayerOrderByWithRelationInput
+    target?: PlayerOrderByWithRelationInput
+    tickets?: TicketOrderByRelationAggregateInput
+  }
+
+  export type PvPAttackWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: PvPAttackWhereInput | PvPAttackWhereInput[]
+    OR?: PvPAttackWhereInput[]
+    NOT?: PvPAttackWhereInput | PvPAttackWhereInput[]
+    type?: EnumPvPAttackTypeFilter<"PvPAttack"> | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFilter<"PvPAttack"> | $Enums.PvPAttackStatus
+    cost?: IntFilter<"PvPAttack"> | number
+    attackerId?: IntFilter<"PvPAttack"> | number
+    targetId?: IntFilter<"PvPAttack"> | number
+    causedBankruptcy?: BoolFilter<"PvPAttack"> | boolean
+    completedAt?: DateTimeNullableFilter<"PvPAttack"> | Date | string | null
+    createdAt?: DateTimeFilter<"PvPAttack"> | Date | string
+    updatedAt?: DateTimeFilter<"PvPAttack"> | Date | string
+    attacker?: XOR<PlayerScalarRelationFilter, PlayerWhereInput>
+    target?: XOR<PlayerScalarRelationFilter, PlayerWhereInput>
+    tickets?: TicketListRelationFilter
+  }, "id">
+
+  export type PvPAttackOrderByWithAggregationInput = {
+    id?: SortOrder
+    type?: SortOrder
+    status?: SortOrder
+    cost?: SortOrder
+    attackerId?: SortOrder
+    targetId?: SortOrder
+    causedBankruptcy?: SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PvPAttackCountOrderByAggregateInput
+    _avg?: PvPAttackAvgOrderByAggregateInput
+    _max?: PvPAttackMaxOrderByAggregateInput
+    _min?: PvPAttackMinOrderByAggregateInput
+    _sum?: PvPAttackSumOrderByAggregateInput
+  }
+
+  export type PvPAttackScalarWhereWithAggregatesInput = {
+    AND?: PvPAttackScalarWhereWithAggregatesInput | PvPAttackScalarWhereWithAggregatesInput[]
+    OR?: PvPAttackScalarWhereWithAggregatesInput[]
+    NOT?: PvPAttackScalarWhereWithAggregatesInput | PvPAttackScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PvPAttack"> | number
+    type?: EnumPvPAttackTypeWithAggregatesFilter<"PvPAttack"> | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusWithAggregatesFilter<"PvPAttack"> | $Enums.PvPAttackStatus
+    cost?: IntWithAggregatesFilter<"PvPAttack"> | number
+    attackerId?: IntWithAggregatesFilter<"PvPAttack"> | number
+    targetId?: IntWithAggregatesFilter<"PvPAttack"> | number
+    causedBankruptcy?: BoolWithAggregatesFilter<"PvPAttack"> | boolean
+    completedAt?: DateTimeNullableWithAggregatesFilter<"PvPAttack"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"PvPAttack"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PvPAttack"> | Date | string
   }
 
   export type UserWhereInput = {
@@ -10875,6 +12596,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutPlayerInput
+    attacksSent?: PvPAttackCreateNestedManyWithoutAttackerInput
+    attacksReceived?: PvPAttackCreateNestedManyWithoutTargetInput
+    attackTickets?: TicketCreateNestedManyWithoutAttackSourcePlayerInput
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     sentTickets?: TicketCreateNestedManyWithoutLastSentByInput
   }
@@ -10900,6 +12624,9 @@ export namespace Prisma {
     nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    attacksSent?: PvPAttackUncheckedCreateNestedManyWithoutAttackerInput
+    attacksReceived?: PvPAttackUncheckedCreateNestedManyWithoutTargetInput
+    attackTickets?: TicketUncheckedCreateNestedManyWithoutAttackSourcePlayerInput
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     sentTickets?: TicketUncheckedCreateNestedManyWithoutLastSentByInput
   }
@@ -10924,6 +12651,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutPlayerNestedInput
+    attacksSent?: PvPAttackUpdateManyWithoutAttackerNestedInput
+    attacksReceived?: PvPAttackUpdateManyWithoutTargetNestedInput
+    attackTickets?: TicketUpdateManyWithoutAttackSourcePlayerNestedInput
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     sentTickets?: TicketUpdateManyWithoutLastSentByNestedInput
   }
@@ -10949,6 +12679,9 @@ export namespace Prisma {
     nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attacksSent?: PvPAttackUncheckedUpdateManyWithoutAttackerNestedInput
+    attacksReceived?: PvPAttackUncheckedUpdateManyWithoutTargetNestedInput
+    attackTickets?: TicketUncheckedUpdateManyWithoutAttackSourcePlayerNestedInput
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     sentTickets?: TicketUncheckedUpdateManyWithoutLastSentByNestedInput
   }
@@ -11040,6 +12773,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     assignedTo: PlayerCreateNestedOneWithoutAssignedTicketsInput
     lastSentBy?: PlayerCreateNestedOneWithoutSentTicketsInput
+    attackSourcePlayer?: PlayerCreateNestedOneWithoutAttackTicketsInput
+    pvpAttack?: PvPAttackCreateNestedOneWithoutTicketsInput
   }
 
   export type TicketUncheckedCreateInput = {
@@ -11056,6 +12791,8 @@ export namespace Prisma {
     failureMessage?: string | null
     assignedToId: number
     lastSentById?: number | null
+    attackSourcePlayerId?: number | null
+    pvpAttackId?: number | null
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
@@ -11085,6 +12822,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedTo?: PlayerUpdateOneRequiredWithoutAssignedTicketsNestedInput
     lastSentBy?: PlayerUpdateOneWithoutSentTicketsNestedInput
+    attackSourcePlayer?: PlayerUpdateOneWithoutAttackTicketsNestedInput
+    pvpAttack?: PvPAttackUpdateOneWithoutTicketsNestedInput
   }
 
   export type TicketUncheckedUpdateInput = {
@@ -11101,6 +12840,8 @@ export namespace Prisma {
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
     lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
+    attackSourcePlayerId?: NullableIntFieldUpdateOperationsInput | number | null
+    pvpAttackId?: NullableIntFieldUpdateOperationsInput | number | null
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -11124,6 +12865,8 @@ export namespace Prisma {
     failureMessage?: string | null
     assignedToId: number
     lastSentById?: number | null
+    attackSourcePlayerId?: number | null
+    pvpAttackId?: number | null
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
@@ -11167,6 +12910,8 @@ export namespace Prisma {
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
     lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
+    attackSourcePlayerId?: NullableIntFieldUpdateOperationsInput | number | null
+    pvpAttackId?: NullableIntFieldUpdateOperationsInput | number | null
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -11281,6 +13026,96 @@ export namespace Prisma {
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PvPAttackCreateInput = {
+    type: $Enums.PvPAttackType
+    status?: $Enums.PvPAttackStatus
+    cost: number
+    causedBankruptcy?: boolean
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    attacker: PlayerCreateNestedOneWithoutAttacksSentInput
+    target: PlayerCreateNestedOneWithoutAttacksReceivedInput
+    tickets?: TicketCreateNestedManyWithoutPvpAttackInput
+  }
+
+  export type PvPAttackUncheckedCreateInput = {
+    id?: number
+    type: $Enums.PvPAttackType
+    status?: $Enums.PvPAttackStatus
+    cost: number
+    attackerId: number
+    targetId: number
+    causedBankruptcy?: boolean
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tickets?: TicketUncheckedCreateNestedManyWithoutPvpAttackInput
+  }
+
+  export type PvPAttackUpdateInput = {
+    type?: EnumPvPAttackTypeFieldUpdateOperationsInput | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFieldUpdateOperationsInput | $Enums.PvPAttackStatus
+    cost?: IntFieldUpdateOperationsInput | number
+    causedBankruptcy?: BoolFieldUpdateOperationsInput | boolean
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attacker?: PlayerUpdateOneRequiredWithoutAttacksSentNestedInput
+    target?: PlayerUpdateOneRequiredWithoutAttacksReceivedNestedInput
+    tickets?: TicketUpdateManyWithoutPvpAttackNestedInput
+  }
+
+  export type PvPAttackUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: EnumPvPAttackTypeFieldUpdateOperationsInput | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFieldUpdateOperationsInput | $Enums.PvPAttackStatus
+    cost?: IntFieldUpdateOperationsInput | number
+    attackerId?: IntFieldUpdateOperationsInput | number
+    targetId?: IntFieldUpdateOperationsInput | number
+    causedBankruptcy?: BoolFieldUpdateOperationsInput | boolean
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tickets?: TicketUncheckedUpdateManyWithoutPvpAttackNestedInput
+  }
+
+  export type PvPAttackCreateManyInput = {
+    id?: number
+    type: $Enums.PvPAttackType
+    status?: $Enums.PvPAttackStatus
+    cost: number
+    attackerId: number
+    targetId: number
+    causedBankruptcy?: boolean
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PvPAttackUpdateManyMutationInput = {
+    type?: EnumPvPAttackTypeFieldUpdateOperationsInput | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFieldUpdateOperationsInput | $Enums.PvPAttackStatus
+    cost?: IntFieldUpdateOperationsInput | number
+    causedBankruptcy?: BoolFieldUpdateOperationsInput | boolean
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PvPAttackUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: EnumPvPAttackTypeFieldUpdateOperationsInput | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFieldUpdateOperationsInput | $Enums.PvPAttackStatus
+    cost?: IntFieldUpdateOperationsInput | number
+    attackerId?: IntFieldUpdateOperationsInput | number
+    targetId?: IntFieldUpdateOperationsInput | number
+    causedBankruptcy?: BoolFieldUpdateOperationsInput | boolean
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11677,6 +13512,12 @@ export namespace Prisma {
     isNot?: UserWhereInput
   }
 
+  export type PvPAttackListRelationFilter = {
+    every?: PvPAttackWhereInput
+    some?: PvPAttackWhereInput
+    none?: PvPAttackWhereInput
+  }
+
   export type TicketListRelationFilter = {
     every?: TicketWhereInput
     some?: TicketWhereInput
@@ -11686,6 +13527,10 @@ export namespace Prisma {
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
+  }
+
+  export type PvPAttackOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type TicketOrderByRelationAggregateInput = {
@@ -11925,6 +13770,11 @@ export namespace Prisma {
     isNot?: PlayerWhereInput | null
   }
 
+  export type PvPAttackNullableScalarRelationFilter = {
+    is?: PvPAttackWhereInput | null
+    isNot?: PvPAttackWhereInput | null
+  }
+
   export type TicketCountOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
@@ -11939,6 +13789,8 @@ export namespace Prisma {
     failureMessage?: SortOrder
     assignedToId?: SortOrder
     lastSentById?: SortOrder
+    attackSourcePlayerId?: SortOrder
+    pvpAttackId?: SortOrder
     bounceCount?: SortOrder
     abandonmentPenaltyApplied?: SortOrder
     abandonmentPenaltyAt?: SortOrder
@@ -11955,6 +13807,8 @@ export namespace Prisma {
     baseXp?: SortOrder
     assignedToId?: SortOrder
     lastSentById?: SortOrder
+    attackSourcePlayerId?: SortOrder
+    pvpAttackId?: SortOrder
     bounceCount?: SortOrder
   }
 
@@ -11972,6 +13826,8 @@ export namespace Prisma {
     failureMessage?: SortOrder
     assignedToId?: SortOrder
     lastSentById?: SortOrder
+    attackSourcePlayerId?: SortOrder
+    pvpAttackId?: SortOrder
     bounceCount?: SortOrder
     abandonmentPenaltyApplied?: SortOrder
     abandonmentPenaltyAt?: SortOrder
@@ -11995,6 +13851,8 @@ export namespace Prisma {
     failureMessage?: SortOrder
     assignedToId?: SortOrder
     lastSentById?: SortOrder
+    attackSourcePlayerId?: SortOrder
+    pvpAttackId?: SortOrder
     bounceCount?: SortOrder
     abandonmentPenaltyApplied?: SortOrder
     abandonmentPenaltyAt?: SortOrder
@@ -12011,6 +13869,8 @@ export namespace Prisma {
     baseXp?: SortOrder
     assignedToId?: SortOrder
     lastSentById?: SortOrder
+    attackSourcePlayerId?: SortOrder
+    pvpAttackId?: SortOrder
     bounceCount?: SortOrder
   }
 
@@ -12146,6 +14006,93 @@ export namespace Prisma {
     difficulty?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+  }
+
+  export type EnumPvPAttackTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PvPAttackType | EnumPvPAttackTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PvPAttackType[] | ListEnumPvPAttackTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PvPAttackType[] | ListEnumPvPAttackTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPvPAttackTypeFilter<$PrismaModel> | $Enums.PvPAttackType
+  }
+
+  export type EnumPvPAttackStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.PvPAttackStatus | EnumPvPAttackStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PvPAttackStatus[] | ListEnumPvPAttackStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PvPAttackStatus[] | ListEnumPvPAttackStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPvPAttackStatusFilter<$PrismaModel> | $Enums.PvPAttackStatus
+  }
+
+  export type PvPAttackCountOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    status?: SortOrder
+    cost?: SortOrder
+    attackerId?: SortOrder
+    targetId?: SortOrder
+    causedBankruptcy?: SortOrder
+    completedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PvPAttackAvgOrderByAggregateInput = {
+    id?: SortOrder
+    cost?: SortOrder
+    attackerId?: SortOrder
+    targetId?: SortOrder
+  }
+
+  export type PvPAttackMaxOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    status?: SortOrder
+    cost?: SortOrder
+    attackerId?: SortOrder
+    targetId?: SortOrder
+    causedBankruptcy?: SortOrder
+    completedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PvPAttackMinOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    status?: SortOrder
+    cost?: SortOrder
+    attackerId?: SortOrder
+    targetId?: SortOrder
+    causedBankruptcy?: SortOrder
+    completedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PvPAttackSumOrderByAggregateInput = {
+    id?: SortOrder
+    cost?: SortOrder
+    attackerId?: SortOrder
+    targetId?: SortOrder
+  }
+
+  export type EnumPvPAttackTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PvPAttackType | EnumPvPAttackTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PvPAttackType[] | ListEnumPvPAttackTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PvPAttackType[] | ListEnumPvPAttackTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPvPAttackTypeWithAggregatesFilter<$PrismaModel> | $Enums.PvPAttackType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPvPAttackTypeFilter<$PrismaModel>
+    _max?: NestedEnumPvPAttackTypeFilter<$PrismaModel>
+  }
+
+  export type EnumPvPAttackStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PvPAttackStatus | EnumPvPAttackStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PvPAttackStatus[] | ListEnumPvPAttackStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PvPAttackStatus[] | ListEnumPvPAttackStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPvPAttackStatusWithAggregatesFilter<$PrismaModel> | $Enums.PvPAttackStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPvPAttackStatusFilter<$PrismaModel>
+    _max?: NestedEnumPvPAttackStatusFilter<$PrismaModel>
   }
 
   export type SessionListRelationFilter = {
@@ -12312,6 +14259,27 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type PvPAttackCreateNestedManyWithoutAttackerInput = {
+    create?: XOR<PvPAttackCreateWithoutAttackerInput, PvPAttackUncheckedCreateWithoutAttackerInput> | PvPAttackCreateWithoutAttackerInput[] | PvPAttackUncheckedCreateWithoutAttackerInput[]
+    connectOrCreate?: PvPAttackCreateOrConnectWithoutAttackerInput | PvPAttackCreateOrConnectWithoutAttackerInput[]
+    createMany?: PvPAttackCreateManyAttackerInputEnvelope
+    connect?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+  }
+
+  export type PvPAttackCreateNestedManyWithoutTargetInput = {
+    create?: XOR<PvPAttackCreateWithoutTargetInput, PvPAttackUncheckedCreateWithoutTargetInput> | PvPAttackCreateWithoutTargetInput[] | PvPAttackUncheckedCreateWithoutTargetInput[]
+    connectOrCreate?: PvPAttackCreateOrConnectWithoutTargetInput | PvPAttackCreateOrConnectWithoutTargetInput[]
+    createMany?: PvPAttackCreateManyTargetInputEnvelope
+    connect?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+  }
+
+  export type TicketCreateNestedManyWithoutAttackSourcePlayerInput = {
+    create?: XOR<TicketCreateWithoutAttackSourcePlayerInput, TicketUncheckedCreateWithoutAttackSourcePlayerInput> | TicketCreateWithoutAttackSourcePlayerInput[] | TicketUncheckedCreateWithoutAttackSourcePlayerInput[]
+    connectOrCreate?: TicketCreateOrConnectWithoutAttackSourcePlayerInput | TicketCreateOrConnectWithoutAttackSourcePlayerInput[]
+    createMany?: TicketCreateManyAttackSourcePlayerInputEnvelope
+    connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+  }
+
   export type TicketCreateNestedManyWithoutAssignedToInput = {
     create?: XOR<TicketCreateWithoutAssignedToInput, TicketUncheckedCreateWithoutAssignedToInput> | TicketCreateWithoutAssignedToInput[] | TicketUncheckedCreateWithoutAssignedToInput[]
     connectOrCreate?: TicketCreateOrConnectWithoutAssignedToInput | TicketCreateOrConnectWithoutAssignedToInput[]
@@ -12323,6 +14291,27 @@ export namespace Prisma {
     create?: XOR<TicketCreateWithoutLastSentByInput, TicketUncheckedCreateWithoutLastSentByInput> | TicketCreateWithoutLastSentByInput[] | TicketUncheckedCreateWithoutLastSentByInput[]
     connectOrCreate?: TicketCreateOrConnectWithoutLastSentByInput | TicketCreateOrConnectWithoutLastSentByInput[]
     createMany?: TicketCreateManyLastSentByInputEnvelope
+    connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+  }
+
+  export type PvPAttackUncheckedCreateNestedManyWithoutAttackerInput = {
+    create?: XOR<PvPAttackCreateWithoutAttackerInput, PvPAttackUncheckedCreateWithoutAttackerInput> | PvPAttackCreateWithoutAttackerInput[] | PvPAttackUncheckedCreateWithoutAttackerInput[]
+    connectOrCreate?: PvPAttackCreateOrConnectWithoutAttackerInput | PvPAttackCreateOrConnectWithoutAttackerInput[]
+    createMany?: PvPAttackCreateManyAttackerInputEnvelope
+    connect?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+  }
+
+  export type PvPAttackUncheckedCreateNestedManyWithoutTargetInput = {
+    create?: XOR<PvPAttackCreateWithoutTargetInput, PvPAttackUncheckedCreateWithoutTargetInput> | PvPAttackCreateWithoutTargetInput[] | PvPAttackUncheckedCreateWithoutTargetInput[]
+    connectOrCreate?: PvPAttackCreateOrConnectWithoutTargetInput | PvPAttackCreateOrConnectWithoutTargetInput[]
+    createMany?: PvPAttackCreateManyTargetInputEnvelope
+    connect?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+  }
+
+  export type TicketUncheckedCreateNestedManyWithoutAttackSourcePlayerInput = {
+    create?: XOR<TicketCreateWithoutAttackSourcePlayerInput, TicketUncheckedCreateWithoutAttackSourcePlayerInput> | TicketCreateWithoutAttackSourcePlayerInput[] | TicketUncheckedCreateWithoutAttackSourcePlayerInput[]
+    connectOrCreate?: TicketCreateOrConnectWithoutAttackSourcePlayerInput | TicketCreateOrConnectWithoutAttackSourcePlayerInput[]
+    createMany?: TicketCreateManyAttackSourcePlayerInputEnvelope
     connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
   }
 
@@ -12372,6 +14361,48 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPlayerInput, UserUpdateWithoutPlayerInput>, UserUncheckedUpdateWithoutPlayerInput>
   }
 
+  export type PvPAttackUpdateManyWithoutAttackerNestedInput = {
+    create?: XOR<PvPAttackCreateWithoutAttackerInput, PvPAttackUncheckedCreateWithoutAttackerInput> | PvPAttackCreateWithoutAttackerInput[] | PvPAttackUncheckedCreateWithoutAttackerInput[]
+    connectOrCreate?: PvPAttackCreateOrConnectWithoutAttackerInput | PvPAttackCreateOrConnectWithoutAttackerInput[]
+    upsert?: PvPAttackUpsertWithWhereUniqueWithoutAttackerInput | PvPAttackUpsertWithWhereUniqueWithoutAttackerInput[]
+    createMany?: PvPAttackCreateManyAttackerInputEnvelope
+    set?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    disconnect?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    delete?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    connect?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    update?: PvPAttackUpdateWithWhereUniqueWithoutAttackerInput | PvPAttackUpdateWithWhereUniqueWithoutAttackerInput[]
+    updateMany?: PvPAttackUpdateManyWithWhereWithoutAttackerInput | PvPAttackUpdateManyWithWhereWithoutAttackerInput[]
+    deleteMany?: PvPAttackScalarWhereInput | PvPAttackScalarWhereInput[]
+  }
+
+  export type PvPAttackUpdateManyWithoutTargetNestedInput = {
+    create?: XOR<PvPAttackCreateWithoutTargetInput, PvPAttackUncheckedCreateWithoutTargetInput> | PvPAttackCreateWithoutTargetInput[] | PvPAttackUncheckedCreateWithoutTargetInput[]
+    connectOrCreate?: PvPAttackCreateOrConnectWithoutTargetInput | PvPAttackCreateOrConnectWithoutTargetInput[]
+    upsert?: PvPAttackUpsertWithWhereUniqueWithoutTargetInput | PvPAttackUpsertWithWhereUniqueWithoutTargetInput[]
+    createMany?: PvPAttackCreateManyTargetInputEnvelope
+    set?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    disconnect?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    delete?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    connect?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    update?: PvPAttackUpdateWithWhereUniqueWithoutTargetInput | PvPAttackUpdateWithWhereUniqueWithoutTargetInput[]
+    updateMany?: PvPAttackUpdateManyWithWhereWithoutTargetInput | PvPAttackUpdateManyWithWhereWithoutTargetInput[]
+    deleteMany?: PvPAttackScalarWhereInput | PvPAttackScalarWhereInput[]
+  }
+
+  export type TicketUpdateManyWithoutAttackSourcePlayerNestedInput = {
+    create?: XOR<TicketCreateWithoutAttackSourcePlayerInput, TicketUncheckedCreateWithoutAttackSourcePlayerInput> | TicketCreateWithoutAttackSourcePlayerInput[] | TicketUncheckedCreateWithoutAttackSourcePlayerInput[]
+    connectOrCreate?: TicketCreateOrConnectWithoutAttackSourcePlayerInput | TicketCreateOrConnectWithoutAttackSourcePlayerInput[]
+    upsert?: TicketUpsertWithWhereUniqueWithoutAttackSourcePlayerInput | TicketUpsertWithWhereUniqueWithoutAttackSourcePlayerInput[]
+    createMany?: TicketCreateManyAttackSourcePlayerInputEnvelope
+    set?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    disconnect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    delete?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    update?: TicketUpdateWithWhereUniqueWithoutAttackSourcePlayerInput | TicketUpdateWithWhereUniqueWithoutAttackSourcePlayerInput[]
+    updateMany?: TicketUpdateManyWithWhereWithoutAttackSourcePlayerInput | TicketUpdateManyWithWhereWithoutAttackSourcePlayerInput[]
+    deleteMany?: TicketScalarWhereInput | TicketScalarWhereInput[]
+  }
+
   export type TicketUpdateManyWithoutAssignedToNestedInput = {
     create?: XOR<TicketCreateWithoutAssignedToInput, TicketUncheckedCreateWithoutAssignedToInput> | TicketCreateWithoutAssignedToInput[] | TicketUncheckedCreateWithoutAssignedToInput[]
     connectOrCreate?: TicketCreateOrConnectWithoutAssignedToInput | TicketCreateOrConnectWithoutAssignedToInput[]
@@ -12397,6 +14428,48 @@ export namespace Prisma {
     connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
     update?: TicketUpdateWithWhereUniqueWithoutLastSentByInput | TicketUpdateWithWhereUniqueWithoutLastSentByInput[]
     updateMany?: TicketUpdateManyWithWhereWithoutLastSentByInput | TicketUpdateManyWithWhereWithoutLastSentByInput[]
+    deleteMany?: TicketScalarWhereInput | TicketScalarWhereInput[]
+  }
+
+  export type PvPAttackUncheckedUpdateManyWithoutAttackerNestedInput = {
+    create?: XOR<PvPAttackCreateWithoutAttackerInput, PvPAttackUncheckedCreateWithoutAttackerInput> | PvPAttackCreateWithoutAttackerInput[] | PvPAttackUncheckedCreateWithoutAttackerInput[]
+    connectOrCreate?: PvPAttackCreateOrConnectWithoutAttackerInput | PvPAttackCreateOrConnectWithoutAttackerInput[]
+    upsert?: PvPAttackUpsertWithWhereUniqueWithoutAttackerInput | PvPAttackUpsertWithWhereUniqueWithoutAttackerInput[]
+    createMany?: PvPAttackCreateManyAttackerInputEnvelope
+    set?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    disconnect?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    delete?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    connect?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    update?: PvPAttackUpdateWithWhereUniqueWithoutAttackerInput | PvPAttackUpdateWithWhereUniqueWithoutAttackerInput[]
+    updateMany?: PvPAttackUpdateManyWithWhereWithoutAttackerInput | PvPAttackUpdateManyWithWhereWithoutAttackerInput[]
+    deleteMany?: PvPAttackScalarWhereInput | PvPAttackScalarWhereInput[]
+  }
+
+  export type PvPAttackUncheckedUpdateManyWithoutTargetNestedInput = {
+    create?: XOR<PvPAttackCreateWithoutTargetInput, PvPAttackUncheckedCreateWithoutTargetInput> | PvPAttackCreateWithoutTargetInput[] | PvPAttackUncheckedCreateWithoutTargetInput[]
+    connectOrCreate?: PvPAttackCreateOrConnectWithoutTargetInput | PvPAttackCreateOrConnectWithoutTargetInput[]
+    upsert?: PvPAttackUpsertWithWhereUniqueWithoutTargetInput | PvPAttackUpsertWithWhereUniqueWithoutTargetInput[]
+    createMany?: PvPAttackCreateManyTargetInputEnvelope
+    set?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    disconnect?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    delete?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    connect?: PvPAttackWhereUniqueInput | PvPAttackWhereUniqueInput[]
+    update?: PvPAttackUpdateWithWhereUniqueWithoutTargetInput | PvPAttackUpdateWithWhereUniqueWithoutTargetInput[]
+    updateMany?: PvPAttackUpdateManyWithWhereWithoutTargetInput | PvPAttackUpdateManyWithWhereWithoutTargetInput[]
+    deleteMany?: PvPAttackScalarWhereInput | PvPAttackScalarWhereInput[]
+  }
+
+  export type TicketUncheckedUpdateManyWithoutAttackSourcePlayerNestedInput = {
+    create?: XOR<TicketCreateWithoutAttackSourcePlayerInput, TicketUncheckedCreateWithoutAttackSourcePlayerInput> | TicketCreateWithoutAttackSourcePlayerInput[] | TicketUncheckedCreateWithoutAttackSourcePlayerInput[]
+    connectOrCreate?: TicketCreateOrConnectWithoutAttackSourcePlayerInput | TicketCreateOrConnectWithoutAttackSourcePlayerInput[]
+    upsert?: TicketUpsertWithWhereUniqueWithoutAttackSourcePlayerInput | TicketUpsertWithWhereUniqueWithoutAttackSourcePlayerInput[]
+    createMany?: TicketCreateManyAttackSourcePlayerInputEnvelope
+    set?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    disconnect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    delete?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    update?: TicketUpdateWithWhereUniqueWithoutAttackSourcePlayerInput | TicketUpdateWithWhereUniqueWithoutAttackSourcePlayerInput[]
+    updateMany?: TicketUpdateManyWithWhereWithoutAttackSourcePlayerInput | TicketUpdateManyWithWhereWithoutAttackSourcePlayerInput[]
     deleteMany?: TicketScalarWhereInput | TicketScalarWhereInput[]
   }
 
@@ -12440,6 +14513,18 @@ export namespace Prisma {
     connect?: PlayerWhereUniqueInput
   }
 
+  export type PlayerCreateNestedOneWithoutAttackTicketsInput = {
+    create?: XOR<PlayerCreateWithoutAttackTicketsInput, PlayerUncheckedCreateWithoutAttackTicketsInput>
+    connectOrCreate?: PlayerCreateOrConnectWithoutAttackTicketsInput
+    connect?: PlayerWhereUniqueInput
+  }
+
+  export type PvPAttackCreateNestedOneWithoutTicketsInput = {
+    create?: XOR<PvPAttackCreateWithoutTicketsInput, PvPAttackUncheckedCreateWithoutTicketsInput>
+    connectOrCreate?: PvPAttackCreateOrConnectWithoutTicketsInput
+    connect?: PvPAttackWhereUniqueInput
+  }
+
   export type EnumTicketCategoryFieldUpdateOperationsInput = {
     set?: $Enums.TicketCategory
   }
@@ -12478,12 +14563,110 @@ export namespace Prisma {
     update?: XOR<XOR<PlayerUpdateToOneWithWhereWithoutSentTicketsInput, PlayerUpdateWithoutSentTicketsInput>, PlayerUncheckedUpdateWithoutSentTicketsInput>
   }
 
+  export type PlayerUpdateOneWithoutAttackTicketsNestedInput = {
+    create?: XOR<PlayerCreateWithoutAttackTicketsInput, PlayerUncheckedCreateWithoutAttackTicketsInput>
+    connectOrCreate?: PlayerCreateOrConnectWithoutAttackTicketsInput
+    upsert?: PlayerUpsertWithoutAttackTicketsInput
+    disconnect?: PlayerWhereInput | boolean
+    delete?: PlayerWhereInput | boolean
+    connect?: PlayerWhereUniqueInput
+    update?: XOR<XOR<PlayerUpdateToOneWithWhereWithoutAttackTicketsInput, PlayerUpdateWithoutAttackTicketsInput>, PlayerUncheckedUpdateWithoutAttackTicketsInput>
+  }
+
+  export type PvPAttackUpdateOneWithoutTicketsNestedInput = {
+    create?: XOR<PvPAttackCreateWithoutTicketsInput, PvPAttackUncheckedCreateWithoutTicketsInput>
+    connectOrCreate?: PvPAttackCreateOrConnectWithoutTicketsInput
+    upsert?: PvPAttackUpsertWithoutTicketsInput
+    disconnect?: PvPAttackWhereInput | boolean
+    delete?: PvPAttackWhereInput | boolean
+    connect?: PvPAttackWhereUniqueInput
+    update?: XOR<XOR<PvPAttackUpdateToOneWithWhereWithoutTicketsInput, PvPAttackUpdateWithoutTicketsInput>, PvPAttackUncheckedUpdateWithoutTicketsInput>
+  }
+
   export type NullableIntFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type PlayerCreateNestedOneWithoutAttacksSentInput = {
+    create?: XOR<PlayerCreateWithoutAttacksSentInput, PlayerUncheckedCreateWithoutAttacksSentInput>
+    connectOrCreate?: PlayerCreateOrConnectWithoutAttacksSentInput
+    connect?: PlayerWhereUniqueInput
+  }
+
+  export type PlayerCreateNestedOneWithoutAttacksReceivedInput = {
+    create?: XOR<PlayerCreateWithoutAttacksReceivedInput, PlayerUncheckedCreateWithoutAttacksReceivedInput>
+    connectOrCreate?: PlayerCreateOrConnectWithoutAttacksReceivedInput
+    connect?: PlayerWhereUniqueInput
+  }
+
+  export type TicketCreateNestedManyWithoutPvpAttackInput = {
+    create?: XOR<TicketCreateWithoutPvpAttackInput, TicketUncheckedCreateWithoutPvpAttackInput> | TicketCreateWithoutPvpAttackInput[] | TicketUncheckedCreateWithoutPvpAttackInput[]
+    connectOrCreate?: TicketCreateOrConnectWithoutPvpAttackInput | TicketCreateOrConnectWithoutPvpAttackInput[]
+    createMany?: TicketCreateManyPvpAttackInputEnvelope
+    connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+  }
+
+  export type TicketUncheckedCreateNestedManyWithoutPvpAttackInput = {
+    create?: XOR<TicketCreateWithoutPvpAttackInput, TicketUncheckedCreateWithoutPvpAttackInput> | TicketCreateWithoutPvpAttackInput[] | TicketUncheckedCreateWithoutPvpAttackInput[]
+    connectOrCreate?: TicketCreateOrConnectWithoutPvpAttackInput | TicketCreateOrConnectWithoutPvpAttackInput[]
+    createMany?: TicketCreateManyPvpAttackInputEnvelope
+    connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+  }
+
+  export type EnumPvPAttackTypeFieldUpdateOperationsInput = {
+    set?: $Enums.PvPAttackType
+  }
+
+  export type EnumPvPAttackStatusFieldUpdateOperationsInput = {
+    set?: $Enums.PvPAttackStatus
+  }
+
+  export type PlayerUpdateOneRequiredWithoutAttacksSentNestedInput = {
+    create?: XOR<PlayerCreateWithoutAttacksSentInput, PlayerUncheckedCreateWithoutAttacksSentInput>
+    connectOrCreate?: PlayerCreateOrConnectWithoutAttacksSentInput
+    upsert?: PlayerUpsertWithoutAttacksSentInput
+    connect?: PlayerWhereUniqueInput
+    update?: XOR<XOR<PlayerUpdateToOneWithWhereWithoutAttacksSentInput, PlayerUpdateWithoutAttacksSentInput>, PlayerUncheckedUpdateWithoutAttacksSentInput>
+  }
+
+  export type PlayerUpdateOneRequiredWithoutAttacksReceivedNestedInput = {
+    create?: XOR<PlayerCreateWithoutAttacksReceivedInput, PlayerUncheckedCreateWithoutAttacksReceivedInput>
+    connectOrCreate?: PlayerCreateOrConnectWithoutAttacksReceivedInput
+    upsert?: PlayerUpsertWithoutAttacksReceivedInput
+    connect?: PlayerWhereUniqueInput
+    update?: XOR<XOR<PlayerUpdateToOneWithWhereWithoutAttacksReceivedInput, PlayerUpdateWithoutAttacksReceivedInput>, PlayerUncheckedUpdateWithoutAttacksReceivedInput>
+  }
+
+  export type TicketUpdateManyWithoutPvpAttackNestedInput = {
+    create?: XOR<TicketCreateWithoutPvpAttackInput, TicketUncheckedCreateWithoutPvpAttackInput> | TicketCreateWithoutPvpAttackInput[] | TicketUncheckedCreateWithoutPvpAttackInput[]
+    connectOrCreate?: TicketCreateOrConnectWithoutPvpAttackInput | TicketCreateOrConnectWithoutPvpAttackInput[]
+    upsert?: TicketUpsertWithWhereUniqueWithoutPvpAttackInput | TicketUpsertWithWhereUniqueWithoutPvpAttackInput[]
+    createMany?: TicketCreateManyPvpAttackInputEnvelope
+    set?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    disconnect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    delete?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    update?: TicketUpdateWithWhereUniqueWithoutPvpAttackInput | TicketUpdateWithWhereUniqueWithoutPvpAttackInput[]
+    updateMany?: TicketUpdateManyWithWhereWithoutPvpAttackInput | TicketUpdateManyWithWhereWithoutPvpAttackInput[]
+    deleteMany?: TicketScalarWhereInput | TicketScalarWhereInput[]
+  }
+
+  export type TicketUncheckedUpdateManyWithoutPvpAttackNestedInput = {
+    create?: XOR<TicketCreateWithoutPvpAttackInput, TicketUncheckedCreateWithoutPvpAttackInput> | TicketCreateWithoutPvpAttackInput[] | TicketUncheckedCreateWithoutPvpAttackInput[]
+    connectOrCreate?: TicketCreateOrConnectWithoutPvpAttackInput | TicketCreateOrConnectWithoutPvpAttackInput[]
+    upsert?: TicketUpsertWithWhereUniqueWithoutPvpAttackInput | TicketUpsertWithWhereUniqueWithoutPvpAttackInput[]
+    createMany?: TicketCreateManyPvpAttackInputEnvelope
+    set?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    disconnect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    delete?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+    update?: TicketUpdateWithWhereUniqueWithoutPvpAttackInput | TicketUpdateWithWhereUniqueWithoutPvpAttackInput[]
+    updateMany?: TicketUpdateManyWithWhereWithoutPvpAttackInput | TicketUpdateManyWithWhereWithoutPvpAttackInput[]
+    deleteMany?: TicketScalarWhereInput | TicketScalarWhereInput[]
   }
 
   export type SessionCreateNestedManyWithoutUserInput = {
@@ -12899,6 +15082,40 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type NestedEnumPvPAttackTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PvPAttackType | EnumPvPAttackTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PvPAttackType[] | ListEnumPvPAttackTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PvPAttackType[] | ListEnumPvPAttackTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPvPAttackTypeFilter<$PrismaModel> | $Enums.PvPAttackType
+  }
+
+  export type NestedEnumPvPAttackStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.PvPAttackStatus | EnumPvPAttackStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PvPAttackStatus[] | ListEnumPvPAttackStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PvPAttackStatus[] | ListEnumPvPAttackStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPvPAttackStatusFilter<$PrismaModel> | $Enums.PvPAttackStatus
+  }
+
+  export type NestedEnumPvPAttackTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PvPAttackType | EnumPvPAttackTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PvPAttackType[] | ListEnumPvPAttackTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PvPAttackType[] | ListEnumPvPAttackTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPvPAttackTypeWithAggregatesFilter<$PrismaModel> | $Enums.PvPAttackType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPvPAttackTypeFilter<$PrismaModel>
+    _max?: NestedEnumPvPAttackTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumPvPAttackStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PvPAttackStatus | EnumPvPAttackStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PvPAttackStatus[] | ListEnumPvPAttackStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PvPAttackStatus[] | ListEnumPvPAttackStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPvPAttackStatusWithAggregatesFilter<$PrismaModel> | $Enums.PvPAttackStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPvPAttackStatusFilter<$PrismaModel>
+    _max?: NestedEnumPvPAttackStatusFilter<$PrismaModel>
+  }
+
   export type UserCreateWithoutPlayerInput = {
     id: string
     name: string
@@ -12928,6 +15145,133 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutPlayerInput, UserUncheckedCreateWithoutPlayerInput>
   }
 
+  export type PvPAttackCreateWithoutAttackerInput = {
+    type: $Enums.PvPAttackType
+    status?: $Enums.PvPAttackStatus
+    cost: number
+    causedBankruptcy?: boolean
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    target: PlayerCreateNestedOneWithoutAttacksReceivedInput
+    tickets?: TicketCreateNestedManyWithoutPvpAttackInput
+  }
+
+  export type PvPAttackUncheckedCreateWithoutAttackerInput = {
+    id?: number
+    type: $Enums.PvPAttackType
+    status?: $Enums.PvPAttackStatus
+    cost: number
+    targetId: number
+    causedBankruptcy?: boolean
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tickets?: TicketUncheckedCreateNestedManyWithoutPvpAttackInput
+  }
+
+  export type PvPAttackCreateOrConnectWithoutAttackerInput = {
+    where: PvPAttackWhereUniqueInput
+    create: XOR<PvPAttackCreateWithoutAttackerInput, PvPAttackUncheckedCreateWithoutAttackerInput>
+  }
+
+  export type PvPAttackCreateManyAttackerInputEnvelope = {
+    data: PvPAttackCreateManyAttackerInput | PvPAttackCreateManyAttackerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PvPAttackCreateWithoutTargetInput = {
+    type: $Enums.PvPAttackType
+    status?: $Enums.PvPAttackStatus
+    cost: number
+    causedBankruptcy?: boolean
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    attacker: PlayerCreateNestedOneWithoutAttacksSentInput
+    tickets?: TicketCreateNestedManyWithoutPvpAttackInput
+  }
+
+  export type PvPAttackUncheckedCreateWithoutTargetInput = {
+    id?: number
+    type: $Enums.PvPAttackType
+    status?: $Enums.PvPAttackStatus
+    cost: number
+    attackerId: number
+    causedBankruptcy?: boolean
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tickets?: TicketUncheckedCreateNestedManyWithoutPvpAttackInput
+  }
+
+  export type PvPAttackCreateOrConnectWithoutTargetInput = {
+    where: PvPAttackWhereUniqueInput
+    create: XOR<PvPAttackCreateWithoutTargetInput, PvPAttackUncheckedCreateWithoutTargetInput>
+  }
+
+  export type PvPAttackCreateManyTargetInputEnvelope = {
+    data: PvPAttackCreateManyTargetInput | PvPAttackCreateManyTargetInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TicketCreateWithoutAttackSourcePlayerInput = {
+    title: string
+    description: string
+    category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
+    status?: $Enums.TicketStatus
+    maxValue: number
+    baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
+    bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
+    resolvedAt?: Date | string | null
+    expiredAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignedTo: PlayerCreateNestedOneWithoutAssignedTicketsInput
+    lastSentBy?: PlayerCreateNestedOneWithoutSentTicketsInput
+    pvpAttack?: PvPAttackCreateNestedOneWithoutTicketsInput
+  }
+
+  export type TicketUncheckedCreateWithoutAttackSourcePlayerInput = {
+    id?: number
+    title: string
+    description: string
+    category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
+    status?: $Enums.TicketStatus
+    maxValue: number
+    baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
+    assignedToId: number
+    lastSentById?: number | null
+    pvpAttackId?: number | null
+    bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
+    resolvedAt?: Date | string | null
+    expiredAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TicketCreateOrConnectWithoutAttackSourcePlayerInput = {
+    where: TicketWhereUniqueInput
+    create: XOR<TicketCreateWithoutAttackSourcePlayerInput, TicketUncheckedCreateWithoutAttackSourcePlayerInput>
+  }
+
+  export type TicketCreateManyAttackSourcePlayerInputEnvelope = {
+    data: TicketCreateManyAttackSourcePlayerInput | TicketCreateManyAttackSourcePlayerInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TicketCreateWithoutAssignedToInput = {
     title: string
     description: string
@@ -12947,6 +15291,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     lastSentBy?: PlayerCreateNestedOneWithoutSentTicketsInput
+    attackSourcePlayer?: PlayerCreateNestedOneWithoutAttackTicketsInput
+    pvpAttack?: PvPAttackCreateNestedOneWithoutTicketsInput
   }
 
   export type TicketUncheckedCreateWithoutAssignedToInput = {
@@ -12962,6 +15308,8 @@ export namespace Prisma {
     successMessage?: string | null
     failureMessage?: string | null
     lastSentById?: number | null
+    attackSourcePlayerId?: number | null
+    pvpAttackId?: number | null
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
@@ -13000,6 +15348,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     assignedTo: PlayerCreateNestedOneWithoutAssignedTicketsInput
+    attackSourcePlayer?: PlayerCreateNestedOneWithoutAttackTicketsInput
+    pvpAttack?: PvPAttackCreateNestedOneWithoutTicketsInput
   }
 
   export type TicketUncheckedCreateWithoutLastSentByInput = {
@@ -13015,6 +15365,8 @@ export namespace Prisma {
     successMessage?: string | null
     failureMessage?: string | null
     assignedToId: number
+    attackSourcePlayerId?: number | null
+    pvpAttackId?: number | null
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
@@ -13069,20 +15421,68 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
   }
 
-  export type TicketUpsertWithWhereUniqueWithoutAssignedToInput = {
-    where: TicketWhereUniqueInput
-    update: XOR<TicketUpdateWithoutAssignedToInput, TicketUncheckedUpdateWithoutAssignedToInput>
-    create: XOR<TicketCreateWithoutAssignedToInput, TicketUncheckedCreateWithoutAssignedToInput>
+  export type PvPAttackUpsertWithWhereUniqueWithoutAttackerInput = {
+    where: PvPAttackWhereUniqueInput
+    update: XOR<PvPAttackUpdateWithoutAttackerInput, PvPAttackUncheckedUpdateWithoutAttackerInput>
+    create: XOR<PvPAttackCreateWithoutAttackerInput, PvPAttackUncheckedCreateWithoutAttackerInput>
   }
 
-  export type TicketUpdateWithWhereUniqueWithoutAssignedToInput = {
-    where: TicketWhereUniqueInput
-    data: XOR<TicketUpdateWithoutAssignedToInput, TicketUncheckedUpdateWithoutAssignedToInput>
+  export type PvPAttackUpdateWithWhereUniqueWithoutAttackerInput = {
+    where: PvPAttackWhereUniqueInput
+    data: XOR<PvPAttackUpdateWithoutAttackerInput, PvPAttackUncheckedUpdateWithoutAttackerInput>
   }
 
-  export type TicketUpdateManyWithWhereWithoutAssignedToInput = {
+  export type PvPAttackUpdateManyWithWhereWithoutAttackerInput = {
+    where: PvPAttackScalarWhereInput
+    data: XOR<PvPAttackUpdateManyMutationInput, PvPAttackUncheckedUpdateManyWithoutAttackerInput>
+  }
+
+  export type PvPAttackScalarWhereInput = {
+    AND?: PvPAttackScalarWhereInput | PvPAttackScalarWhereInput[]
+    OR?: PvPAttackScalarWhereInput[]
+    NOT?: PvPAttackScalarWhereInput | PvPAttackScalarWhereInput[]
+    id?: IntFilter<"PvPAttack"> | number
+    type?: EnumPvPAttackTypeFilter<"PvPAttack"> | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFilter<"PvPAttack"> | $Enums.PvPAttackStatus
+    cost?: IntFilter<"PvPAttack"> | number
+    attackerId?: IntFilter<"PvPAttack"> | number
+    targetId?: IntFilter<"PvPAttack"> | number
+    causedBankruptcy?: BoolFilter<"PvPAttack"> | boolean
+    completedAt?: DateTimeNullableFilter<"PvPAttack"> | Date | string | null
+    createdAt?: DateTimeFilter<"PvPAttack"> | Date | string
+    updatedAt?: DateTimeFilter<"PvPAttack"> | Date | string
+  }
+
+  export type PvPAttackUpsertWithWhereUniqueWithoutTargetInput = {
+    where: PvPAttackWhereUniqueInput
+    update: XOR<PvPAttackUpdateWithoutTargetInput, PvPAttackUncheckedUpdateWithoutTargetInput>
+    create: XOR<PvPAttackCreateWithoutTargetInput, PvPAttackUncheckedCreateWithoutTargetInput>
+  }
+
+  export type PvPAttackUpdateWithWhereUniqueWithoutTargetInput = {
+    where: PvPAttackWhereUniqueInput
+    data: XOR<PvPAttackUpdateWithoutTargetInput, PvPAttackUncheckedUpdateWithoutTargetInput>
+  }
+
+  export type PvPAttackUpdateManyWithWhereWithoutTargetInput = {
+    where: PvPAttackScalarWhereInput
+    data: XOR<PvPAttackUpdateManyMutationInput, PvPAttackUncheckedUpdateManyWithoutTargetInput>
+  }
+
+  export type TicketUpsertWithWhereUniqueWithoutAttackSourcePlayerInput = {
+    where: TicketWhereUniqueInput
+    update: XOR<TicketUpdateWithoutAttackSourcePlayerInput, TicketUncheckedUpdateWithoutAttackSourcePlayerInput>
+    create: XOR<TicketCreateWithoutAttackSourcePlayerInput, TicketUncheckedCreateWithoutAttackSourcePlayerInput>
+  }
+
+  export type TicketUpdateWithWhereUniqueWithoutAttackSourcePlayerInput = {
+    where: TicketWhereUniqueInput
+    data: XOR<TicketUpdateWithoutAttackSourcePlayerInput, TicketUncheckedUpdateWithoutAttackSourcePlayerInput>
+  }
+
+  export type TicketUpdateManyWithWhereWithoutAttackSourcePlayerInput = {
     where: TicketScalarWhereInput
-    data: XOR<TicketUpdateManyMutationInput, TicketUncheckedUpdateManyWithoutAssignedToInput>
+    data: XOR<TicketUpdateManyMutationInput, TicketUncheckedUpdateManyWithoutAttackSourcePlayerInput>
   }
 
   export type TicketScalarWhereInput = {
@@ -13102,6 +15502,8 @@ export namespace Prisma {
     failureMessage?: StringNullableFilter<"Ticket"> | string | null
     assignedToId?: IntFilter<"Ticket"> | number
     lastSentById?: IntNullableFilter<"Ticket"> | number | null
+    attackSourcePlayerId?: IntNullableFilter<"Ticket"> | number | null
+    pvpAttackId?: IntNullableFilter<"Ticket"> | number | null
     bounceCount?: IntFilter<"Ticket"> | number
     abandonmentPenaltyApplied?: BoolFilter<"Ticket"> | boolean
     abandonmentPenaltyAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
@@ -13109,6 +15511,22 @@ export namespace Prisma {
     expiredAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
     updatedAt?: DateTimeFilter<"Ticket"> | Date | string
+  }
+
+  export type TicketUpsertWithWhereUniqueWithoutAssignedToInput = {
+    where: TicketWhereUniqueInput
+    update: XOR<TicketUpdateWithoutAssignedToInput, TicketUncheckedUpdateWithoutAssignedToInput>
+    create: XOR<TicketCreateWithoutAssignedToInput, TicketUncheckedCreateWithoutAssignedToInput>
+  }
+
+  export type TicketUpdateWithWhereUniqueWithoutAssignedToInput = {
+    where: TicketWhereUniqueInput
+    data: XOR<TicketUpdateWithoutAssignedToInput, TicketUncheckedUpdateWithoutAssignedToInput>
+  }
+
+  export type TicketUpdateManyWithWhereWithoutAssignedToInput = {
+    where: TicketScalarWhereInput
+    data: XOR<TicketUpdateManyMutationInput, TicketUncheckedUpdateManyWithoutAssignedToInput>
   }
 
   export type TicketUpsertWithWhereUniqueWithoutLastSentByInput = {
@@ -13147,6 +15565,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutPlayerInput
+    attacksSent?: PvPAttackCreateNestedManyWithoutAttackerInput
+    attacksReceived?: PvPAttackCreateNestedManyWithoutTargetInput
+    attackTickets?: TicketCreateNestedManyWithoutAttackSourcePlayerInput
     sentTickets?: TicketCreateNestedManyWithoutLastSentByInput
   }
 
@@ -13171,6 +15592,9 @@ export namespace Prisma {
     nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    attacksSent?: PvPAttackUncheckedCreateNestedManyWithoutAttackerInput
+    attacksReceived?: PvPAttackUncheckedCreateNestedManyWithoutTargetInput
+    attackTickets?: TicketUncheckedCreateNestedManyWithoutAttackSourcePlayerInput
     sentTickets?: TicketUncheckedCreateNestedManyWithoutLastSentByInput
   }
 
@@ -13199,6 +15623,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutPlayerInput
+    attacksSent?: PvPAttackCreateNestedManyWithoutAttackerInput
+    attacksReceived?: PvPAttackCreateNestedManyWithoutTargetInput
+    attackTickets?: TicketCreateNestedManyWithoutAttackSourcePlayerInput
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
   }
 
@@ -13223,12 +15650,103 @@ export namespace Prisma {
     nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    attacksSent?: PvPAttackUncheckedCreateNestedManyWithoutAttackerInput
+    attacksReceived?: PvPAttackUncheckedCreateNestedManyWithoutTargetInput
+    attackTickets?: TicketUncheckedCreateNestedManyWithoutAttackSourcePlayerInput
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
   }
 
   export type PlayerCreateOrConnectWithoutSentTicketsInput = {
     where: PlayerWhereUniqueInput
     create: XOR<PlayerCreateWithoutSentTicketsInput, PlayerUncheckedCreateWithoutSentTicketsInput>
+  }
+
+  export type PlayerCreateWithoutAttackTicketsInput = {
+    username: string
+    level?: number
+    xp?: number
+    careerPath?: $Enums.CareerPath | null
+    credits?: number
+    kills?: number
+    bankruptcies?: number
+    ticketsResolved?: number
+    correctBounces?: number
+    incorrectBounces?: number
+    incorrectResolves?: number
+    lifetimeCreditsEarned?: number
+    lifetimeTicketsHandled?: number
+    lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutPlayerInput
+    attacksSent?: PvPAttackCreateNestedManyWithoutAttackerInput
+    attacksReceived?: PvPAttackCreateNestedManyWithoutTargetInput
+    assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
+    sentTickets?: TicketCreateNestedManyWithoutLastSentByInput
+  }
+
+  export type PlayerUncheckedCreateWithoutAttackTicketsInput = {
+    id?: number
+    userId: string
+    username: string
+    level?: number
+    xp?: number
+    careerPath?: $Enums.CareerPath | null
+    credits?: number
+    kills?: number
+    bankruptcies?: number
+    ticketsResolved?: number
+    correctBounces?: number
+    incorrectBounces?: number
+    incorrectResolves?: number
+    lifetimeCreditsEarned?: number
+    lifetimeTicketsHandled?: number
+    lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    attacksSent?: PvPAttackUncheckedCreateNestedManyWithoutAttackerInput
+    attacksReceived?: PvPAttackUncheckedCreateNestedManyWithoutTargetInput
+    assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    sentTickets?: TicketUncheckedCreateNestedManyWithoutLastSentByInput
+  }
+
+  export type PlayerCreateOrConnectWithoutAttackTicketsInput = {
+    where: PlayerWhereUniqueInput
+    create: XOR<PlayerCreateWithoutAttackTicketsInput, PlayerUncheckedCreateWithoutAttackTicketsInput>
+  }
+
+  export type PvPAttackCreateWithoutTicketsInput = {
+    type: $Enums.PvPAttackType
+    status?: $Enums.PvPAttackStatus
+    cost: number
+    causedBankruptcy?: boolean
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    attacker: PlayerCreateNestedOneWithoutAttacksSentInput
+    target: PlayerCreateNestedOneWithoutAttacksReceivedInput
+  }
+
+  export type PvPAttackUncheckedCreateWithoutTicketsInput = {
+    id?: number
+    type: $Enums.PvPAttackType
+    status?: $Enums.PvPAttackStatus
+    cost: number
+    attackerId: number
+    targetId: number
+    causedBankruptcy?: boolean
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PvPAttackCreateOrConnectWithoutTicketsInput = {
+    where: PvPAttackWhereUniqueInput
+    create: XOR<PvPAttackCreateWithoutTicketsInput, PvPAttackUncheckedCreateWithoutTicketsInput>
   }
 
   export type PlayerUpsertWithoutAssignedTicketsInput = {
@@ -13262,6 +15780,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutPlayerNestedInput
+    attacksSent?: PvPAttackUpdateManyWithoutAttackerNestedInput
+    attacksReceived?: PvPAttackUpdateManyWithoutTargetNestedInput
+    attackTickets?: TicketUpdateManyWithoutAttackSourcePlayerNestedInput
     sentTickets?: TicketUpdateManyWithoutLastSentByNestedInput
   }
 
@@ -13286,6 +15807,9 @@ export namespace Prisma {
     nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attacksSent?: PvPAttackUncheckedUpdateManyWithoutAttackerNestedInput
+    attacksReceived?: PvPAttackUncheckedUpdateManyWithoutTargetNestedInput
+    attackTickets?: TicketUncheckedUpdateManyWithoutAttackSourcePlayerNestedInput
     sentTickets?: TicketUncheckedUpdateManyWithoutLastSentByNestedInput
   }
 
@@ -13320,6 +15844,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutPlayerNestedInput
+    attacksSent?: PvPAttackUpdateManyWithoutAttackerNestedInput
+    attacksReceived?: PvPAttackUpdateManyWithoutTargetNestedInput
+    attackTickets?: TicketUpdateManyWithoutAttackSourcePlayerNestedInput
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
   }
 
@@ -13344,7 +15871,427 @@ export namespace Prisma {
     nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attacksSent?: PvPAttackUncheckedUpdateManyWithoutAttackerNestedInput
+    attacksReceived?: PvPAttackUncheckedUpdateManyWithoutTargetNestedInput
+    attackTickets?: TicketUncheckedUpdateManyWithoutAttackSourcePlayerNestedInput
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+  }
+
+  export type PlayerUpsertWithoutAttackTicketsInput = {
+    update: XOR<PlayerUpdateWithoutAttackTicketsInput, PlayerUncheckedUpdateWithoutAttackTicketsInput>
+    create: XOR<PlayerCreateWithoutAttackTicketsInput, PlayerUncheckedCreateWithoutAttackTicketsInput>
+    where?: PlayerWhereInput
+  }
+
+  export type PlayerUpdateToOneWithWhereWithoutAttackTicketsInput = {
+    where?: PlayerWhereInput
+    data: XOR<PlayerUpdateWithoutAttackTicketsInput, PlayerUncheckedUpdateWithoutAttackTicketsInput>
+  }
+
+  export type PlayerUpdateWithoutAttackTicketsInput = {
+    username?: StringFieldUpdateOperationsInput | string
+    level?: IntFieldUpdateOperationsInput | number
+    xp?: IntFieldUpdateOperationsInput | number
+    careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    credits?: IntFieldUpdateOperationsInput | number
+    kills?: IntFieldUpdateOperationsInput | number
+    bankruptcies?: IntFieldUpdateOperationsInput | number
+    ticketsResolved?: IntFieldUpdateOperationsInput | number
+    correctBounces?: IntFieldUpdateOperationsInput | number
+    incorrectBounces?: IntFieldUpdateOperationsInput | number
+    incorrectResolves?: IntFieldUpdateOperationsInput | number
+    lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
+    lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
+    lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutPlayerNestedInput
+    attacksSent?: PvPAttackUpdateManyWithoutAttackerNestedInput
+    attacksReceived?: PvPAttackUpdateManyWithoutTargetNestedInput
+    assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
+    sentTickets?: TicketUpdateManyWithoutLastSentByNestedInput
+  }
+
+  export type PlayerUncheckedUpdateWithoutAttackTicketsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    level?: IntFieldUpdateOperationsInput | number
+    xp?: IntFieldUpdateOperationsInput | number
+    careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    credits?: IntFieldUpdateOperationsInput | number
+    kills?: IntFieldUpdateOperationsInput | number
+    bankruptcies?: IntFieldUpdateOperationsInput | number
+    ticketsResolved?: IntFieldUpdateOperationsInput | number
+    correctBounces?: IntFieldUpdateOperationsInput | number
+    incorrectBounces?: IntFieldUpdateOperationsInput | number
+    incorrectResolves?: IntFieldUpdateOperationsInput | number
+    lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
+    lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
+    lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attacksSent?: PvPAttackUncheckedUpdateManyWithoutAttackerNestedInput
+    attacksReceived?: PvPAttackUncheckedUpdateManyWithoutTargetNestedInput
+    assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    sentTickets?: TicketUncheckedUpdateManyWithoutLastSentByNestedInput
+  }
+
+  export type PvPAttackUpsertWithoutTicketsInput = {
+    update: XOR<PvPAttackUpdateWithoutTicketsInput, PvPAttackUncheckedUpdateWithoutTicketsInput>
+    create: XOR<PvPAttackCreateWithoutTicketsInput, PvPAttackUncheckedCreateWithoutTicketsInput>
+    where?: PvPAttackWhereInput
+  }
+
+  export type PvPAttackUpdateToOneWithWhereWithoutTicketsInput = {
+    where?: PvPAttackWhereInput
+    data: XOR<PvPAttackUpdateWithoutTicketsInput, PvPAttackUncheckedUpdateWithoutTicketsInput>
+  }
+
+  export type PvPAttackUpdateWithoutTicketsInput = {
+    type?: EnumPvPAttackTypeFieldUpdateOperationsInput | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFieldUpdateOperationsInput | $Enums.PvPAttackStatus
+    cost?: IntFieldUpdateOperationsInput | number
+    causedBankruptcy?: BoolFieldUpdateOperationsInput | boolean
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attacker?: PlayerUpdateOneRequiredWithoutAttacksSentNestedInput
+    target?: PlayerUpdateOneRequiredWithoutAttacksReceivedNestedInput
+  }
+
+  export type PvPAttackUncheckedUpdateWithoutTicketsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: EnumPvPAttackTypeFieldUpdateOperationsInput | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFieldUpdateOperationsInput | $Enums.PvPAttackStatus
+    cost?: IntFieldUpdateOperationsInput | number
+    attackerId?: IntFieldUpdateOperationsInput | number
+    targetId?: IntFieldUpdateOperationsInput | number
+    causedBankruptcy?: BoolFieldUpdateOperationsInput | boolean
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PlayerCreateWithoutAttacksSentInput = {
+    username: string
+    level?: number
+    xp?: number
+    careerPath?: $Enums.CareerPath | null
+    credits?: number
+    kills?: number
+    bankruptcies?: number
+    ticketsResolved?: number
+    correctBounces?: number
+    incorrectBounces?: number
+    incorrectResolves?: number
+    lifetimeCreditsEarned?: number
+    lifetimeTicketsHandled?: number
+    lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutPlayerInput
+    attacksReceived?: PvPAttackCreateNestedManyWithoutTargetInput
+    attackTickets?: TicketCreateNestedManyWithoutAttackSourcePlayerInput
+    assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
+    sentTickets?: TicketCreateNestedManyWithoutLastSentByInput
+  }
+
+  export type PlayerUncheckedCreateWithoutAttacksSentInput = {
+    id?: number
+    userId: string
+    username: string
+    level?: number
+    xp?: number
+    careerPath?: $Enums.CareerPath | null
+    credits?: number
+    kills?: number
+    bankruptcies?: number
+    ticketsResolved?: number
+    correctBounces?: number
+    incorrectBounces?: number
+    incorrectResolves?: number
+    lifetimeCreditsEarned?: number
+    lifetimeTicketsHandled?: number
+    lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    attacksReceived?: PvPAttackUncheckedCreateNestedManyWithoutTargetInput
+    attackTickets?: TicketUncheckedCreateNestedManyWithoutAttackSourcePlayerInput
+    assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    sentTickets?: TicketUncheckedCreateNestedManyWithoutLastSentByInput
+  }
+
+  export type PlayerCreateOrConnectWithoutAttacksSentInput = {
+    where: PlayerWhereUniqueInput
+    create: XOR<PlayerCreateWithoutAttacksSentInput, PlayerUncheckedCreateWithoutAttacksSentInput>
+  }
+
+  export type PlayerCreateWithoutAttacksReceivedInput = {
+    username: string
+    level?: number
+    xp?: number
+    careerPath?: $Enums.CareerPath | null
+    credits?: number
+    kills?: number
+    bankruptcies?: number
+    ticketsResolved?: number
+    correctBounces?: number
+    incorrectBounces?: number
+    incorrectResolves?: number
+    lifetimeCreditsEarned?: number
+    lifetimeTicketsHandled?: number
+    lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutPlayerInput
+    attacksSent?: PvPAttackCreateNestedManyWithoutAttackerInput
+    attackTickets?: TicketCreateNestedManyWithoutAttackSourcePlayerInput
+    assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
+    sentTickets?: TicketCreateNestedManyWithoutLastSentByInput
+  }
+
+  export type PlayerUncheckedCreateWithoutAttacksReceivedInput = {
+    id?: number
+    userId: string
+    username: string
+    level?: number
+    xp?: number
+    careerPath?: $Enums.CareerPath | null
+    credits?: number
+    kills?: number
+    bankruptcies?: number
+    ticketsResolved?: number
+    correctBounces?: number
+    incorrectBounces?: number
+    incorrectResolves?: number
+    lifetimeCreditsEarned?: number
+    lifetimeTicketsHandled?: number
+    lastActiveAt?: Date | string
+    queuePenaltyUntil?: Date | string | null
+    nextTicketAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    attacksSent?: PvPAttackUncheckedCreateNestedManyWithoutAttackerInput
+    attackTickets?: TicketUncheckedCreateNestedManyWithoutAttackSourcePlayerInput
+    assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    sentTickets?: TicketUncheckedCreateNestedManyWithoutLastSentByInput
+  }
+
+  export type PlayerCreateOrConnectWithoutAttacksReceivedInput = {
+    where: PlayerWhereUniqueInput
+    create: XOR<PlayerCreateWithoutAttacksReceivedInput, PlayerUncheckedCreateWithoutAttacksReceivedInput>
+  }
+
+  export type TicketCreateWithoutPvpAttackInput = {
+    title: string
+    description: string
+    category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
+    status?: $Enums.TicketStatus
+    maxValue: number
+    baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
+    bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
+    resolvedAt?: Date | string | null
+    expiredAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignedTo: PlayerCreateNestedOneWithoutAssignedTicketsInput
+    lastSentBy?: PlayerCreateNestedOneWithoutSentTicketsInput
+    attackSourcePlayer?: PlayerCreateNestedOneWithoutAttackTicketsInput
+  }
+
+  export type TicketUncheckedCreateWithoutPvpAttackInput = {
+    id?: number
+    title: string
+    description: string
+    category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
+    status?: $Enums.TicketStatus
+    maxValue: number
+    baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
+    assignedToId: number
+    lastSentById?: number | null
+    attackSourcePlayerId?: number | null
+    bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
+    resolvedAt?: Date | string | null
+    expiredAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TicketCreateOrConnectWithoutPvpAttackInput = {
+    where: TicketWhereUniqueInput
+    create: XOR<TicketCreateWithoutPvpAttackInput, TicketUncheckedCreateWithoutPvpAttackInput>
+  }
+
+  export type TicketCreateManyPvpAttackInputEnvelope = {
+    data: TicketCreateManyPvpAttackInput | TicketCreateManyPvpAttackInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PlayerUpsertWithoutAttacksSentInput = {
+    update: XOR<PlayerUpdateWithoutAttacksSentInput, PlayerUncheckedUpdateWithoutAttacksSentInput>
+    create: XOR<PlayerCreateWithoutAttacksSentInput, PlayerUncheckedCreateWithoutAttacksSentInput>
+    where?: PlayerWhereInput
+  }
+
+  export type PlayerUpdateToOneWithWhereWithoutAttacksSentInput = {
+    where?: PlayerWhereInput
+    data: XOR<PlayerUpdateWithoutAttacksSentInput, PlayerUncheckedUpdateWithoutAttacksSentInput>
+  }
+
+  export type PlayerUpdateWithoutAttacksSentInput = {
+    username?: StringFieldUpdateOperationsInput | string
+    level?: IntFieldUpdateOperationsInput | number
+    xp?: IntFieldUpdateOperationsInput | number
+    careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    credits?: IntFieldUpdateOperationsInput | number
+    kills?: IntFieldUpdateOperationsInput | number
+    bankruptcies?: IntFieldUpdateOperationsInput | number
+    ticketsResolved?: IntFieldUpdateOperationsInput | number
+    correctBounces?: IntFieldUpdateOperationsInput | number
+    incorrectBounces?: IntFieldUpdateOperationsInput | number
+    incorrectResolves?: IntFieldUpdateOperationsInput | number
+    lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
+    lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
+    lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutPlayerNestedInput
+    attacksReceived?: PvPAttackUpdateManyWithoutTargetNestedInput
+    attackTickets?: TicketUpdateManyWithoutAttackSourcePlayerNestedInput
+    assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
+    sentTickets?: TicketUpdateManyWithoutLastSentByNestedInput
+  }
+
+  export type PlayerUncheckedUpdateWithoutAttacksSentInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    level?: IntFieldUpdateOperationsInput | number
+    xp?: IntFieldUpdateOperationsInput | number
+    careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    credits?: IntFieldUpdateOperationsInput | number
+    kills?: IntFieldUpdateOperationsInput | number
+    bankruptcies?: IntFieldUpdateOperationsInput | number
+    ticketsResolved?: IntFieldUpdateOperationsInput | number
+    correctBounces?: IntFieldUpdateOperationsInput | number
+    incorrectBounces?: IntFieldUpdateOperationsInput | number
+    incorrectResolves?: IntFieldUpdateOperationsInput | number
+    lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
+    lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
+    lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attacksReceived?: PvPAttackUncheckedUpdateManyWithoutTargetNestedInput
+    attackTickets?: TicketUncheckedUpdateManyWithoutAttackSourcePlayerNestedInput
+    assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    sentTickets?: TicketUncheckedUpdateManyWithoutLastSentByNestedInput
+  }
+
+  export type PlayerUpsertWithoutAttacksReceivedInput = {
+    update: XOR<PlayerUpdateWithoutAttacksReceivedInput, PlayerUncheckedUpdateWithoutAttacksReceivedInput>
+    create: XOR<PlayerCreateWithoutAttacksReceivedInput, PlayerUncheckedCreateWithoutAttacksReceivedInput>
+    where?: PlayerWhereInput
+  }
+
+  export type PlayerUpdateToOneWithWhereWithoutAttacksReceivedInput = {
+    where?: PlayerWhereInput
+    data: XOR<PlayerUpdateWithoutAttacksReceivedInput, PlayerUncheckedUpdateWithoutAttacksReceivedInput>
+  }
+
+  export type PlayerUpdateWithoutAttacksReceivedInput = {
+    username?: StringFieldUpdateOperationsInput | string
+    level?: IntFieldUpdateOperationsInput | number
+    xp?: IntFieldUpdateOperationsInput | number
+    careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    credits?: IntFieldUpdateOperationsInput | number
+    kills?: IntFieldUpdateOperationsInput | number
+    bankruptcies?: IntFieldUpdateOperationsInput | number
+    ticketsResolved?: IntFieldUpdateOperationsInput | number
+    correctBounces?: IntFieldUpdateOperationsInput | number
+    incorrectBounces?: IntFieldUpdateOperationsInput | number
+    incorrectResolves?: IntFieldUpdateOperationsInput | number
+    lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
+    lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
+    lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutPlayerNestedInput
+    attacksSent?: PvPAttackUpdateManyWithoutAttackerNestedInput
+    attackTickets?: TicketUpdateManyWithoutAttackSourcePlayerNestedInput
+    assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
+    sentTickets?: TicketUpdateManyWithoutLastSentByNestedInput
+  }
+
+  export type PlayerUncheckedUpdateWithoutAttacksReceivedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    level?: IntFieldUpdateOperationsInput | number
+    xp?: IntFieldUpdateOperationsInput | number
+    careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    credits?: IntFieldUpdateOperationsInput | number
+    kills?: IntFieldUpdateOperationsInput | number
+    bankruptcies?: IntFieldUpdateOperationsInput | number
+    ticketsResolved?: IntFieldUpdateOperationsInput | number
+    correctBounces?: IntFieldUpdateOperationsInput | number
+    incorrectBounces?: IntFieldUpdateOperationsInput | number
+    incorrectResolves?: IntFieldUpdateOperationsInput | number
+    lifetimeCreditsEarned?: IntFieldUpdateOperationsInput | number
+    lifetimeTicketsHandled?: IntFieldUpdateOperationsInput | number
+    lastActiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    queuePenaltyUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attacksSent?: PvPAttackUncheckedUpdateManyWithoutAttackerNestedInput
+    attackTickets?: TicketUncheckedUpdateManyWithoutAttackSourcePlayerNestedInput
+    assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    sentTickets?: TicketUncheckedUpdateManyWithoutLastSentByNestedInput
+  }
+
+  export type TicketUpsertWithWhereUniqueWithoutPvpAttackInput = {
+    where: TicketWhereUniqueInput
+    update: XOR<TicketUpdateWithoutPvpAttackInput, TicketUncheckedUpdateWithoutPvpAttackInput>
+    create: XOR<TicketCreateWithoutPvpAttackInput, TicketUncheckedCreateWithoutPvpAttackInput>
+  }
+
+  export type TicketUpdateWithWhereUniqueWithoutPvpAttackInput = {
+    where: TicketWhereUniqueInput
+    data: XOR<TicketUpdateWithoutPvpAttackInput, TicketUncheckedUpdateWithoutPvpAttackInput>
+  }
+
+  export type TicketUpdateManyWithWhereWithoutPvpAttackInput = {
+    where: TicketScalarWhereInput
+    data: XOR<TicketUpdateManyMutationInput, TicketUncheckedUpdateManyWithoutPvpAttackInput>
   }
 
   export type SessionCreateWithoutUserInput = {
@@ -13436,6 +16383,9 @@ export namespace Prisma {
     nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    attacksSent?: PvPAttackCreateNestedManyWithoutAttackerInput
+    attacksReceived?: PvPAttackCreateNestedManyWithoutTargetInput
+    attackTickets?: TicketCreateNestedManyWithoutAttackSourcePlayerInput
     assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
     sentTickets?: TicketCreateNestedManyWithoutLastSentByInput
   }
@@ -13460,6 +16410,9 @@ export namespace Prisma {
     nextTicketAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    attacksSent?: PvPAttackUncheckedCreateNestedManyWithoutAttackerInput
+    attacksReceived?: PvPAttackUncheckedCreateNestedManyWithoutTargetInput
+    attackTickets?: TicketUncheckedCreateNestedManyWithoutAttackSourcePlayerInput
     assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     sentTickets?: TicketUncheckedCreateNestedManyWithoutLastSentByInput
   }
@@ -13564,6 +16517,9 @@ export namespace Prisma {
     nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attacksSent?: PvPAttackUpdateManyWithoutAttackerNestedInput
+    attacksReceived?: PvPAttackUpdateManyWithoutTargetNestedInput
+    attackTickets?: TicketUpdateManyWithoutAttackSourcePlayerNestedInput
     assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
     sentTickets?: TicketUpdateManyWithoutLastSentByNestedInput
   }
@@ -13588,6 +16544,9 @@ export namespace Prisma {
     nextTicketAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attacksSent?: PvPAttackUncheckedUpdateManyWithoutAttackerNestedInput
+    attacksReceived?: PvPAttackUncheckedUpdateManyWithoutTargetNestedInput
+    attackTickets?: TicketUncheckedUpdateManyWithoutAttackSourcePlayerNestedInput
     assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     sentTickets?: TicketUncheckedUpdateManyWithoutLastSentByNestedInput
   }
@@ -13720,6 +16679,54 @@ export namespace Prisma {
     player?: PlayerUncheckedUpdateOneWithoutUserNestedInput
   }
 
+  export type PvPAttackCreateManyAttackerInput = {
+    id?: number
+    type: $Enums.PvPAttackType
+    status?: $Enums.PvPAttackStatus
+    cost: number
+    targetId: number
+    causedBankruptcy?: boolean
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PvPAttackCreateManyTargetInput = {
+    id?: number
+    type: $Enums.PvPAttackType
+    status?: $Enums.PvPAttackStatus
+    cost: number
+    attackerId: number
+    causedBankruptcy?: boolean
+    completedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TicketCreateManyAttackSourcePlayerInput = {
+    id?: number
+    title: string
+    description: string
+    category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
+    status?: $Enums.TicketStatus
+    maxValue: number
+    baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
+    assignedToId: number
+    lastSentById?: number | null
+    pvpAttackId?: number | null
+    bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
+    resolvedAt?: Date | string | null
+    expiredAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type TicketCreateManyAssignedToInput = {
     id?: number
     title: string
@@ -13733,6 +16740,8 @@ export namespace Prisma {
     successMessage?: string | null
     failureMessage?: string | null
     lastSentById?: number | null
+    attackSourcePlayerId?: number | null
+    pvpAttackId?: number | null
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
@@ -13755,6 +16764,8 @@ export namespace Prisma {
     successMessage?: string | null
     failureMessage?: string | null
     assignedToId: number
+    attackSourcePlayerId?: number | null
+    pvpAttackId?: number | null
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
@@ -13762,6 +16773,151 @@ export namespace Prisma {
     expiredAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type PvPAttackUpdateWithoutAttackerInput = {
+    type?: EnumPvPAttackTypeFieldUpdateOperationsInput | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFieldUpdateOperationsInput | $Enums.PvPAttackStatus
+    cost?: IntFieldUpdateOperationsInput | number
+    causedBankruptcy?: BoolFieldUpdateOperationsInput | boolean
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    target?: PlayerUpdateOneRequiredWithoutAttacksReceivedNestedInput
+    tickets?: TicketUpdateManyWithoutPvpAttackNestedInput
+  }
+
+  export type PvPAttackUncheckedUpdateWithoutAttackerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: EnumPvPAttackTypeFieldUpdateOperationsInput | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFieldUpdateOperationsInput | $Enums.PvPAttackStatus
+    cost?: IntFieldUpdateOperationsInput | number
+    targetId?: IntFieldUpdateOperationsInput | number
+    causedBankruptcy?: BoolFieldUpdateOperationsInput | boolean
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tickets?: TicketUncheckedUpdateManyWithoutPvpAttackNestedInput
+  }
+
+  export type PvPAttackUncheckedUpdateManyWithoutAttackerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: EnumPvPAttackTypeFieldUpdateOperationsInput | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFieldUpdateOperationsInput | $Enums.PvPAttackStatus
+    cost?: IntFieldUpdateOperationsInput | number
+    targetId?: IntFieldUpdateOperationsInput | number
+    causedBankruptcy?: BoolFieldUpdateOperationsInput | boolean
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PvPAttackUpdateWithoutTargetInput = {
+    type?: EnumPvPAttackTypeFieldUpdateOperationsInput | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFieldUpdateOperationsInput | $Enums.PvPAttackStatus
+    cost?: IntFieldUpdateOperationsInput | number
+    causedBankruptcy?: BoolFieldUpdateOperationsInput | boolean
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attacker?: PlayerUpdateOneRequiredWithoutAttacksSentNestedInput
+    tickets?: TicketUpdateManyWithoutPvpAttackNestedInput
+  }
+
+  export type PvPAttackUncheckedUpdateWithoutTargetInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: EnumPvPAttackTypeFieldUpdateOperationsInput | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFieldUpdateOperationsInput | $Enums.PvPAttackStatus
+    cost?: IntFieldUpdateOperationsInput | number
+    attackerId?: IntFieldUpdateOperationsInput | number
+    causedBankruptcy?: BoolFieldUpdateOperationsInput | boolean
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tickets?: TicketUncheckedUpdateManyWithoutPvpAttackNestedInput
+  }
+
+  export type PvPAttackUncheckedUpdateManyWithoutTargetInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: EnumPvPAttackTypeFieldUpdateOperationsInput | $Enums.PvPAttackType
+    status?: EnumPvPAttackStatusFieldUpdateOperationsInput | $Enums.PvPAttackStatus
+    cost?: IntFieldUpdateOperationsInput | number
+    attackerId?: IntFieldUpdateOperationsInput | number
+    causedBankruptcy?: BoolFieldUpdateOperationsInput | boolean
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TicketUpdateWithoutAttackSourcePlayerInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    maxValue?: IntFieldUpdateOperationsInput | number
+    baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignedTo?: PlayerUpdateOneRequiredWithoutAssignedTicketsNestedInput
+    lastSentBy?: PlayerUpdateOneWithoutSentTicketsNestedInput
+    pvpAttack?: PvPAttackUpdateOneWithoutTicketsNestedInput
+  }
+
+  export type TicketUncheckedUpdateWithoutAttackSourcePlayerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    maxValue?: IntFieldUpdateOperationsInput | number
+    baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedToId?: IntFieldUpdateOperationsInput | number
+    lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
+    pvpAttackId?: NullableIntFieldUpdateOperationsInput | number | null
+    bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TicketUncheckedUpdateManyWithoutAttackSourcePlayerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    maxValue?: IntFieldUpdateOperationsInput | number
+    baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedToId?: IntFieldUpdateOperationsInput | number
+    lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
+    pvpAttackId?: NullableIntFieldUpdateOperationsInput | number | null
+    bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type TicketUpdateWithoutAssignedToInput = {
@@ -13783,6 +16939,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastSentBy?: PlayerUpdateOneWithoutSentTicketsNestedInput
+    attackSourcePlayer?: PlayerUpdateOneWithoutAttackTicketsNestedInput
+    pvpAttack?: PvPAttackUpdateOneWithoutTicketsNestedInput
   }
 
   export type TicketUncheckedUpdateWithoutAssignedToInput = {
@@ -13798,6 +16956,8 @@ export namespace Prisma {
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
+    attackSourcePlayerId?: NullableIntFieldUpdateOperationsInput | number | null
+    pvpAttackId?: NullableIntFieldUpdateOperationsInput | number | null
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13820,6 +16980,8 @@ export namespace Prisma {
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
+    attackSourcePlayerId?: NullableIntFieldUpdateOperationsInput | number | null
+    pvpAttackId?: NullableIntFieldUpdateOperationsInput | number | null
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13848,6 +17010,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignedTo?: PlayerUpdateOneRequiredWithoutAssignedTicketsNestedInput
+    attackSourcePlayer?: PlayerUpdateOneWithoutAttackTicketsNestedInput
+    pvpAttack?: PvPAttackUpdateOneWithoutTicketsNestedInput
   }
 
   export type TicketUncheckedUpdateWithoutLastSentByInput = {
@@ -13863,6 +17027,8 @@ export namespace Prisma {
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
+    attackSourcePlayerId?: NullableIntFieldUpdateOperationsInput | number | null
+    pvpAttackId?: NullableIntFieldUpdateOperationsInput | number | null
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13885,6 +17051,103 @@ export namespace Prisma {
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
+    attackSourcePlayerId?: NullableIntFieldUpdateOperationsInput | number | null
+    pvpAttackId?: NullableIntFieldUpdateOperationsInput | number | null
+    bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TicketCreateManyPvpAttackInput = {
+    id?: number
+    title: string
+    description: string
+    category: $Enums.TicketCategory
+    severity?: $Enums.TicketSeverity
+    difficulty?: number
+    status?: $Enums.TicketStatus
+    maxValue: number
+    baseXp?: number
+    successMessage?: string | null
+    failureMessage?: string | null
+    assignedToId: number
+    lastSentById?: number | null
+    attackSourcePlayerId?: number | null
+    bounceCount?: number
+    abandonmentPenaltyApplied?: boolean
+    abandonmentPenaltyAt?: Date | string | null
+    resolvedAt?: Date | string | null
+    expiredAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TicketUpdateWithoutPvpAttackInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    maxValue?: IntFieldUpdateOperationsInput | number
+    baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignedTo?: PlayerUpdateOneRequiredWithoutAssignedTicketsNestedInput
+    lastSentBy?: PlayerUpdateOneWithoutSentTicketsNestedInput
+    attackSourcePlayer?: PlayerUpdateOneWithoutAttackTicketsNestedInput
+  }
+
+  export type TicketUncheckedUpdateWithoutPvpAttackInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    maxValue?: IntFieldUpdateOperationsInput | number
+    baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedToId?: IntFieldUpdateOperationsInput | number
+    lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
+    attackSourcePlayerId?: NullableIntFieldUpdateOperationsInput | number | null
+    bounceCount?: IntFieldUpdateOperationsInput | number
+    abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
+    abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TicketUncheckedUpdateManyWithoutPvpAttackInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    category?: EnumTicketCategoryFieldUpdateOperationsInput | $Enums.TicketCategory
+    severity?: EnumTicketSeverityFieldUpdateOperationsInput | $Enums.TicketSeverity
+    difficulty?: IntFieldUpdateOperationsInput | number
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    maxValue?: IntFieldUpdateOperationsInput | number
+    baseXp?: IntFieldUpdateOperationsInput | number
+    successMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedToId?: IntFieldUpdateOperationsInput | number
+    lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
+    attackSourcePlayerId?: NullableIntFieldUpdateOperationsInput | number | null
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

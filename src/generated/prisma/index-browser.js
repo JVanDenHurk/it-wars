@@ -157,6 +157,8 @@ exports.Prisma.TicketScalarFieldEnum = {
   failureMessage: 'failureMessage',
   assignedToId: 'assignedToId',
   lastSentById: 'lastSentById',
+  attackSourcePlayerId: 'attackSourcePlayerId',
+  pvpAttackId: 'pvpAttackId',
   bounceCount: 'bounceCount',
   abandonmentPenaltyApplied: 'abandonmentPenaltyApplied',
   abandonmentPenaltyAt: 'abandonmentPenaltyAt',
@@ -178,6 +180,19 @@ exports.Prisma.TicketTemplateScalarFieldEnum = {
   successMessage: 'successMessage',
   failureMessage: 'failureMessage',
   active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PvPAttackScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  status: 'status',
+  cost: 'cost',
+  attackerId: 'attackerId',
+  targetId: 'targetId',
+  causedBankruptcy: 'causedBankruptcy',
+  completedAt: 'completedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -270,10 +285,26 @@ exports.TicketStatus = exports.$Enums.TicketStatus = {
   EXPIRED: 'EXPIRED'
 };
 
+exports.PvPAttackType = exports.$Enums.PvPAttackType = {
+  PASSWORD_RESET_FLOOD: 'PASSWORD_RESET_FLOOD',
+  NETWORK_OUTAGE: 'NETWORK_OUTAGE',
+  FAILED_DEPLOYMENT: 'FAILED_DEPLOYMENT',
+  PHISHING_CAMPAIGN: 'PHISHING_CAMPAIGN',
+  TICKET_STORM: 'TICKET_STORM',
+  MAJOR_INCIDENT: 'MAJOR_INCIDENT'
+};
+
+exports.PvPAttackStatus = exports.$Enums.PvPAttackStatus = {
+  ACTIVE: 'ACTIVE',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+};
+
 exports.Prisma.ModelName = {
   Player: 'Player',
   Ticket: 'Ticket',
   TicketTemplate: 'TicketTemplate',
+  PvPAttack: 'PvPAttack',
   User: 'User',
   Session: 'Session',
   Account: 'Account',

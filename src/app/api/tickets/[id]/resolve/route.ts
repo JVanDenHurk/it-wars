@@ -76,14 +76,16 @@ export async function POST(
      * AUTHENTICATION
      * ============================
      */
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session =
+      await auth.api.getSession({
+        headers: await headers(),
+      });
 
     if (!session) {
       return NextResponse.json(
         {
-          error: "Not authenticated.",
+          error:
+            "Not authenticated.",
         },
         {
           status: 401,
@@ -96,14 +98,17 @@ export async function POST(
      * TICKET ID
      * ============================
      */
-    const { id } = await context.params;
+    const { id } =
+      await context.params;
 
-    const ticketId = Number(id);
+    const ticketId =
+      Number(id);
 
     if (!Number.isInteger(ticketId)) {
       return NextResponse.json(
         {
-          error: "Invalid ticket ID.",
+          error:
+            "Invalid ticket ID.",
         },
         {
           status: 400,
@@ -116,16 +121,19 @@ export async function POST(
      * CURRENT PLAYER
      * ============================
      */
-    const player = await prisma.player.findUnique({
-      where: {
-        userId: session.user.id,
-      },
-    });
+    const player =
+      await prisma.player.findUnique({
+        where: {
+          userId:
+            session.user.id,
+        },
+      });
 
     if (!player) {
       return NextResponse.json(
         {
-          error: "Player not found.",
+          error:
+            "Player not found.",
         },
         {
           status: 404,
@@ -138,16 +146,19 @@ export async function POST(
      * TICKET
      * ============================
      */
-    const ticket = await prisma.ticket.findUnique({
-      where: {
-        id: ticketId,
-      },
-    });
+    const ticket =
+      await prisma.ticket.findUnique({
+        where: {
+          id:
+            ticketId,
+        },
+      });
 
     if (!ticket) {
       return NextResponse.json(
         {
-          error: "Ticket does not exist.",
+          error:
+            "Ticket does not exist.",
         },
         {
           status: 404,
@@ -159,7 +170,10 @@ export async function POST(
      * Ticket must belong to
      * the current player.
      */
-    if (ticket.assignedToId !== player.id) {
+    if (
+      ticket.assignedToId !==
+      player.id
+    ) {
       return NextResponse.json(
         {
           error:
@@ -174,10 +188,14 @@ export async function POST(
     /*
      * Ticket must still be open.
      */
-    if (ticket.status !== "OPEN") {
+    if (
+      ticket.status !==
+      "OPEN"
+    ) {
       return NextResponse.json(
         {
-          error: `Ticket is ${ticket.status}, not OPEN.`,
+          error:
+            `Ticket is ${ticket.status}, not OPEN.`,
         },
         {
           status: 400,
@@ -189,21 +207,6 @@ export async function POST(
      * ============================
      * RESOLVER CHECK
      * ============================
-     *
-     * Service Desk:
-     *   SERVICE_DESK
-     *
-     * Network:
-     *   SERVICE_DESK
-     *   NETWORK
-     *
-     * Systems:
-     *   SERVICE_DESK
-     *   SYSTEMS
-     *
-     * Security:
-     *   SERVICE_DESK
-     *   SECURITY
      */
     const correct =
       canPlayerResolve(
@@ -212,10 +215,6 @@ export async function POST(
         ticket.category
       );
 
-    /*
-     * Friendly incident number used
-     * by both success and failure popups.
-     */
     const ticketNumber =
       `INC${ticket.id
         .toString()
@@ -255,12 +254,10 @@ export async function POST(
         !player.careerPath;
 
       await prisma.$transaction([
-        /*
-         * Close ticket successfully.
-         */
         prisma.ticket.update({
           where: {
-            id: ticket.id,
+            id:
+              ticket.id,
           },
 
           data: {
@@ -272,12 +269,10 @@ export async function POST(
           },
         }),
 
-        /*
-         * Reward player.
-         */
         prisma.player.update({
           where: {
-            id: player.id,
+            id:
+              player.id,
           },
 
           data: {
@@ -293,11 +288,13 @@ export async function POST(
               newLevel,
 
             ticketsResolved: {
-              increment: 1,
+              increment:
+                1,
             },
 
             lifetimeTicketsHandled: {
-              increment: 1,
+              increment:
+                1,
             },
 
             lifetimeCreditsEarned: {
@@ -317,8 +314,11 @@ export async function POST(
        * ============================
        */
       return NextResponse.json({
-        success: true,
-        correct: true,
+        success:
+          true,
+
+        correct:
+          true,
 
         ticketId:
           ticket.id,
@@ -351,7 +351,7 @@ export async function POST(
 
         successMessage:
           ticket.successMessage ??
-          `${ticket.title} resolved successfully. The user has confirmed the issue is fixed.`,
+          undefined,
       });
     }
 
@@ -360,19 +360,20 @@ export async function POST(
      * WRONG RESOLUTION
      * ============================
      */
-
-    const penalty = 100;
+    const penalty =
+      100;
 
     const failureMessage =
       ticket.failureMessage ??
-      `${ticket.title} was not resolved successfully. Somehow the situation is now worse.`;
+      "Your attempted resolution somehow made the situation worse.";
 
     /*
-     * Close the ticket as FAILED.
+     * Close ticket as FAILED.
      */
     await prisma.ticket.update({
       where: {
-        id: ticket.id,
+        id:
+          ticket.id,
       },
 
       data: {
@@ -382,33 +383,53 @@ export async function POST(
     });
 
     /*
-     * Apply credit penalty.
+     * ============================
+     * APPLY CREDIT PENALTY
+     * ============================
      *
-     * Bankruptcy helper handles
-     * demotion back to Service Desk.
+     * If this ticket originated
+     * from a PvP attack, pass the
+     * original attack information
+     * to the bankruptcy helper.
+     *
+     * If this penalty reduces the
+     * player to 0 Credits, the
+     * attacker receives the kill.
      */
     const penaltyResult =
       await applyCreditPenalty(
         player.id,
         player.credits,
-        penalty
+        penalty,
+        {
+          attackSourcePlayerId:
+            ticket.attackSourcePlayerId,
+
+          pvpAttackId:
+            ticket.pvpAttackId,
+        }
       );
 
     /*
-     * Record failed resolution.
+     * ============================
+     * RECORD FAILED RESOLUTION
+     * ============================
      */
     await prisma.player.update({
       where: {
-        id: player.id,
+        id:
+          player.id,
       },
 
       data: {
         incorrectResolves: {
-          increment: 1,
+          increment:
+            1,
         },
 
         lifetimeTicketsHandled: {
-          increment: 1,
+          increment:
+            1,
         },
 
         lastActiveAt:
@@ -422,9 +443,14 @@ export async function POST(
      * ============================
      */
     return NextResponse.json({
-      success: true,
-      correct: false,
-      failed: true,
+      success:
+        true,
+
+      correct:
+        false,
+
+      failed:
+        true,
 
       ticketId:
         ticket.id,
@@ -453,6 +479,23 @@ export async function POST(
 
       resetToServiceDesk:
         penaltyResult.bankrupt,
+
+      /*
+       * PvP information.
+       *
+       * We can use this later for
+       * messages such as:
+       *
+       * "Justin caused your bankruptcy."
+       */
+      killAwarded:
+        penaltyResult.killAwarded,
+
+      attackSourcePlayerId:
+        ticket.attackSourcePlayerId,
+
+      pvpAttackId:
+        ticket.pvpAttackId,
     });
   } catch (error) {
     console.error(
