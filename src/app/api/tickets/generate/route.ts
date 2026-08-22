@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  getPvPAttackDefinition,
+  type PvPAttackType,
+} from "@/lib/pvp-attacks";
 
 type ResolvableCategory =
   | "SERVICE_DESK"
@@ -20,26 +24,72 @@ function randomSeconds(
   max: number
 ) {
   return Math.floor(
-    Math.random() * (max - min + 1) + min
+    Math.random() *
+      (max - min + 1) +
+      min
   );
 }
 
+/*
+ * ============================
+ * NEXT TICKET TIME
+ * ============================
+ *
+ * Normal:
+ * 60-120 seconds
+ *
+ * Ownership warning:
+ * 180-300 seconds
+ *
+ * Queue-speed poison:
+ * multiplier comes from
+ * pvp-attacks.ts
+ */
 function getNextTicketTime(
-  queuePenaltyActive: boolean
+  queuePenaltyActive: boolean,
+  queueSpeedMultiplier = 1
 ) {
+  let seconds =
+    queuePenaltyActive
+      ? randomSeconds(
+          180,
+          300
+        )
+      : randomSeconds(
+          60,
+          120
+        );
+
   /*
-   * Normal queue:
-   * 60-120 seconds
+   * Self-Service Portal Outage.
    *
-   * Ownership warning:
-   * 180-300 seconds
+   * Example:
+   *
+   * queueSpeedMultiplier = 0.7
+   *
+   * 100 seconds
+   *      ↓
+   * 70 seconds
    */
-  const seconds = queuePenaltyActive
-    ? randomSeconds(180, 300)
-    : randomSeconds(60, 120);
+  const safeMultiplier =
+    Math.max(
+      0.1,
+      queueSpeedMultiplier
+    );
+
+  seconds =
+    Math.max(
+      15,
+      Math.floor(
+        seconds *
+          safeMultiplier
+      )
+    );
 
   return new Date(
-    Date.now() + seconds * 1000
+    Date.now() +
+      seconds *
+        1000
   );
 }
 
@@ -47,9 +97,6 @@ function getNextTicketTime(
  * ============================
  * TEAM COUNTS
  * ============================
- *
- * Players without a specialist
- * career are still Service Desk.
  */
 function getTeamCounts(
   players: PlayerCareerInfo[]
@@ -66,21 +113,24 @@ function getTeamCounts(
       players.filter(
         (player) =>
           player.level >= 4 &&
-          player.careerPath === "NETWORK"
+          player.careerPath ===
+            "NETWORK"
       ).length,
 
     SYSTEMS:
       players.filter(
         (player) =>
           player.level >= 4 &&
-          player.careerPath === "SYSTEMS"
+          player.careerPath ===
+            "SYSTEMS"
       ).length,
 
     SECURITY:
       players.filter(
         (player) =>
           player.level >= 4 &&
-          player.careerPath === "SECURITY"
+          player.careerPath ===
+            "SECURITY"
       ).length,
   };
 }
@@ -89,24 +139,22 @@ function getTeamCounts(
  * ============================
  * CATEGORY WEIGHTS
  * ============================
- *
- * Demand scales with the number
- * of currently active players
- * in each resolver team.
- *
- * Service Desk gets +2 baseline
- * weight so it remains the main
- * intake category.
  */
 function getCategoryWeights(
   players: PlayerCareerInfo[]
-): Record<ResolvableCategory, number> {
+): Record<
+  ResolvableCategory,
+  number
+> {
   const counts =
-    getTeamCounts(players);
+    getTeamCounts(
+      players
+    );
 
   return {
     SERVICE_DESK:
-      counts.SERVICE_DESK + 2,
+      counts.SERVICE_DESK +
+      2,
 
     NETWORK:
       counts.NETWORK,
@@ -131,7 +179,9 @@ function chooseWeightedCategory(
   >
 ): ResolvableCategory | null {
   const entries =
-    Object.entries(weights).filter(
+    Object.entries(
+      weights
+    ).filter(
       ([, weight]) =>
         weight > 0
     ) as [
@@ -139,14 +189,21 @@ function chooseWeightedCategory(
       number,
     ][];
 
-  if (entries.length === 0) {
+  if (
+    entries.length ===
+    0
+  ) {
     return null;
   }
 
   const totalWeight =
     entries.reduce(
-      (sum, [, weight]) =>
-        sum + weight,
+      (
+        sum,
+        [, weight]
+      ) =>
+        sum +
+        weight,
       0
     );
 
@@ -154,20 +211,109 @@ function chooseWeightedCategory(
     Math.random() *
     totalWeight;
 
-  for (const [
-    category,
-    weight,
-  ] of entries) {
-    roll -= weight;
+  for (
+    const [
+      category,
+      weight,
+    ] of entries
+  ) {
+    roll -=
+      weight;
 
-    if (roll < 0) {
+    if (
+      roll <
+      0
+    ) {
       return category;
     }
   }
 
   return entries[
-    entries.length - 1
+    entries.length -
+      1
   ][0];
+}
+
+/*
+ * ============================
+ * RANDOM TEMPLATE
+ * ============================
+ */
+async function getRandomTemplate(
+  categoryWeights: Record<
+    ResolvableCategory,
+    number
+  >
+) {
+  const selectedCategory =
+    chooseWeightedCategory(
+      categoryWeights
+    );
+
+  if (
+    !selectedCategory
+  ) {
+    return null;
+  }
+
+  let templates =
+    await prisma.ticketTemplate.findMany({
+      where: {
+        active:
+          true,
+
+        category:
+          selectedCategory,
+      },
+    });
+
+  let finalCategory =
+    selectedCategory;
+
+  /*
+   * Safety fallback.
+   */
+  if (
+    templates.length ===
+      0 &&
+    selectedCategory !==
+      "SERVICE_DESK"
+  ) {
+    finalCategory =
+      "SERVICE_DESK";
+
+    templates =
+      await prisma.ticketTemplate.findMany({
+        where: {
+          active:
+            true,
+
+          category:
+            "SERVICE_DESK",
+        },
+      });
+  }
+
+  if (
+    templates.length ===
+    0
+  ) {
+    return null;
+  }
+
+  const template =
+    templates[
+      Math.floor(
+        Math.random() *
+          templates.length
+      )
+    ];
+
+  return {
+    template,
+    category:
+      finalCategory,
+  };
 }
 
 export async function POST() {
@@ -179,7 +325,8 @@ export async function POST() {
      */
     const session =
       await auth.api.getSession({
-        headers: await headers(),
+        headers:
+          await headers(),
       });
 
     if (!session) {
@@ -222,15 +369,12 @@ export async function POST() {
     const now =
       new Date();
 
-    /*
-     * Player is considered active if
-     * they have sent a heartbeat within
-     * the last 2 minutes.
-     */
     const activeCutoff =
       new Date(
         now.getTime() -
-          2 * 60 * 1000
+          2 *
+            60 *
+            1000
       );
 
     /*
@@ -240,11 +384,16 @@ export async function POST() {
      */
     if (
       player.nextTicketAt &&
-      player.nextTicketAt > now
+      player.nextTicketAt >
+        now
     ) {
       return NextResponse.json({
-        success: true,
-        generated: false,
+        success:
+          true,
+
+        generated:
+          false,
+
         nextTicketAt:
           player.nextTicketAt,
       });
@@ -256,38 +405,193 @@ export async function POST() {
      * ============================
      */
     const queuePenaltyActive =
-      player.queuePenaltyUntil !== null &&
-      player.queuePenaltyUntil > now;
+      player.queuePenaltyUntil !==
+        null &&
+      player.queuePenaltyUntil >
+        now;
 
     /*
      * ============================
-     * CURRENTLY ACTIVE PLAYERS
+     * SELF-SERVICE PORTAL OUTAGE
      * ============================
      *
-     * A player only contributes to
-     * the global ticket pool when:
+     * Find the active Poison Ticket.
      *
-     * 1. They still have Credits
-     * 2. They have a valid auth session
-     * 3. Their heartbeat was received
-     *    within the last 2 minutes
+     * We load its PvP attack so the
+     * actual multiplier can come from
+     * pvp-attacks.ts rather than being
+     * duplicated here.
+     */
+    const queueSpeedPoison =
+      await prisma.ticket.findFirst({
+        where: {
+          assignedToId:
+            player.id,
+
+          status:
+            "OPEN",
+
+          isPoison:
+            true,
+
+          poisonEffect:
+            "QUEUE_SPEED",
+        },
+
+        select: {
+          id:
+            true,
+
+          pvpAttack: {
+            select: {
+              type:
+                true,
+            },
+          },
+        },
+      });
+
+    const queueSpeedPoisonActive =
+      queueSpeedPoison !==
+      null;
+
+    let queueSpeedMultiplier =
+      1;
+
+    if (
+      queueSpeedPoisonActive &&
+      queueSpeedPoison
+        .pvpAttack
+    ) {
+      const definition =
+        getPvPAttackDefinition(
+          queueSpeedPoison
+            .pvpAttack
+            .type as
+            PvPAttackType
+        );
+
+      queueSpeedMultiplier =
+        definition
+          ?.queueSpeedMultiplier ??
+        1;
+    }
+
+    /*
+     * ============================
+     * MAIL QUEUE BACKLOG
+     * ============================
+     *
+     * The Poison Ticket stays open
+     * until the player deals with it,
+     * but the burst itself only fires
+     * once.
+     *
+     * PvPAttack ACTIVE:
+     * burst hasn't fired yet
+     *
+     * PvPAttack COMPLETED:
+     * burst already consumed
+     */
+    const mailBacklogPoison =
+      await prisma.ticket.findFirst({
+        where: {
+          assignedToId:
+            player.id,
+
+          status:
+            "OPEN",
+
+          isPoison:
+            true,
+
+          poisonEffect:
+            "MAIL_BACKLOG",
+
+          pvpAttack: {
+            is: {
+              status:
+                "ACTIVE",
+            },
+          },
+        },
+
+        select: {
+          id:
+            true,
+
+          pvpAttackId:
+            true,
+
+          pvpAttack: {
+            select: {
+              type:
+                true,
+            },
+          },
+        },
+      });
+
+    const mailBacklogActive =
+      mailBacklogPoison !==
+        null &&
+      mailBacklogPoison
+        .pvpAttackId !==
+        null;
+
+    /*
+     * Get burst count from
+     * pvp-attacks.ts.
+     */
+    let backlogTicketCount =
+      1;
+
+    if (
+      mailBacklogActive &&
+      mailBacklogPoison
+        ?.pvpAttack
+    ) {
+      const definition =
+        getPvPAttackDefinition(
+          mailBacklogPoison
+            .pvpAttack
+            .type as
+            PvPAttackType
+        );
+
+      backlogTicketCount =
+        Math.max(
+          1,
+          definition
+            ?.backlogTicketCount ??
+            3
+        );
+    }
+
+    /*
+     * ============================
+     * ACTIVE PLAYERS
+     * ============================
      */
     const activePlayers =
       await prisma.player.findMany({
         where: {
           credits: {
-            gt: 0,
+            gt:
+              0,
           },
 
           lastActiveAt: {
-            gt: activeCutoff,
+            gt:
+              activeCutoff,
           },
 
           user: {
             sessions: {
               some: {
                 expiresAt: {
-                  gt: now,
+                  gt:
+                    now,
                 },
               },
             },
@@ -295,20 +599,17 @@ export async function POST() {
         },
 
         select: {
-          level: true,
-          careerPath: true,
+          level:
+            true,
+
+          careerPath:
+            true,
         },
       });
 
-    /*
-     * The current player should normally
-     * be included because their heartbeat
-     * is running while playing.
-     *
-     * This remains as a safety check.
-     */
     if (
-      activePlayers.length === 0
+      activePlayers.length ===
+      0
     ) {
       return NextResponse.json(
         {
@@ -323,7 +624,7 @@ export async function POST() {
 
     /*
      * ============================
-     * SCALED TICKET POOL
+     * CATEGORY WEIGHTS
      * ============================
      */
     const categoryWeights =
@@ -331,185 +632,238 @@ export async function POST() {
         activePlayers
       );
 
-    const selectedCategory =
-      chooseWeightedCategory(
-        categoryWeights
-      );
-
-    if (!selectedCategory) {
-      return NextResponse.json(
-        {
-          error:
-            "No ticket categories are currently available.",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
+    /*
+     * ============================
+     * NUMBER OF NORMAL TICKETS
+     * ============================
+     *
+     * Normal delivery:
+     * 1
+     *
+     * Mail Queue Backlog:
+     * configured burst amount.
+     */
+    const ticketCount =
+      mailBacklogActive
+        ? backlogTicketCount
+        : 1;
 
     /*
      * ============================
      * LOAD TEMPLATES
      * ============================
      *
-     * Category is chosen BEFORE
-     * the template.
-     *
-     * This stops categories with
-     * more templates from receiving
-     * an accidental spawn advantage.
+     * Every legitimate ticket gets
+     * its own category/template roll.
      */
-    let templates =
-      await prisma.ticketTemplate.findMany({
-        where: {
-          active: true,
+    const chosenTemplates = [];
 
-          category:
-            selectedCategory,
-        },
-      });
-
-    let finalCategory =
-      selectedCategory;
-
-    /*
-     * Safety fallback.
-     *
-     * If the chosen specialist
-     * category has no templates,
-     * fall back to Service Desk.
-     */
-    if (
-      templates.length === 0 &&
-      selectedCategory !==
-        "SERVICE_DESK"
+    for (
+      let i = 0;
+      i < ticketCount;
+      i++
     ) {
-      finalCategory =
-        "SERVICE_DESK";
+      const chosen =
+        await getRandomTemplate(
+          categoryWeights
+        );
 
-      templates =
-        await prisma.ticketTemplate.findMany({
-          where: {
-            active: true,
-
-            category:
-              "SERVICE_DESK",
+      if (!chosen) {
+        return NextResponse.json(
+          {
+            error:
+              "No ticket templates are available.",
           },
-        });
-    }
+          {
+            status: 404,
+          }
+        );
+      }
 
-    if (
-      templates.length === 0
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "No ticket templates are available.",
-        },
-        {
-          status: 404,
-        }
+      chosenTemplates.push(
+        chosen
       );
     }
-
-    /*
-     * ============================
-     * RANDOM TEMPLATE
-     * ============================
-     */
-    const template =
-      templates[
-        Math.floor(
-          Math.random() *
-            templates.length
-        )
-      ];
 
     /*
      * ============================
      * NEXT TICKET TIME
      * ============================
+     *
+     * Ownership slowdown is applied
+     * first.
+     *
+     * Self-Service Portal Outage then
+     * reduces whatever interval was
+     * generated.
+     *
+     * This means poison can partially
+     * counteract an ownership slowdown.
      */
     const nextTicketAt =
       getNextTicketTime(
-        queuePenaltyActive
+        queuePenaltyActive,
+        queueSpeedMultiplier
       );
 
     /*
      * ============================
-     * CREATE LIVE TICKET
+     * CREATE LIVE TICKETS
      * ============================
      */
-    const [ticket] =
-      await prisma.$transaction([
-        prisma.ticket.create({
-          data: {
-            title:
-              template.title,
+    const transactionResult =
+      await prisma.$transaction(
+        async (tx) => {
+          const createdTickets =
+            [];
 
-            description:
-              template.description,
+          for (
+            const chosen of
+            chosenTemplates
+          ) {
+            const template =
+              chosen.template;
 
-            category:
-              template.category,
+            const ticket =
+              await tx.ticket.create({
+                data: {
+                  title:
+                    template.title,
 
-            severity:
-              template.severity,
+                  description:
+                    template.description,
 
-            difficulty:
-              template.difficulty,
+                  category:
+                    template.category,
 
-            maxValue:
-              template.maxValue,
+                  severity:
+                    template.severity,
 
-            baseXp:
-              template.baseXp,
+                  difficulty:
+                    template.difficulty,
 
-            successMessage:
-              template.successMessage,
+                  maxValue:
+                    template.maxValue,
 
-            failureMessage:
-              template.failureMessage,
+                  baseXp:
+                    template.baseXp,
 
-            /*
-             * System ticket enters
-             * the current player's queue.
-             *
-             * The player then decides
-             * whether to resolve it
-             * or route it elsewhere.
-             */
-            assignedToId:
-              player.id,
+                  /*
+                   * ============================
+                   * NORMAL SYSTEM TICKET
+                   * ============================
+                   */
+                  isPoison:
+                    false,
 
-            /*
-             * null means generated
-             * by the game.
-             */
-            lastSentById:
-              null,
-          },
-        }),
+                  poisonEffect:
+                    "NONE",
 
-        /*
-         * Start the next timer and
-         * also refresh activity.
-         */
-        prisma.player.update({
-          where: {
-            id:
-              player.id,
-          },
+                  successMessage:
+                    template
+                      .successMessage,
 
-          data: {
-            nextTicketAt,
+                  failureMessage:
+                    template
+                      .failureMessage,
 
-            lastActiveAt:
-              now,
-          },
-        }),
-      ]);
+                  assignedToId:
+                    player.id,
+
+                  /*
+                   * Not bounced.
+                   */
+                  lastSentById:
+                    null,
+
+                  /*
+                   * Not PvP generated.
+                   */
+                  attackSourcePlayerId:
+                    null,
+
+                  pvpAttackId:
+                    null,
+
+                  /*
+                   * New legitimate tickets
+                   * begin with no artificial
+                   * SLA pressure.
+                   */
+                  slaAgeOffsetMinutes:
+                    0,
+                },
+              });
+
+            createdTickets.push(
+              ticket
+            );
+          }
+
+          /*
+           * ============================
+           * NEXT DELIVERY TIMER
+           * ============================
+           */
+          await tx.player.update({
+            where: {
+              id:
+                player.id,
+            },
+
+            data: {
+              nextTicketAt,
+
+              lastActiveAt:
+                now,
+            },
+          });
+
+          /*
+           * ============================
+           * CONSUME MAIL BACKLOG
+           * ============================
+           *
+           * Important:
+           *
+           * We mark the ATTACK as
+           * completed, not the Poison
+           * Ticket.
+           *
+           * The ticket still sits in
+           * the victim's queue and can
+           * still be resolved/bounced.
+           *
+           * But it cannot trigger a
+           * second burst.
+           */
+          if (
+            mailBacklogActive &&
+            mailBacklogPoison
+              ?.pvpAttackId
+          ) {
+            await tx.pvPAttack.update({
+              where: {
+                id:
+                  mailBacklogPoison
+                    .pvpAttackId,
+              },
+
+              data: {
+                status:
+                  "COMPLETED",
+
+                completedAt:
+                  now,
+              },
+            });
+          }
+
+          return {
+            createdTickets,
+          };
+        }
+      );
 
     /*
      * ============================
@@ -517,27 +871,70 @@ export async function POST() {
      * ============================
      */
     return NextResponse.json({
-      success: true,
-      generated: true,
+      success:
+        true,
 
-      ticketId:
-        ticket.id,
-
-      severity:
-        ticket.severity,
+      generated:
+        true,
 
       /*
-       * Development/testing info.
-       *
-       * This does not need to be
-       * shown to the player.
+       * Compatibility with the
+       * existing TicketTimer.
        */
+      ticketId:
+        transactionResult
+          .createdTickets[0]
+          ?.id,
+
+      severity:
+        transactionResult
+          .createdTickets[0]
+          ?.severity,
+
       generatedCategory:
-        finalCategory,
+        chosenTemplates[0]
+          ?.category,
+
+      /*
+       * Burst information.
+       */
+      ticketsCreated:
+        transactionResult
+          .createdTickets
+          .length,
+
+      ticketIds:
+        transactionResult
+          .createdTickets
+          .map(
+            (ticket) =>
+              ticket.id
+          ),
+
+      generatedCategories:
+        chosenTemplates.map(
+          (chosen) =>
+            chosen.category
+        ),
 
       nextTicketAt,
 
+      /*
+       * Current queue modifiers.
+       */
       queuePenaltyActive,
+
+      queueSpeedPoisonActive,
+
+      queueSpeedMultiplier,
+
+      mailBacklogTriggered:
+        mailBacklogActive,
+
+      mailBacklogTicketCount:
+        mailBacklogActive
+          ? backlogTicketCount
+          : 0,
 
       categoryWeights,
 

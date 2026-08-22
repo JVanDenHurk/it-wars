@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 
-const STARTING_CREDITS = 1000;
+const STARTING_CREDITS =
+  1000;
 
 type CreditPenaltySource = {
   attackSourcePlayerId?: number | null;
@@ -13,40 +14,60 @@ export async function applyCreditPenalty(
   penalty: number,
   source?: CreditPenaltySource
 ) {
-  const remainingCredits = Math.max(
-    0,
-    currentCredits - penalty
-  );
+  /*
+   * Never allow a negative penalty.
+   */
+  const safePenalty =
+    Math.max(
+      0,
+      penalty
+    );
+
+  const remainingCredits =
+    Math.max(
+      0,
+      currentCredits -
+        safePenalty
+    );
 
   /*
    * ============================
    * NORMAL PENALTY
    * ============================
    *
-   * Player survives, so just reduce
-   * their Credits.
+   * Player survives.
    */
-  if (remainingCredits > 0) {
-    const player = await prisma.player.update({
-      where: {
-        id: playerId,
-      },
+  if (
+    remainingCredits >
+    0
+  ) {
+    const player =
+      await prisma.player.update({
+        where: {
+          id:
+            playerId,
+        },
 
-      data: {
-        credits: remainingCredits,
+        data: {
+          credits:
+            remainingCredits,
 
-        lastActiveAt: new Date(),
-      },
-    });
+          lastActiveAt:
+            new Date(),
+        },
+      });
 
     return {
       player,
 
-      bankrupt: false,
+      bankrupt:
+        false,
 
-      penalty,
+      penalty:
+        safePenalty,
 
-      killAwarded: false,
+      killAwarded:
+        false,
     };
   }
 
@@ -54,132 +75,255 @@ export async function applyCreditPenalty(
    * ============================
    * BANKRUPTCY
    * ============================
-   *
-   * Player has reached 0 Credits.
-   *
-   * Reset their current career while
-   * retaining lifetime statistics.
    */
-  const now = new Date();
+  const now =
+    new Date();
 
-  const result = await prisma.$transaction(
-    async (tx) => {
-      /*
-       * Reset bankrupt player.
-       */
-      const player =
-        await tx.player.update({
+  const result =
+    await prisma.$transaction(
+      async (tx) => {
+        /*
+         * ============================
+         * CLEAR CURRENT QUEUE
+         * ============================
+         *
+         * Bankruptcy starts a completely
+         * new career/run.
+         *
+         * Nothing currently assigned to
+         * the player should survive into
+         * the new career.
+         *
+         * This includes:
+         *
+         * - normal tickets
+         * - Poison Tickets
+         * - Maintenance Window tickets
+         */
+        await tx.ticket.updateMany({
           where: {
-            id: playerId,
-          },
-
-          data: {
-            credits:
-              STARTING_CREDITS,
-
-            level:
-              1,
-
-            xp:
-              0,
-
-            careerPath:
-              null,
-
-            bankruptcies: {
-              increment:
-                1,
-            },
-
-            queuePenaltyUntil:
-              null,
-
-            nextTicketAt:
-              null,
-
-            lastActiveAt:
-              now,
-          },
-        });
-
-      let killAwarded =
-        false;
-
-      /*
-       * ============================
-       * PVP KILL ATTRIBUTION
-       * ============================
-       *
-       * Only award a kill when:
-       *
-       * 1. A PvP attacker exists
-       * 2. The attacker is not the victim
-       *
-       * This prevents accidental
-       * self-kill attribution.
-       */
-      if (
-        source?.attackSourcePlayerId &&
-        source.attackSourcePlayerId !==
-          playerId
-      ) {
-        await tx.player.update({
-          where: {
-            id:
-              source.attackSourcePlayerId,
-          },
-
-          data: {
-            kills: {
-              increment:
-                1,
-            },
-          },
-        });
-
-        killAwarded =
-          true;
-      }
-
-      /*
-       * ============================
-       * PVP ATTACK RESULT
-       * ============================
-       *
-       * If this penalty came from
-       * a recorded PvP attack, mark
-       * that attack as the one that
-       * caused bankruptcy.
-       */
-      if (
-        source?.pvpAttackId
-      ) {
-        await tx.pvPAttack.update({
-          where: {
-            id:
-              source.pvpAttackId,
-          },
-
-          data: {
-            causedBankruptcy:
-              true,
+            assignedToId:
+              playerId,
 
             status:
-              "COMPLETED",
+              "OPEN",
+          },
 
-            completedAt:
+          data: {
+            status:
+              "EXPIRED",
+
+            expiredAt:
               now,
+
+            /*
+             * Clear temporary
+             * Maintenance Window state.
+             *
+             * The ticket is expired anyway,
+             * but clearing this prevents old
+             * career state hanging around.
+             */
+            maintenanceUntil:
+              null,
           },
         });
+
+        /*
+         * ============================
+         * RESET PLAYER CAREER
+         * ============================
+         *
+         * Lifetime statistics are NOT
+         * touched here.
+         */
+        const player =
+          await tx.player.update({
+            where: {
+              id:
+                playerId,
+            },
+
+            data: {
+              /*
+               * ============================
+               * CURRENT CAREER
+               * ============================
+               */
+              credits:
+                STARTING_CREDITS,
+
+              level:
+                1,
+
+              xp:
+                0,
+
+              careerPath:
+                null,
+
+              /*
+               * ============================
+               * CURRENT CAREER STATS
+               * ============================
+               *
+               * These are the stats shown
+               * on the dashboard for the
+               * current run.
+               */
+              careerTicketsResolved:
+                0,
+
+              careerCorrectBounces:
+                0,
+
+              careerIncorrectBounces:
+                0,
+
+              careerIncorrectResolves:
+                0,
+
+              /*
+               * ============================
+               * BANKRUPTCY COUNT
+               * ============================
+               *
+               * Lifetime statistic.
+               */
+              bankruptcies: {
+                increment:
+                  1,
+              },
+
+              /*
+               * ============================
+               * CAREER ABILITY
+               * ============================
+               *
+               * Player is no longer a
+               * specialist, so remove any
+               * remaining ability cooldown.
+               */
+              careerAbilityReadyAt:
+                null,
+
+              /*
+               * ============================
+               * QUEUE PENALTY
+               * ============================
+               */
+              queuePenaltyUntil:
+                null,
+
+              /*
+               * ============================
+               * NEXT TICKET
+               * ============================
+               *
+               * Start the new career with
+               * a fresh queue timer.
+               */
+              nextTicketAt:
+                null,
+
+              lastActiveAt:
+                now,
+            },
+          });
+
+        let killAwarded =
+          false;
+
+        /*
+         * ============================
+         * PVP KILL
+         * ============================
+         *
+         * Only award a kill when:
+         *
+         * - there is an original PvP attacker
+         * - attacker is not the victim
+         */
+        if (
+          source
+            ?.attackSourcePlayerId &&
+          source
+            .attackSourcePlayerId !==
+            playerId
+        ) {
+          /*
+           * updateMany is intentional.
+           *
+           * If the attacker was somehow
+           * deleted before bankruptcy,
+           * the victim's bankruptcy can
+           * still complete successfully.
+           */
+          const attackerUpdate =
+            await tx.player.updateMany({
+              where: {
+                id:
+                  source
+                    .attackSourcePlayerId,
+
+                NOT: {
+                  id:
+                    playerId,
+                },
+              },
+
+              data: {
+                kills: {
+                  increment:
+                    1,
+                },
+              },
+            });
+
+          killAwarded =
+            attackerUpdate.count ===
+            1;
+        }
+
+        /*
+         * ============================
+         * PVP ATTACK RESULT
+         * ============================
+         *
+         * Mark the originating attack
+         * as the one that caused the
+         * bankruptcy.
+         */
+        if (
+          source
+            ?.pvpAttackId
+        ) {
+          await tx.pvPAttack.updateMany({
+            where: {
+              id:
+                source
+                  .pvpAttackId,
+            },
+
+            data: {
+              causedBankruptcy:
+                true,
+
+              status:
+                "COMPLETED",
+
+              completedAt:
+                now,
+            },
+          });
+        }
+
+        return {
+          player,
+          killAwarded,
+        };
       }
-
-      return {
-        player,
-
-        killAwarded,
-      };
-    }
-  );
+    );
 
   return {
     player:
@@ -188,7 +332,8 @@ export async function applyCreditPenalty(
     bankrupt:
       true,
 
-    penalty,
+    penalty:
+      safePenalty,
 
     killAwarded:
       result.killAwarded,

@@ -2,8 +2,14 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
+import {
+  finalizeExpiredMaintenanceWindows,
+} from "@/lib/maintenance-window";
 import { applyCreditPenalty } from "@/lib/player-bankruptcy";
 import { prisma } from "@/lib/prisma";
+import {
+  calculateTicketAgeMinutes,
+} from "@/lib/ticket-value";
 
 function getAbandonmentRule(
   severity: "P1" | "P2" | "P3" | "P4"
@@ -44,36 +50,56 @@ function getAbandonmentMessage(
     title.toLowerCase();
 
   if (
-    lowerTitle.includes("phishing") ||
-    lowerTitle.includes("suspicious email")
+    lowerTitle.includes(
+      "phishing"
+    ) ||
+    lowerTitle.includes(
+      "suspicious email"
+    )
   ) {
     return "You ignored a phishing incident long enough for the email to make a full tour of the company. Security would like to know why everyone in Sales clicked it.";
   }
 
   if (
-    lowerTitle.includes("printer")
+    lowerTitle.includes(
+      "printer"
+    )
   ) {
     return "The printer ticket sat untouched for so long that the user has now formed a personal vendetta against IT.";
   }
 
   if (
-    lowerTitle.includes("password") ||
-    lowerTitle.includes("locked")
+    lowerTitle.includes(
+      "password"
+    ) ||
+    lowerTitle.includes(
+      "locked"
+    )
   ) {
     return "The user waited so long for help that they've called the Service Desk four times, emailed your manager, and are now standing behind you.";
   }
 
   if (
-    lowerTitle.includes("network") ||
-    lowerTitle.includes("switch") ||
-    lowerTitle.includes("wifi") ||
-    lowerTitle.includes("wi-fi")
+    lowerTitle.includes(
+      "network"
+    ) ||
+    lowerTitle.includes(
+      "switch"
+    ) ||
+    lowerTitle.includes(
+      "wifi"
+    ) ||
+    lowerTitle.includes(
+      "wi-fi"
+    )
   ) {
     return "The network issue was left alone long enough to become everyone else's problem too.";
   }
 
   if (
-    lowerTitle.includes("backup")
+    lowerTitle.includes(
+      "backup"
+    )
   ) {
     return "The backup failure was ignored long enough for someone to finally ask the uncomfortable question: when was the last successful backup?";
   }
@@ -105,7 +131,8 @@ export async function POST() {
      */
     const session =
       await auth.api.getSession({
-        headers: await headers(),
+        headers:
+          await headers(),
       });
 
     if (!session) {
@@ -147,12 +174,30 @@ export async function POST() {
 
     /*
      * ============================
-     * OPEN TICKETS
+     * FINALIZE MAINTENANCE WINDOWS
      * ============================
      *
-     * Only load tickets where an
-     * abandonment penalty has not
-     * already been applied.
+     * Any Maintenance Window that
+     * has finished becomes permanent
+     * paused SLA time before we check
+     * abandonment.
+     *
+     * Example:
+     *
+     * maintenancePausedMinutes:
+     * 0 -> 5
+     *
+     * maintenanceUntil:
+     * expired date -> null
+     */
+    await finalizeExpiredMaintenanceWindows(
+      player.id
+    );
+
+    /*
+     * ============================
+     * OPEN TICKETS
+     * ============================
      */
     const openTickets =
       await prisma.ticket.findMany({
@@ -174,7 +219,8 @@ export async function POST() {
       });
 
     if (
-      openTickets.length === 0
+      openTickets.length ===
+      0
     ) {
       return NextResponse.json({
         success:
@@ -186,33 +232,104 @@ export async function POST() {
     }
 
     const now =
-      Date.now();
+      new Date();
 
     /*
      * ============================
-     * FIND ONE ABANDONED TICKET
+     * ACTIVE POISON EFFECTS
+     * ============================
+     */
+
+    /*
+     * Major Incident
+     *
+     * Abandonment penalties
+     * increase by 50%.
+     */
+    const abandonmentPenaltyPoisonActive =
+      openTickets.some(
+        (ticket) =>
+          ticket.isPoison &&
+          ticket.poisonEffect ===
+            "ABANDONMENT_PENALTY"
+      );
+
+    /*
+     * ============================
+     * FIND ABANDONED TICKET
      * ============================
      *
-     * Only process ONE ticket per call.
+     * Effective age now includes:
      *
-     * This means the player sees one
-     * abandonment popup at a time.
+     * real age
+     * +
+     * poison SLA pressure
+     * -
+     * completed maintenance time
+     * -
+     * elapsed active maintenance time
+     *
+     * An actively protected ticket
+     * cannot continue ageing toward
+     * abandonment.
      */
     const abandonedTicket =
       openTickets.find(
         (ticket) => {
+          /*
+           * If Maintenance Window is
+           * currently active, the ticket
+           * is protected from abandonment.
+           *
+           * We explicitly skip it here
+           * in addition to using effective
+           * age calculations.
+           */
+          const maintenanceActive =
+            ticket
+              .maintenanceUntil !==
+              null &&
+            ticket
+              .maintenanceUntil >
+              now;
+
+          if (
+            maintenanceActive
+          ) {
+            return false;
+          }
+
+          const ageMinutes =
+            calculateTicketAgeMinutes(
+              ticket.createdAt,
+              ticket
+                .slaAgeOffsetMinutes,
+              ticket
+                .maintenanceUntil,
+              ticket
+                .maintenancePausedMinutes
+            );
+
+          /*
+           * Executive Escalation
+           *
+           * Special 8 minute SLA.
+           */
+          if (
+            ticket.isPoison &&
+            ticket.poisonEffect ===
+              "EXECUTIVE_ESCALATION"
+          ) {
+            return (
+              ageMinutes >=
+              8
+            );
+          }
+
           const rule =
             getAbandonmentRule(
               ticket.severity
             );
-
-          const ageMs =
-            now -
-            ticket.createdAt.getTime();
-
-          const ageMinutes =
-            ageMs /
-            60000;
 
           return (
             ageMinutes >=
@@ -221,6 +338,9 @@ export async function POST() {
         }
       );
 
+    /*
+     * Nothing has breached yet.
+     */
     if (!abandonedTicket) {
       return NextResponse.json({
         success:
@@ -233,19 +353,95 @@ export async function POST() {
 
     /*
      * ============================
-     * ABANDONMENT RULE
+     * EFFECTIVE AGE
      * ============================
      */
-    const rule =
-      getAbandonmentRule(
-        abandonedTicket.severity
+    const effectiveAgeMinutes =
+      calculateTicketAgeMinutes(
+        abandonedTicket
+          .createdAt,
+        abandonedTicket
+          .slaAgeOffsetMinutes,
+        abandonedTicket
+          .maintenanceUntil,
+        abandonedTicket
+          .maintenancePausedMinutes
       );
 
-    const failureMessage =
-      getAbandonmentMessage(
-        abandonedTicket.title,
-        abandonedTicket.category
+    /*
+     * ============================
+     * BASE ABANDONMENT RULE
+     * ============================
+     */
+    const baseRule =
+      getAbandonmentRule(
+        abandonedTicket
+          .severity
       );
+
+    let abandonmentMinutes =
+      baseRule.minutes;
+
+    let basePenalty =
+      baseRule.penalty;
+
+    /*
+     * ============================
+     * EXECUTIVE ESCALATION
+     * ============================
+     *
+     * Special rules:
+     *
+     * 8 minute SLA
+     * 500 CR penalty
+     */
+    if (
+      abandonedTicket
+        .isPoison &&
+      abandonedTicket
+        .poisonEffect ===
+        "EXECUTIVE_ESCALATION"
+    ) {
+      abandonmentMinutes =
+        8;
+
+      basePenalty =
+        500;
+    }
+
+    /*
+     * ============================
+     * MAJOR INCIDENT
+     * ============================
+     *
+     * +50% abandonment penalty.
+     */
+    const finalPenalty =
+      abandonmentPenaltyPoisonActive
+        ? Math.floor(
+            basePenalty *
+              1.5
+          )
+        : basePenalty;
+
+    /*
+     * ============================
+     * FAILURE MESSAGE
+     * ============================
+     */
+    const failureMessage =
+      abandonedTicket
+        .isPoison &&
+      abandonedTicket
+        .poisonEffect ===
+        "EXECUTIVE_ESCALATION"
+        ? "The executive waited long enough to escalate the escalation. Your manager is now involved, their manager is involved, and somehow this has become a career discussion."
+        : getAbandonmentMessage(
+            abandonedTicket
+              .title,
+            abandonedTicket
+              .category
+          );
 
     const abandonmentTime =
       new Date();
@@ -254,10 +450,6 @@ export async function POST() {
      * ============================
      * CLOSE ABANDONED TICKET
      * ============================
-     *
-     * Mark the ticket first so this
-     * penalty can never be processed
-     * twice.
      */
     await prisma.ticket.update({
       where: {
@@ -284,27 +476,12 @@ export async function POST() {
      * ============================
      * APPLY CREDIT PENALTY
      * ============================
-     *
-     * PvP information is passed into
-     * the shared bankruptcy helper.
-     *
-     * Normal system tickets have:
-     *
-     * attackSourcePlayerId = null
-     * pvpAttackId = null
-     *
-     * so they behave exactly as before.
-     *
-     * PvP tickets retain the ID of the
-     * original attacker even if the
-     * ticket has been bounced between
-     * several players.
      */
     const penaltyResult =
       await applyCreditPenalty(
         player.id,
         player.credits,
-        rule.penalty,
+        finalPenalty,
         {
           attackSourcePlayerId:
             abandonedTicket
@@ -345,8 +522,59 @@ export async function POST() {
       severity:
         abandonedTicket.severity,
 
+      isPoison:
+        abandonedTicket.isPoison,
+
+      poisonEffect:
+        abandonedTicket
+          .poisonEffect,
+
+      /*
+       * ============================
+       * AGE INFORMATION
+       * ============================
+       */
+      realAgeMinutes:
+        Math.max(
+          0,
+          Math.floor(
+            (
+              Date.now() -
+              abandonedTicket
+                .createdAt
+                .getTime()
+            ) /
+              60000
+          )
+        ),
+
+      slaAgeOffsetMinutes:
+        abandonedTicket
+          .slaAgeOffsetMinutes,
+
+      maintenancePausedMinutes:
+        abandonedTicket
+          .maintenancePausedMinutes,
+
+      maintenanceUntil:
+        abandonedTicket
+          .maintenanceUntil,
+
+      effectiveAgeMinutes,
+
+      abandonmentMinutes,
+
+      /*
+       * ============================
+       * PENALTY INFORMATION
+       * ============================
+       */
+      basePenalty,
+
       penalty:
-        rule.penalty,
+        finalPenalty,
+
+      abandonmentPenaltyPoisonActive,
 
       credits:
         penaltyResult.player
@@ -360,12 +588,6 @@ export async function POST() {
       resetToServiceDesk:
         penaltyResult.bankrupt,
 
-      /*
-       * PvP information.
-       *
-       * Frontend does not have to
-       * display this yet.
-       */
       killAwarded:
         penaltyResult.killAwarded,
 

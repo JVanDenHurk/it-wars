@@ -30,7 +30,13 @@ export type Ticket = $Result.DefaultSelection<Prisma.$TicketPayload>
 export type TicketTemplate = $Result.DefaultSelection<Prisma.$TicketTemplatePayload>
 /**
  * Model PvPAttack
- * 
+ * *
+ *  * ============================
+ *  * PVP ATTACK
+ *  * ============================
+ *  * One purchased poison attack.
+ *  * One attack can create one
+ *  * or multiple Poison Tickets.
  */
 export type PvPAttack = $Result.DefaultSelection<Prisma.$PvPAttackPayload>
 /**
@@ -100,11 +106,15 @@ export type TicketStatus = (typeof TicketStatus)[keyof typeof TicketStatus]
 
 export const PvPAttackType: {
   PASSWORD_RESET_FLOOD: 'PASSWORD_RESET_FLOOD',
+  SELF_SERVICE_PORTAL_OUTAGE: 'SELF_SERVICE_PORTAL_OUTAGE',
   NETWORK_OUTAGE: 'NETWORK_OUTAGE',
   FAILED_DEPLOYMENT: 'FAILED_DEPLOYMENT',
   PHISHING_CAMPAIGN: 'PHISHING_CAMPAIGN',
-  TICKET_STORM: 'TICKET_STORM',
-  MAJOR_INCIDENT: 'MAJOR_INCIDENT'
+  MONITORING_FAILURE: 'MONITORING_FAILURE',
+  DNS_FAILURE: 'DNS_FAILURE',
+  MAJOR_INCIDENT: 'MAJOR_INCIDENT',
+  EXECUTIVE_ESCALATION: 'EXECUTIVE_ESCALATION',
+  MAIL_QUEUE_BACKLOG: 'MAIL_QUEUE_BACKLOG'
 };
 
 export type PvPAttackType = (typeof PvPAttackType)[keyof typeof PvPAttackType]
@@ -117,6 +127,22 @@ export const PvPAttackStatus: {
 };
 
 export type PvPAttackStatus = (typeof PvPAttackStatus)[keyof typeof PvPAttackStatus]
+
+
+export const PoisonEffect: {
+  NONE: 'NONE',
+  QUEUE_SPEED: 'QUEUE_SPEED',
+  SLA_PRESSURE: 'SLA_PRESSURE',
+  VALUE_DECAY: 'VALUE_DECAY',
+  RESOLUTION_PENALTY: 'RESOLUTION_PENALTY',
+  MONITORING_FAILURE: 'MONITORING_FAILURE',
+  BOUNCE_FAILURE: 'BOUNCE_FAILURE',
+  ABANDONMENT_PENALTY: 'ABANDONMENT_PENALTY',
+  EXECUTIVE_ESCALATION: 'EXECUTIVE_ESCALATION',
+  MAIL_BACKLOG: 'MAIL_BACKLOG'
+};
+
+export type PoisonEffect = (typeof PoisonEffect)[keyof typeof PoisonEffect]
 
 }
 
@@ -143,6 +169,10 @@ export const PvPAttackType: typeof $Enums.PvPAttackType
 export type PvPAttackStatus = $Enums.PvPAttackStatus
 
 export const PvPAttackStatus: typeof $Enums.PvPAttackStatus
+
+export type PoisonEffect = $Enums.PoisonEffect
+
+export const PoisonEffect: typeof $Enums.PoisonEffect
 
 /**
  * ##  Prisma Client ʲˢ
@@ -1775,6 +1805,10 @@ export namespace Prisma {
     level: number | null
     xp: number | null
     credits: number | null
+    careerTicketsResolved: number | null
+    careerCorrectBounces: number | null
+    careerIncorrectBounces: number | null
+    careerIncorrectResolves: number | null
     kills: number | null
     bankruptcies: number | null
     ticketsResolved: number | null
@@ -1790,6 +1824,10 @@ export namespace Prisma {
     level: number | null
     xp: number | null
     credits: number | null
+    careerTicketsResolved: number | null
+    careerCorrectBounces: number | null
+    careerIncorrectBounces: number | null
+    careerIncorrectResolves: number | null
     kills: number | null
     bankruptcies: number | null
     ticketsResolved: number | null
@@ -1804,10 +1842,16 @@ export namespace Prisma {
     id: number | null
     userId: string | null
     username: string | null
+    usernameChangedAt: Date | null
     level: number | null
     xp: number | null
     careerPath: $Enums.CareerPath | null
+    careerAbilityReadyAt: Date | null
     credits: number | null
+    careerTicketsResolved: number | null
+    careerCorrectBounces: number | null
+    careerIncorrectBounces: number | null
+    careerIncorrectResolves: number | null
     kills: number | null
     bankruptcies: number | null
     ticketsResolved: number | null
@@ -1827,10 +1871,16 @@ export namespace Prisma {
     id: number | null
     userId: string | null
     username: string | null
+    usernameChangedAt: Date | null
     level: number | null
     xp: number | null
     careerPath: $Enums.CareerPath | null
+    careerAbilityReadyAt: Date | null
     credits: number | null
+    careerTicketsResolved: number | null
+    careerCorrectBounces: number | null
+    careerIncorrectBounces: number | null
+    careerIncorrectResolves: number | null
     kills: number | null
     bankruptcies: number | null
     ticketsResolved: number | null
@@ -1850,10 +1900,16 @@ export namespace Prisma {
     id: number
     userId: number
     username: number
+    usernameChangedAt: number
     level: number
     xp: number
     careerPath: number
+    careerAbilityReadyAt: number
     credits: number
+    careerTicketsResolved: number
+    careerCorrectBounces: number
+    careerIncorrectBounces: number
+    careerIncorrectResolves: number
     kills: number
     bankruptcies: number
     ticketsResolved: number
@@ -1876,6 +1932,10 @@ export namespace Prisma {
     level?: true
     xp?: true
     credits?: true
+    careerTicketsResolved?: true
+    careerCorrectBounces?: true
+    careerIncorrectBounces?: true
+    careerIncorrectResolves?: true
     kills?: true
     bankruptcies?: true
     ticketsResolved?: true
@@ -1891,6 +1951,10 @@ export namespace Prisma {
     level?: true
     xp?: true
     credits?: true
+    careerTicketsResolved?: true
+    careerCorrectBounces?: true
+    careerIncorrectBounces?: true
+    careerIncorrectResolves?: true
     kills?: true
     bankruptcies?: true
     ticketsResolved?: true
@@ -1905,10 +1969,16 @@ export namespace Prisma {
     id?: true
     userId?: true
     username?: true
+    usernameChangedAt?: true
     level?: true
     xp?: true
     careerPath?: true
+    careerAbilityReadyAt?: true
     credits?: true
+    careerTicketsResolved?: true
+    careerCorrectBounces?: true
+    careerIncorrectBounces?: true
+    careerIncorrectResolves?: true
     kills?: true
     bankruptcies?: true
     ticketsResolved?: true
@@ -1928,10 +1998,16 @@ export namespace Prisma {
     id?: true
     userId?: true
     username?: true
+    usernameChangedAt?: true
     level?: true
     xp?: true
     careerPath?: true
+    careerAbilityReadyAt?: true
     credits?: true
+    careerTicketsResolved?: true
+    careerCorrectBounces?: true
+    careerIncorrectBounces?: true
+    careerIncorrectResolves?: true
     kills?: true
     bankruptcies?: true
     ticketsResolved?: true
@@ -1951,10 +2027,16 @@ export namespace Prisma {
     id?: true
     userId?: true
     username?: true
+    usernameChangedAt?: true
     level?: true
     xp?: true
     careerPath?: true
+    careerAbilityReadyAt?: true
     credits?: true
+    careerTicketsResolved?: true
+    careerCorrectBounces?: true
+    careerIncorrectBounces?: true
+    careerIncorrectResolves?: true
     kills?: true
     bankruptcies?: true
     ticketsResolved?: true
@@ -2061,10 +2143,16 @@ export namespace Prisma {
     id: number
     userId: string
     username: string
+    usernameChangedAt: Date | null
     level: number
     xp: number
     careerPath: $Enums.CareerPath | null
+    careerAbilityReadyAt: Date | null
     credits: number
+    careerTicketsResolved: number
+    careerCorrectBounces: number
+    careerIncorrectBounces: number
+    careerIncorrectResolves: number
     kills: number
     bankruptcies: number
     ticketsResolved: number
@@ -2103,10 +2191,16 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     username?: boolean
+    usernameChangedAt?: boolean
     level?: boolean
     xp?: boolean
     careerPath?: boolean
+    careerAbilityReadyAt?: boolean
     credits?: boolean
+    careerTicketsResolved?: boolean
+    careerCorrectBounces?: boolean
+    careerIncorrectBounces?: boolean
+    careerIncorrectResolves?: boolean
     kills?: boolean
     bankruptcies?: boolean
     ticketsResolved?: boolean
@@ -2133,10 +2227,16 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     username?: boolean
+    usernameChangedAt?: boolean
     level?: boolean
     xp?: boolean
     careerPath?: boolean
+    careerAbilityReadyAt?: boolean
     credits?: boolean
+    careerTicketsResolved?: boolean
+    careerCorrectBounces?: boolean
+    careerIncorrectBounces?: boolean
+    careerIncorrectResolves?: boolean
     kills?: boolean
     bankruptcies?: boolean
     ticketsResolved?: boolean
@@ -2157,10 +2257,16 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     username?: boolean
+    usernameChangedAt?: boolean
     level?: boolean
     xp?: boolean
     careerPath?: boolean
+    careerAbilityReadyAt?: boolean
     credits?: boolean
+    careerTicketsResolved?: boolean
+    careerCorrectBounces?: boolean
+    careerIncorrectBounces?: boolean
+    careerIncorrectResolves?: boolean
     kills?: boolean
     bankruptcies?: boolean
     ticketsResolved?: boolean
@@ -2181,10 +2287,16 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     username?: boolean
+    usernameChangedAt?: boolean
     level?: boolean
     xp?: boolean
     careerPath?: boolean
+    careerAbilityReadyAt?: boolean
     credits?: boolean
+    careerTicketsResolved?: boolean
+    careerCorrectBounces?: boolean
+    careerIncorrectBounces?: boolean
+    careerIncorrectResolves?: boolean
     kills?: boolean
     bankruptcies?: boolean
     ticketsResolved?: boolean
@@ -2200,7 +2312,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type PlayerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "username" | "level" | "xp" | "careerPath" | "credits" | "kills" | "bankruptcies" | "ticketsResolved" | "correctBounces" | "incorrectBounces" | "incorrectResolves" | "lifetimeCreditsEarned" | "lifetimeTicketsHandled" | "lastActiveAt" | "queuePenaltyUntil" | "nextTicketAt" | "createdAt" | "updatedAt", ExtArgs["result"]["player"]>
+  export type PlayerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "username" | "usernameChangedAt" | "level" | "xp" | "careerPath" | "careerAbilityReadyAt" | "credits" | "careerTicketsResolved" | "careerCorrectBounces" | "careerIncorrectBounces" | "careerIncorrectResolves" | "kills" | "bankruptcies" | "ticketsResolved" | "correctBounces" | "incorrectBounces" | "incorrectResolves" | "lifetimeCreditsEarned" | "lifetimeTicketsHandled" | "lastActiveAt" | "queuePenaltyUntil" | "nextTicketAt" | "createdAt" | "updatedAt", ExtArgs["result"]["player"]>
   export type PlayerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     attacksSent?: boolean | Player$attacksSentArgs<ExtArgs>
@@ -2221,30 +2333,139 @@ export namespace Prisma {
     name: "Player"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
+      /**
+       * *
+       *    * ============================
+       *    * PVP RELATIONSHIPS
+       *    * ============================
+       */
       attacksSent: Prisma.$PvPAttackPayload<ExtArgs>[]
       attacksReceived: Prisma.$PvPAttackPayload<ExtArgs>[]
+      /**
+       * *
+       *    * Tickets originally created
+       *    * by this player as PvP poison.
+       */
       attackTickets: Prisma.$TicketPayload<ExtArgs>[]
+      /**
+       * *
+       *    * ============================
+       *    * TICKET RELATIONSHIPS
+       *    * ============================
+       */
       assignedTickets: Prisma.$TicketPayload<ExtArgs>[]
       sentTickets: Prisma.$TicketPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       userId: string
+      /**
+       * *
+       *    * ============================
+       *    * PLAYER IDENTITY
+       *    * ============================
+       *    * usernameChangedAt is null until
+       *    * the player changes their username.
+       *    * Username changes are limited
+       *    * to once every 30 days.
+       */
       username: string
+      usernameChangedAt: Date | null
+      /**
+       * *
+       *    * ============================
+       *    * CURRENT CAREER
+       *    * ============================
+       *    * These reset on bankruptcy.
+       */
       level: number
       xp: number
       careerPath: $Enums.CareerPath | null
+      /**
+       * *
+       *    * ============================
+       *    * CAREER ABILITY
+       *    * ============================
+       *    * Timestamp for when the player's
+       *    * active specialist ability can
+       *    * next be used.
+       *    * Null means immediately ready.
+       */
+      careerAbilityReadyAt: Date | null
+      /**
+       * *
+       *    * ============================
+       *    * CURRENT CREDITS
+       *    * ============================
+       *    * Credits are both currency
+       *    * and effectively player health.
+       *    * Reset to starting Credits
+       *    * after bankruptcy.
+       */
       credits: number
+      /**
+       * *
+       *    * ============================
+       *    * CURRENT RUN PERFORMANCE
+       *    * ============================
+       *    * These are displayed on the
+       *    * dashboard.
+       *    * They reset when the player
+       *    * becomes bankrupt.
+       */
+      careerTicketsResolved: number
+      careerCorrectBounces: number
+      careerIncorrectBounces: number
+      careerIncorrectResolves: number
+      /**
+       * *
+       *    * ============================
+       *    * LIFETIME PVP STATS
+       *    * ============================
+       *    * These never reset.
+       */
       kills: number
       bankruptcies: number
+      /**
+       * *
+       *    * ============================
+       *    * LIFETIME TICKET PERFORMANCE
+       *    * ============================
+       *    * These never reset.
+       *    * They are shown on the
+       *    * player's profile page.
+       */
       ticketsResolved: number
       correctBounces: number
       incorrectBounces: number
       incorrectResolves: number
+      /**
+       * *
+       *    * ============================
+       *    * LIFETIME TOTALS
+       *    * ============================
+       *    * These also never reset.
+       */
       lifetimeCreditsEarned: number
       lifetimeTicketsHandled: number
+      /**
+       * *
+       *    * ============================
+       *    * PLAYER ACTIVITY
+       *    * ============================
+       */
       lastActiveAt: Date
+      /**
+       * *
+       *    * Personal queue slowdown after
+       *    * bouncing something they could
+       *    * have resolved.
+       */
       queuePenaltyUntil: Date | null
+      /**
+       * *
+       *    * Next automatic system ticket.
+       */
       nextTicketAt: Date | null
       createdAt: Date
       updatedAt: Date
@@ -2680,10 +2901,16 @@ export namespace Prisma {
     readonly id: FieldRef<"Player", 'Int'>
     readonly userId: FieldRef<"Player", 'String'>
     readonly username: FieldRef<"Player", 'String'>
+    readonly usernameChangedAt: FieldRef<"Player", 'DateTime'>
     readonly level: FieldRef<"Player", 'Int'>
     readonly xp: FieldRef<"Player", 'Int'>
     readonly careerPath: FieldRef<"Player", 'CareerPath'>
+    readonly careerAbilityReadyAt: FieldRef<"Player", 'DateTime'>
     readonly credits: FieldRef<"Player", 'Int'>
+    readonly careerTicketsResolved: FieldRef<"Player", 'Int'>
+    readonly careerCorrectBounces: FieldRef<"Player", 'Int'>
+    readonly careerIncorrectBounces: FieldRef<"Player", 'Int'>
+    readonly careerIncorrectResolves: FieldRef<"Player", 'Int'>
     readonly kills: FieldRef<"Player", 'Int'>
     readonly bankruptcies: FieldRef<"Player", 'Int'>
     readonly ticketsResolved: FieldRef<"Player", 'Int'>
@@ -3258,6 +3485,8 @@ export namespace Prisma {
     attackSourcePlayerId: number | null
     pvpAttackId: number | null
     bounceCount: number | null
+    slaAgeOffsetMinutes: number | null
+    maintenancePausedMinutes: number | null
   }
 
   export type TicketSumAggregateOutputType = {
@@ -3270,6 +3499,8 @@ export namespace Prisma {
     attackSourcePlayerId: number | null
     pvpAttackId: number | null
     bounceCount: number | null
+    slaAgeOffsetMinutes: number | null
+    maintenancePausedMinutes: number | null
   }
 
   export type TicketMinAggregateOutputType = {
@@ -3282,6 +3513,8 @@ export namespace Prisma {
     status: $Enums.TicketStatus | null
     maxValue: number | null
     baseXp: number | null
+    isPoison: boolean | null
+    poisonEffect: $Enums.PoisonEffect | null
     successMessage: string | null
     failureMessage: string | null
     assignedToId: number | null
@@ -3291,6 +3524,9 @@ export namespace Prisma {
     bounceCount: number | null
     abandonmentPenaltyApplied: boolean | null
     abandonmentPenaltyAt: Date | null
+    slaAgeOffsetMinutes: number | null
+    maintenanceUntil: Date | null
+    maintenancePausedMinutes: number | null
     resolvedAt: Date | null
     expiredAt: Date | null
     createdAt: Date | null
@@ -3307,6 +3543,8 @@ export namespace Prisma {
     status: $Enums.TicketStatus | null
     maxValue: number | null
     baseXp: number | null
+    isPoison: boolean | null
+    poisonEffect: $Enums.PoisonEffect | null
     successMessage: string | null
     failureMessage: string | null
     assignedToId: number | null
@@ -3316,6 +3554,9 @@ export namespace Prisma {
     bounceCount: number | null
     abandonmentPenaltyApplied: boolean | null
     abandonmentPenaltyAt: Date | null
+    slaAgeOffsetMinutes: number | null
+    maintenanceUntil: Date | null
+    maintenancePausedMinutes: number | null
     resolvedAt: Date | null
     expiredAt: Date | null
     createdAt: Date | null
@@ -3332,6 +3573,8 @@ export namespace Prisma {
     status: number
     maxValue: number
     baseXp: number
+    isPoison: number
+    poisonEffect: number
     successMessage: number
     failureMessage: number
     assignedToId: number
@@ -3341,6 +3584,9 @@ export namespace Prisma {
     bounceCount: number
     abandonmentPenaltyApplied: number
     abandonmentPenaltyAt: number
+    slaAgeOffsetMinutes: number
+    maintenanceUntil: number
+    maintenancePausedMinutes: number
     resolvedAt: number
     expiredAt: number
     createdAt: number
@@ -3359,6 +3605,8 @@ export namespace Prisma {
     attackSourcePlayerId?: true
     pvpAttackId?: true
     bounceCount?: true
+    slaAgeOffsetMinutes?: true
+    maintenancePausedMinutes?: true
   }
 
   export type TicketSumAggregateInputType = {
@@ -3371,6 +3619,8 @@ export namespace Prisma {
     attackSourcePlayerId?: true
     pvpAttackId?: true
     bounceCount?: true
+    slaAgeOffsetMinutes?: true
+    maintenancePausedMinutes?: true
   }
 
   export type TicketMinAggregateInputType = {
@@ -3383,6 +3633,8 @@ export namespace Prisma {
     status?: true
     maxValue?: true
     baseXp?: true
+    isPoison?: true
+    poisonEffect?: true
     successMessage?: true
     failureMessage?: true
     assignedToId?: true
@@ -3392,6 +3644,9 @@ export namespace Prisma {
     bounceCount?: true
     abandonmentPenaltyApplied?: true
     abandonmentPenaltyAt?: true
+    slaAgeOffsetMinutes?: true
+    maintenanceUntil?: true
+    maintenancePausedMinutes?: true
     resolvedAt?: true
     expiredAt?: true
     createdAt?: true
@@ -3408,6 +3663,8 @@ export namespace Prisma {
     status?: true
     maxValue?: true
     baseXp?: true
+    isPoison?: true
+    poisonEffect?: true
     successMessage?: true
     failureMessage?: true
     assignedToId?: true
@@ -3417,6 +3674,9 @@ export namespace Prisma {
     bounceCount?: true
     abandonmentPenaltyApplied?: true
     abandonmentPenaltyAt?: true
+    slaAgeOffsetMinutes?: true
+    maintenanceUntil?: true
+    maintenancePausedMinutes?: true
     resolvedAt?: true
     expiredAt?: true
     createdAt?: true
@@ -3433,6 +3693,8 @@ export namespace Prisma {
     status?: true
     maxValue?: true
     baseXp?: true
+    isPoison?: true
+    poisonEffect?: true
     successMessage?: true
     failureMessage?: true
     assignedToId?: true
@@ -3442,6 +3704,9 @@ export namespace Prisma {
     bounceCount?: true
     abandonmentPenaltyApplied?: true
     abandonmentPenaltyAt?: true
+    slaAgeOffsetMinutes?: true
+    maintenanceUntil?: true
+    maintenancePausedMinutes?: true
     resolvedAt?: true
     expiredAt?: true
     createdAt?: true
@@ -3545,6 +3810,8 @@ export namespace Prisma {
     status: $Enums.TicketStatus
     maxValue: number
     baseXp: number
+    isPoison: boolean
+    poisonEffect: $Enums.PoisonEffect
     successMessage: string | null
     failureMessage: string | null
     assignedToId: number
@@ -3554,6 +3821,9 @@ export namespace Prisma {
     bounceCount: number
     abandonmentPenaltyApplied: boolean
     abandonmentPenaltyAt: Date | null
+    slaAgeOffsetMinutes: number
+    maintenanceUntil: Date | null
+    maintenancePausedMinutes: number
     resolvedAt: Date | null
     expiredAt: Date | null
     createdAt: Date
@@ -3589,6 +3859,8 @@ export namespace Prisma {
     status?: boolean
     maxValue?: boolean
     baseXp?: boolean
+    isPoison?: boolean
+    poisonEffect?: boolean
     successMessage?: boolean
     failureMessage?: boolean
     assignedToId?: boolean
@@ -3598,6 +3870,9 @@ export namespace Prisma {
     bounceCount?: boolean
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: boolean
+    slaAgeOffsetMinutes?: boolean
+    maintenanceUntil?: boolean
+    maintenancePausedMinutes?: boolean
     resolvedAt?: boolean
     expiredAt?: boolean
     createdAt?: boolean
@@ -3618,6 +3893,8 @@ export namespace Prisma {
     status?: boolean
     maxValue?: boolean
     baseXp?: boolean
+    isPoison?: boolean
+    poisonEffect?: boolean
     successMessage?: boolean
     failureMessage?: boolean
     assignedToId?: boolean
@@ -3627,6 +3904,9 @@ export namespace Prisma {
     bounceCount?: boolean
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: boolean
+    slaAgeOffsetMinutes?: boolean
+    maintenanceUntil?: boolean
+    maintenancePausedMinutes?: boolean
     resolvedAt?: boolean
     expiredAt?: boolean
     createdAt?: boolean
@@ -3647,6 +3927,8 @@ export namespace Prisma {
     status?: boolean
     maxValue?: boolean
     baseXp?: boolean
+    isPoison?: boolean
+    poisonEffect?: boolean
     successMessage?: boolean
     failureMessage?: boolean
     assignedToId?: boolean
@@ -3656,6 +3938,9 @@ export namespace Prisma {
     bounceCount?: boolean
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: boolean
+    slaAgeOffsetMinutes?: boolean
+    maintenanceUntil?: boolean
+    maintenancePausedMinutes?: boolean
     resolvedAt?: boolean
     expiredAt?: boolean
     createdAt?: boolean
@@ -3676,6 +3961,8 @@ export namespace Prisma {
     status?: boolean
     maxValue?: boolean
     baseXp?: boolean
+    isPoison?: boolean
+    poisonEffect?: boolean
     successMessage?: boolean
     failureMessage?: boolean
     assignedToId?: boolean
@@ -3685,13 +3972,16 @@ export namespace Prisma {
     bounceCount?: boolean
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: boolean
+    slaAgeOffsetMinutes?: boolean
+    maintenanceUntil?: boolean
+    maintenancePausedMinutes?: boolean
     resolvedAt?: boolean
     expiredAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "severity" | "difficulty" | "status" | "maxValue" | "baseXp" | "successMessage" | "failureMessage" | "assignedToId" | "lastSentById" | "attackSourcePlayerId" | "pvpAttackId" | "bounceCount" | "abandonmentPenaltyApplied" | "abandonmentPenaltyAt" | "resolvedAt" | "expiredAt" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
+  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "severity" | "difficulty" | "status" | "maxValue" | "baseXp" | "isPoison" | "poisonEffect" | "successMessage" | "failureMessage" | "assignedToId" | "lastSentById" | "attackSourcePlayerId" | "pvpAttackId" | "bounceCount" | "abandonmentPenaltyApplied" | "abandonmentPenaltyAt" | "slaAgeOffsetMinutes" | "maintenanceUntil" | "maintenancePausedMinutes" | "resolvedAt" | "expiredAt" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
   export type TicketInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     assignedTo?: boolean | PlayerDefaultArgs<ExtArgs>
     lastSentBy?: boolean | Ticket$lastSentByArgs<ExtArgs>
@@ -3723,21 +4013,141 @@ export namespace Prisma {
       id: number
       title: string
       description: string
+      /**
+       * *
+       *    * Hidden correct resolver.
+       */
       category: $Enums.TicketCategory
+      /**
+       * *
+       *    * Visible urgency.
+       */
       severity: $Enums.TicketSeverity
+      /**
+       * *
+       *    * Hidden difficulty.
+       *    * 1 = Easy
+       *    * 2 = Standard
+       *    * 3 = Hard
+       *    * 4 = Expert
+       *    * 5 = Nightmare
+       */
       difficulty: number
       status: $Enums.TicketStatus
+      /**
+       * *
+       *    * ============================
+       *    * REWARDS
+       *    * ============================
+       *    * Normal tickets use:
+       *    * maxValue
+       *    * baseXp
+       *    * Poison Tickets normally use:
+       *    * maxValue = 0
+       *    * baseXp   = 0
+       */
       maxValue: number
       baseXp: number
+      /**
+       * *
+       *    * ============================
+       *    * POISON TICKET
+       *    * ============================
+       */
+      isPoison: boolean
+      /**
+       * *
+       *    * Active poison effect attached
+       *    * to this ticket.
+       */
+      poisonEffect: $Enums.PoisonEffect
+      /**
+       * *
+       *    * Optional ticket-specific
+       *    * outcome messages.
+       */
       successMessage: string | null
       failureMessage: string | null
+      /**
+       * *
+       *    * ============================
+       *    * CURRENT OWNER
+       *    * ============================
+       */
       assignedToId: number
+      /**
+       * *
+       *    * ============================
+       *    * MOST RECENT BOUNCE
+       *    * ============================
+       *    * Null means the ticket came
+       *    * directly from the game or
+       *    * PvP system.
+       */
       lastSentById: number | null
+      /**
+       * *
+       *    * ============================
+       *    * ORIGINAL PVP ATTACKER
+       *    * ============================
+       *    * Never changes when the
+       *    * Poison Ticket moves between
+       *    * players.
+       */
       attackSourcePlayerId: number | null
+      /**
+       * *
+       *    * ============================
+       *    * PVP ATTACK EVENT
+       *    * ============================
+       */
       pvpAttackId: number | null
+      /**
+       * *
+       *    * Number of times this ticket
+       *    * has moved between queues.
+       */
       bounceCount: number
+      /**
+       * *
+       *    * ============================
+       *    * ABANDONMENT / SLA
+       *    * ============================
+       */
       abandonmentPenaltyApplied: boolean
       abandonmentPenaltyAt: Date | null
+      /**
+       * *
+       *    * Artificial SLA pressure
+       *    * added by poison attacks.
+       *    * Effective age includes this
+       *    * value without modifying
+       *    * createdAt.
+       */
+      slaAgeOffsetMinutes: number
+      /**
+       * *
+       *    * ============================
+       *    * SYSTEMS - MAINTENANCE WINDOW
+       *    * ============================
+       *    * maintenanceUntil:
+       *    * While this timestamp is in
+       *    * the future, SLA ageing and
+       *    * Credit decay are frozen.
+       *    * maintenancePausedMinutes:
+       *    * Once the Maintenance Window
+       *    * ends, its completed frozen
+       *    * time is permanently stored
+       *    * here.
+       */
+      maintenanceUntil: Date | null
+      maintenancePausedMinutes: number
+      /**
+       * *
+       *    * ============================
+       *    * COMPLETION TIMES
+       *    * ============================
+       */
       resolvedAt: Date | null
       expiredAt: Date | null
       createdAt: Date
@@ -4178,6 +4588,8 @@ export namespace Prisma {
     readonly status: FieldRef<"Ticket", 'TicketStatus'>
     readonly maxValue: FieldRef<"Ticket", 'Int'>
     readonly baseXp: FieldRef<"Ticket", 'Int'>
+    readonly isPoison: FieldRef<"Ticket", 'Boolean'>
+    readonly poisonEffect: FieldRef<"Ticket", 'PoisonEffect'>
     readonly successMessage: FieldRef<"Ticket", 'String'>
     readonly failureMessage: FieldRef<"Ticket", 'String'>
     readonly assignedToId: FieldRef<"Ticket", 'Int'>
@@ -4187,6 +4599,9 @@ export namespace Prisma {
     readonly bounceCount: FieldRef<"Ticket", 'Int'>
     readonly abandonmentPenaltyApplied: FieldRef<"Ticket", 'Boolean'>
     readonly abandonmentPenaltyAt: FieldRef<"Ticket", 'DateTime'>
+    readonly slaAgeOffsetMinutes: FieldRef<"Ticket", 'Int'>
+    readonly maintenanceUntil: FieldRef<"Ticket", 'DateTime'>
+    readonly maintenancePausedMinutes: FieldRef<"Ticket", 'Int'>
     readonly resolvedAt: FieldRef<"Ticket", 'DateTime'>
     readonly expiredAt: FieldRef<"Ticket", 'DateTime'>
     readonly createdAt: FieldRef<"Ticket", 'DateTime'>
@@ -5000,13 +5415,46 @@ export namespace Prisma {
       id: number
       title: string
       description: string
+      /**
+       * *
+       *    * Hidden correct resolver.
+       */
       category: $Enums.TicketCategory
+      /**
+       * *
+       *    * Visible urgency.
+       */
       severity: $Enums.TicketSeverity
+      /**
+       * *
+       *    * Hidden internal difficulty.
+       *    * 1 = Easy
+       *    * 2 = Standard
+       *    * 3 = Hard
+       *    * 4 = Expert
+       *    * 5 = Nightmare
+       */
       difficulty: number
+      /**
+       * *
+       *    * ============================
+       *    * REWARDS
+       *    * ============================
+       */
       maxValue: number
       baseXp: number
+      /**
+       * *
+       *    * Optional ticket-specific
+       *    * outcome messages.
+       */
       successMessage: string | null
       failureMessage: string | null
+      /**
+       * *
+       *    * Can be disabled without
+       *    * deleting the template.
+       */
       active: boolean
       createdAt: Date
       updatedAt: Date
@@ -6137,15 +6585,41 @@ export namespace Prisma {
     objects: {
       attacker: Prisma.$PlayerPayload<ExtArgs>
       target: Prisma.$PlayerPayload<ExtArgs>
+      /**
+       * *
+       *    * Poison Tickets generated
+       *    * by this attack.
+       */
       tickets: Prisma.$TicketPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       type: $Enums.PvPAttackType
       status: $Enums.PvPAttackStatus
+      /**
+       * *
+       *    * Credits paid by attacker.
+       */
       cost: number
+      /**
+       * *
+       *    * ============================
+       *    * ATTACKER
+       *    * ============================
+       */
       attackerId: number
+      /**
+       * *
+       *    * ============================
+       *    * ORIGINAL TARGET
+       *    * ============================
+       */
       targetId: number
+      /**
+       * *
+       *    * True when this attack
+       *    * directly causes bankruptcy.
+       */
       causedBankruptcy: boolean
       completedAt: Date | null
       createdAt: Date
@@ -11481,10 +11955,16 @@ export namespace Prisma {
     id: 'id',
     userId: 'userId',
     username: 'username',
+    usernameChangedAt: 'usernameChangedAt',
     level: 'level',
     xp: 'xp',
     careerPath: 'careerPath',
+    careerAbilityReadyAt: 'careerAbilityReadyAt',
     credits: 'credits',
+    careerTicketsResolved: 'careerTicketsResolved',
+    careerCorrectBounces: 'careerCorrectBounces',
+    careerIncorrectBounces: 'careerIncorrectBounces',
+    careerIncorrectResolves: 'careerIncorrectResolves',
     kills: 'kills',
     bankruptcies: 'bankruptcies',
     ticketsResolved: 'ticketsResolved',
@@ -11513,6 +11993,8 @@ export namespace Prisma {
     status: 'status',
     maxValue: 'maxValue',
     baseXp: 'baseXp',
+    isPoison: 'isPoison',
+    poisonEffect: 'poisonEffect',
     successMessage: 'successMessage',
     failureMessage: 'failureMessage',
     assignedToId: 'assignedToId',
@@ -11522,6 +12004,9 @@ export namespace Prisma {
     bounceCount: 'bounceCount',
     abandonmentPenaltyApplied: 'abandonmentPenaltyApplied',
     abandonmentPenaltyAt: 'abandonmentPenaltyAt',
+    slaAgeOffsetMinutes: 'slaAgeOffsetMinutes',
+    maintenanceUntil: 'maintenanceUntil',
+    maintenancePausedMinutes: 'maintenancePausedMinutes',
     resolvedAt: 'resolvedAt',
     expiredAt: 'expiredAt',
     createdAt: 'createdAt',
@@ -11682,20 +12167,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'CareerPath'
-   */
-  export type EnumCareerPathFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CareerPath'>
-    
-
-
-  /**
-   * Reference to a field of type 'CareerPath[]'
-   */
-  export type ListEnumCareerPathFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CareerPath[]'>
-    
-
-
-  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -11706,6 +12177,20 @@ export namespace Prisma {
    * Reference to a field of type 'DateTime[]'
    */
   export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'CareerPath'
+   */
+  export type EnumCareerPathFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CareerPath'>
+    
+
+
+  /**
+   * Reference to a field of type 'CareerPath[]'
+   */
+  export type ListEnumCareerPathFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CareerPath[]'>
     
 
 
@@ -11755,6 +12240,20 @@ export namespace Prisma {
    * Reference to a field of type 'Boolean'
    */
   export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
+   * Reference to a field of type 'PoisonEffect'
+   */
+  export type EnumPoisonEffectFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PoisonEffect'>
+    
+
+
+  /**
+   * Reference to a field of type 'PoisonEffect[]'
+   */
+  export type ListEnumPoisonEffectFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PoisonEffect[]'>
     
 
 
@@ -11810,10 +12309,16 @@ export namespace Prisma {
     id?: IntFilter<"Player"> | number
     userId?: StringFilter<"Player"> | string
     username?: StringFilter<"Player"> | string
+    usernameChangedAt?: DateTimeNullableFilter<"Player"> | Date | string | null
     level?: IntFilter<"Player"> | number
     xp?: IntFilter<"Player"> | number
     careerPath?: EnumCareerPathNullableFilter<"Player"> | $Enums.CareerPath | null
+    careerAbilityReadyAt?: DateTimeNullableFilter<"Player"> | Date | string | null
     credits?: IntFilter<"Player"> | number
+    careerTicketsResolved?: IntFilter<"Player"> | number
+    careerCorrectBounces?: IntFilter<"Player"> | number
+    careerIncorrectBounces?: IntFilter<"Player"> | number
+    careerIncorrectResolves?: IntFilter<"Player"> | number
     kills?: IntFilter<"Player"> | number
     bankruptcies?: IntFilter<"Player"> | number
     ticketsResolved?: IntFilter<"Player"> | number
@@ -11839,10 +12344,16 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     username?: SortOrder
+    usernameChangedAt?: SortOrderInput | SortOrder
     level?: SortOrder
     xp?: SortOrder
     careerPath?: SortOrderInput | SortOrder
+    careerAbilityReadyAt?: SortOrderInput | SortOrder
     credits?: SortOrder
+    careerTicketsResolved?: SortOrder
+    careerCorrectBounces?: SortOrder
+    careerIncorrectBounces?: SortOrder
+    careerIncorrectResolves?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -11871,10 +12382,16 @@ export namespace Prisma {
     AND?: PlayerWhereInput | PlayerWhereInput[]
     OR?: PlayerWhereInput[]
     NOT?: PlayerWhereInput | PlayerWhereInput[]
+    usernameChangedAt?: DateTimeNullableFilter<"Player"> | Date | string | null
     level?: IntFilter<"Player"> | number
     xp?: IntFilter<"Player"> | number
     careerPath?: EnumCareerPathNullableFilter<"Player"> | $Enums.CareerPath | null
+    careerAbilityReadyAt?: DateTimeNullableFilter<"Player"> | Date | string | null
     credits?: IntFilter<"Player"> | number
+    careerTicketsResolved?: IntFilter<"Player"> | number
+    careerCorrectBounces?: IntFilter<"Player"> | number
+    careerIncorrectBounces?: IntFilter<"Player"> | number
+    careerIncorrectResolves?: IntFilter<"Player"> | number
     kills?: IntFilter<"Player"> | number
     bankruptcies?: IntFilter<"Player"> | number
     ticketsResolved?: IntFilter<"Player"> | number
@@ -11900,10 +12417,16 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     username?: SortOrder
+    usernameChangedAt?: SortOrderInput | SortOrder
     level?: SortOrder
     xp?: SortOrder
     careerPath?: SortOrderInput | SortOrder
+    careerAbilityReadyAt?: SortOrderInput | SortOrder
     credits?: SortOrder
+    careerTicketsResolved?: SortOrder
+    careerCorrectBounces?: SortOrder
+    careerIncorrectBounces?: SortOrder
+    careerIncorrectResolves?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -11931,10 +12454,16 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"Player"> | number
     userId?: StringWithAggregatesFilter<"Player"> | string
     username?: StringWithAggregatesFilter<"Player"> | string
+    usernameChangedAt?: DateTimeNullableWithAggregatesFilter<"Player"> | Date | string | null
     level?: IntWithAggregatesFilter<"Player"> | number
     xp?: IntWithAggregatesFilter<"Player"> | number
     careerPath?: EnumCareerPathNullableWithAggregatesFilter<"Player"> | $Enums.CareerPath | null
+    careerAbilityReadyAt?: DateTimeNullableWithAggregatesFilter<"Player"> | Date | string | null
     credits?: IntWithAggregatesFilter<"Player"> | number
+    careerTicketsResolved?: IntWithAggregatesFilter<"Player"> | number
+    careerCorrectBounces?: IntWithAggregatesFilter<"Player"> | number
+    careerIncorrectBounces?: IntWithAggregatesFilter<"Player"> | number
+    careerIncorrectResolves?: IntWithAggregatesFilter<"Player"> | number
     kills?: IntWithAggregatesFilter<"Player"> | number
     bankruptcies?: IntWithAggregatesFilter<"Player"> | number
     ticketsResolved?: IntWithAggregatesFilter<"Player"> | number
@@ -11963,6 +12492,8 @@ export namespace Prisma {
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
     maxValue?: IntFilter<"Ticket"> | number
     baseXp?: IntFilter<"Ticket"> | number
+    isPoison?: BoolFilter<"Ticket"> | boolean
+    poisonEffect?: EnumPoisonEffectFilter<"Ticket"> | $Enums.PoisonEffect
     successMessage?: StringNullableFilter<"Ticket"> | string | null
     failureMessage?: StringNullableFilter<"Ticket"> | string | null
     assignedToId?: IntFilter<"Ticket"> | number
@@ -11972,6 +12503,9 @@ export namespace Prisma {
     bounceCount?: IntFilter<"Ticket"> | number
     abandonmentPenaltyApplied?: BoolFilter<"Ticket"> | boolean
     abandonmentPenaltyAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    slaAgeOffsetMinutes?: IntFilter<"Ticket"> | number
+    maintenanceUntil?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    maintenancePausedMinutes?: IntFilter<"Ticket"> | number
     resolvedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     expiredAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
@@ -11992,6 +12526,8 @@ export namespace Prisma {
     status?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    isPoison?: SortOrder
+    poisonEffect?: SortOrder
     successMessage?: SortOrderInput | SortOrder
     failureMessage?: SortOrderInput | SortOrder
     assignedToId?: SortOrder
@@ -12001,6 +12537,9 @@ export namespace Prisma {
     bounceCount?: SortOrder
     abandonmentPenaltyApplied?: SortOrder
     abandonmentPenaltyAt?: SortOrderInput | SortOrder
+    slaAgeOffsetMinutes?: SortOrder
+    maintenanceUntil?: SortOrderInput | SortOrder
+    maintenancePausedMinutes?: SortOrder
     resolvedAt?: SortOrderInput | SortOrder
     expiredAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -12024,6 +12563,8 @@ export namespace Prisma {
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
     maxValue?: IntFilter<"Ticket"> | number
     baseXp?: IntFilter<"Ticket"> | number
+    isPoison?: BoolFilter<"Ticket"> | boolean
+    poisonEffect?: EnumPoisonEffectFilter<"Ticket"> | $Enums.PoisonEffect
     successMessage?: StringNullableFilter<"Ticket"> | string | null
     failureMessage?: StringNullableFilter<"Ticket"> | string | null
     assignedToId?: IntFilter<"Ticket"> | number
@@ -12033,6 +12574,9 @@ export namespace Prisma {
     bounceCount?: IntFilter<"Ticket"> | number
     abandonmentPenaltyApplied?: BoolFilter<"Ticket"> | boolean
     abandonmentPenaltyAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    slaAgeOffsetMinutes?: IntFilter<"Ticket"> | number
+    maintenanceUntil?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    maintenancePausedMinutes?: IntFilter<"Ticket"> | number
     resolvedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     expiredAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
@@ -12053,6 +12597,8 @@ export namespace Prisma {
     status?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    isPoison?: SortOrder
+    poisonEffect?: SortOrder
     successMessage?: SortOrderInput | SortOrder
     failureMessage?: SortOrderInput | SortOrder
     assignedToId?: SortOrder
@@ -12062,6 +12608,9 @@ export namespace Prisma {
     bounceCount?: SortOrder
     abandonmentPenaltyApplied?: SortOrder
     abandonmentPenaltyAt?: SortOrderInput | SortOrder
+    slaAgeOffsetMinutes?: SortOrder
+    maintenanceUntil?: SortOrderInput | SortOrder
+    maintenancePausedMinutes?: SortOrder
     resolvedAt?: SortOrderInput | SortOrder
     expiredAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -12086,6 +12635,8 @@ export namespace Prisma {
     status?: EnumTicketStatusWithAggregatesFilter<"Ticket"> | $Enums.TicketStatus
     maxValue?: IntWithAggregatesFilter<"Ticket"> | number
     baseXp?: IntWithAggregatesFilter<"Ticket"> | number
+    isPoison?: BoolWithAggregatesFilter<"Ticket"> | boolean
+    poisonEffect?: EnumPoisonEffectWithAggregatesFilter<"Ticket"> | $Enums.PoisonEffect
     successMessage?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
     failureMessage?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
     assignedToId?: IntWithAggregatesFilter<"Ticket"> | number
@@ -12095,6 +12646,9 @@ export namespace Prisma {
     bounceCount?: IntWithAggregatesFilter<"Ticket"> | number
     abandonmentPenaltyApplied?: BoolWithAggregatesFilter<"Ticket"> | boolean
     abandonmentPenaltyAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
+    slaAgeOffsetMinutes?: IntWithAggregatesFilter<"Ticket"> | number
+    maintenanceUntil?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
+    maintenancePausedMinutes?: IntWithAggregatesFilter<"Ticket"> | number
     resolvedAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
     expiredAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Ticket"> | Date | string
@@ -12578,10 +13132,16 @@ export namespace Prisma {
 
   export type PlayerCreateInput = {
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -12607,10 +13167,16 @@ export namespace Prisma {
     id?: number
     userId: string
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -12633,10 +13199,16 @@ export namespace Prisma {
 
   export type PlayerUpdateInput = {
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -12662,10 +13234,16 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     userId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -12690,10 +13268,16 @@ export namespace Prisma {
     id?: number
     userId: string
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -12711,10 +13295,16 @@ export namespace Prisma {
 
   export type PlayerUpdateManyMutationInput = {
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -12734,10 +13324,16 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     userId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -12762,11 +13358,16 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -12787,6 +13388,8 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     assignedToId: number
@@ -12796,6 +13399,9 @@ export namespace Prisma {
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -12811,11 +13417,16 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12836,6 +13447,8 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
@@ -12845,6 +13458,9 @@ export namespace Prisma {
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12861,6 +13477,8 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     assignedToId: number
@@ -12870,6 +13488,9 @@ export namespace Prisma {
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -12885,11 +13506,16 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12906,6 +13532,8 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
@@ -12915,6 +13543,9 @@ export namespace Prisma {
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13478,6 +14109,17 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type EnumCareerPathNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.CareerPath | EnumCareerPathFieldRefInput<$PrismaModel> | null
     in?: $Enums.CareerPath[] | ListEnumCareerPathFieldRefInput<$PrismaModel> | null
@@ -13494,17 +14136,6 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
-  }
-
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type UserScalarRelationFilter = {
@@ -13541,10 +14172,16 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     username?: SortOrder
+    usernameChangedAt?: SortOrder
     level?: SortOrder
     xp?: SortOrder
     careerPath?: SortOrder
+    careerAbilityReadyAt?: SortOrder
     credits?: SortOrder
+    careerTicketsResolved?: SortOrder
+    careerCorrectBounces?: SortOrder
+    careerIncorrectBounces?: SortOrder
+    careerIncorrectResolves?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -13565,6 +14202,10 @@ export namespace Prisma {
     level?: SortOrder
     xp?: SortOrder
     credits?: SortOrder
+    careerTicketsResolved?: SortOrder
+    careerCorrectBounces?: SortOrder
+    careerIncorrectBounces?: SortOrder
+    careerIncorrectResolves?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -13579,10 +14220,16 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     username?: SortOrder
+    usernameChangedAt?: SortOrder
     level?: SortOrder
     xp?: SortOrder
     careerPath?: SortOrder
+    careerAbilityReadyAt?: SortOrder
     credits?: SortOrder
+    careerTicketsResolved?: SortOrder
+    careerCorrectBounces?: SortOrder
+    careerIncorrectBounces?: SortOrder
+    careerIncorrectResolves?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -13602,10 +14249,16 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     username?: SortOrder
+    usernameChangedAt?: SortOrder
     level?: SortOrder
     xp?: SortOrder
     careerPath?: SortOrder
+    careerAbilityReadyAt?: SortOrder
     credits?: SortOrder
+    careerTicketsResolved?: SortOrder
+    careerCorrectBounces?: SortOrder
+    careerIncorrectBounces?: SortOrder
+    careerIncorrectResolves?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -13626,6 +14279,10 @@ export namespace Prisma {
     level?: SortOrder
     xp?: SortOrder
     credits?: SortOrder
+    careerTicketsResolved?: SortOrder
+    careerCorrectBounces?: SortOrder
+    careerIncorrectBounces?: SortOrder
+    careerIncorrectResolves?: SortOrder
     kills?: SortOrder
     bankruptcies?: SortOrder
     ticketsResolved?: SortOrder
@@ -13670,6 +14327,20 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type EnumCareerPathNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.CareerPath | EnumCareerPathFieldRefInput<$PrismaModel> | null
     in?: $Enums.CareerPath[] | ListEnumCareerPathFieldRefInput<$PrismaModel> | null
@@ -13694,20 +14365,6 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
-  }
-
   export type EnumTicketCategoryFilter<$PrismaModel = never> = {
     equals?: $Enums.TicketCategory | EnumTicketCategoryFieldRefInput<$PrismaModel>
     in?: $Enums.TicketCategory[] | ListEnumTicketCategoryFieldRefInput<$PrismaModel>
@@ -13727,6 +14384,18 @@ export namespace Prisma {
     in?: $Enums.TicketStatus[] | ListEnumTicketStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.TicketStatus[] | ListEnumTicketStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumTicketStatusFilter<$PrismaModel> | $Enums.TicketStatus
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type EnumPoisonEffectFilter<$PrismaModel = never> = {
+    equals?: $Enums.PoisonEffect | EnumPoisonEffectFieldRefInput<$PrismaModel>
+    in?: $Enums.PoisonEffect[] | ListEnumPoisonEffectFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PoisonEffect[] | ListEnumPoisonEffectFieldRefInput<$PrismaModel>
+    not?: NestedEnumPoisonEffectFilter<$PrismaModel> | $Enums.PoisonEffect
   }
 
   export type StringNullableFilter<$PrismaModel = never> = {
@@ -13755,11 +14424,6 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type PlayerScalarRelationFilter = {
     is?: PlayerWhereInput
     isNot?: PlayerWhereInput
@@ -13785,6 +14449,8 @@ export namespace Prisma {
     status?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    isPoison?: SortOrder
+    poisonEffect?: SortOrder
     successMessage?: SortOrder
     failureMessage?: SortOrder
     assignedToId?: SortOrder
@@ -13794,6 +14460,9 @@ export namespace Prisma {
     bounceCount?: SortOrder
     abandonmentPenaltyApplied?: SortOrder
     abandonmentPenaltyAt?: SortOrder
+    slaAgeOffsetMinutes?: SortOrder
+    maintenanceUntil?: SortOrder
+    maintenancePausedMinutes?: SortOrder
     resolvedAt?: SortOrder
     expiredAt?: SortOrder
     createdAt?: SortOrder
@@ -13810,6 +14479,8 @@ export namespace Prisma {
     attackSourcePlayerId?: SortOrder
     pvpAttackId?: SortOrder
     bounceCount?: SortOrder
+    slaAgeOffsetMinutes?: SortOrder
+    maintenancePausedMinutes?: SortOrder
   }
 
   export type TicketMaxOrderByAggregateInput = {
@@ -13822,6 +14493,8 @@ export namespace Prisma {
     status?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    isPoison?: SortOrder
+    poisonEffect?: SortOrder
     successMessage?: SortOrder
     failureMessage?: SortOrder
     assignedToId?: SortOrder
@@ -13831,6 +14504,9 @@ export namespace Prisma {
     bounceCount?: SortOrder
     abandonmentPenaltyApplied?: SortOrder
     abandonmentPenaltyAt?: SortOrder
+    slaAgeOffsetMinutes?: SortOrder
+    maintenanceUntil?: SortOrder
+    maintenancePausedMinutes?: SortOrder
     resolvedAt?: SortOrder
     expiredAt?: SortOrder
     createdAt?: SortOrder
@@ -13847,6 +14523,8 @@ export namespace Prisma {
     status?: SortOrder
     maxValue?: SortOrder
     baseXp?: SortOrder
+    isPoison?: SortOrder
+    poisonEffect?: SortOrder
     successMessage?: SortOrder
     failureMessage?: SortOrder
     assignedToId?: SortOrder
@@ -13856,6 +14534,9 @@ export namespace Prisma {
     bounceCount?: SortOrder
     abandonmentPenaltyApplied?: SortOrder
     abandonmentPenaltyAt?: SortOrder
+    slaAgeOffsetMinutes?: SortOrder
+    maintenanceUntil?: SortOrder
+    maintenancePausedMinutes?: SortOrder
     resolvedAt?: SortOrder
     expiredAt?: SortOrder
     createdAt?: SortOrder
@@ -13872,6 +14553,8 @@ export namespace Prisma {
     attackSourcePlayerId?: SortOrder
     pvpAttackId?: SortOrder
     bounceCount?: SortOrder
+    slaAgeOffsetMinutes?: SortOrder
+    maintenancePausedMinutes?: SortOrder
   }
 
   export type EnumTicketCategoryWithAggregatesFilter<$PrismaModel = never> = {
@@ -13902,6 +14585,24 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumTicketStatusFilter<$PrismaModel>
     _max?: NestedEnumTicketStatusFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type EnumPoisonEffectWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PoisonEffect | EnumPoisonEffectFieldRefInput<$PrismaModel>
+    in?: $Enums.PoisonEffect[] | ListEnumPoisonEffectFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PoisonEffect[] | ListEnumPoisonEffectFieldRefInput<$PrismaModel>
+    not?: NestedEnumPoisonEffectWithAggregatesFilter<$PrismaModel> | $Enums.PoisonEffect
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPoisonEffectFilter<$PrismaModel>
+    _max?: NestedEnumPoisonEffectFilter<$PrismaModel>
   }
 
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -13936,14 +14637,6 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type TicketTemplateCountOrderByAggregateInput = {
@@ -14333,6 +15026,10 @@ export namespace Prisma {
     set?: string
   }
 
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -14347,10 +15044,6 @@ export namespace Prisma {
 
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
-  }
-
-  export type NullableDateTimeFieldUpdateOperationsInput = {
-    set?: Date | string | null
   }
 
   export type UserUpdateOneRequiredWithoutPlayerNestedInput = {
@@ -14537,12 +15230,16 @@ export namespace Prisma {
     set?: $Enums.TicketStatus
   }
 
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
-  }
-
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
+  }
+
+  export type EnumPoisonEffectFieldUpdateOperationsInput = {
+    set?: $Enums.PoisonEffect
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
   }
 
   export type PlayerUpdateOneRequiredWithoutAssignedTicketsNestedInput = {
@@ -14838,6 +15535,17 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type NestedEnumCareerPathNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.CareerPath | EnumCareerPathFieldRefInput<$PrismaModel> | null
     in?: $Enums.CareerPath[] | ListEnumCareerPathFieldRefInput<$PrismaModel> | null
@@ -14854,17 +15562,6 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
-  }
-
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
@@ -14911,14 +15608,18 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
-  export type NestedEnumCareerPathNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.CareerPath | EnumCareerPathFieldRefInput<$PrismaModel> | null
-    in?: $Enums.CareerPath[] | ListEnumCareerPathFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.CareerPath[] | ListEnumCareerPathFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumCareerPathNullableWithAggregatesFilter<$PrismaModel> | $Enums.CareerPath | null
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
     _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumCareerPathNullableFilter<$PrismaModel>
-    _max?: NestedEnumCareerPathNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type NestedIntNullableFilter<$PrismaModel = never> = {
@@ -14930,6 +15631,16 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedEnumCareerPathNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CareerPath | EnumCareerPathFieldRefInput<$PrismaModel> | null
+    in?: $Enums.CareerPath[] | ListEnumCareerPathFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.CareerPath[] | ListEnumCareerPathFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumCareerPathNullableWithAggregatesFilter<$PrismaModel> | $Enums.CareerPath | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumCareerPathNullableFilter<$PrismaModel>
+    _max?: NestedEnumCareerPathNullableFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -14944,20 +15655,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumTicketCategoryFilter<$PrismaModel = never> = {
@@ -14981,6 +15678,18 @@ export namespace Prisma {
     not?: NestedEnumTicketStatusFilter<$PrismaModel> | $Enums.TicketStatus
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedEnumPoisonEffectFilter<$PrismaModel = never> = {
+    equals?: $Enums.PoisonEffect | EnumPoisonEffectFieldRefInput<$PrismaModel>
+    in?: $Enums.PoisonEffect[] | ListEnumPoisonEffectFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PoisonEffect[] | ListEnumPoisonEffectFieldRefInput<$PrismaModel>
+    not?: NestedEnumPoisonEffectFilter<$PrismaModel> | $Enums.PoisonEffect
+  }
+
   export type NestedStringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -14993,11 +15702,6 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type NestedEnumTicketCategoryWithAggregatesFilter<$PrismaModel = never> = {
@@ -15028,6 +15732,24 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumTicketStatusFilter<$PrismaModel>
     _max?: NestedEnumTicketStatusFilter<$PrismaModel>
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedEnumPoisonEffectWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PoisonEffect | EnumPoisonEffectFieldRefInput<$PrismaModel>
+    in?: $Enums.PoisonEffect[] | ListEnumPoisonEffectFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PoisonEffect[] | ListEnumPoisonEffectFieldRefInput<$PrismaModel>
+    not?: NestedEnumPoisonEffectWithAggregatesFilter<$PrismaModel> | $Enums.PoisonEffect
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPoisonEffectFilter<$PrismaModel>
+    _max?: NestedEnumPoisonEffectFilter<$PrismaModel>
   }
 
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -15072,14 +15794,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedEnumPvPAttackTypeFilter<$PrismaModel = never> = {
@@ -15224,11 +15938,16 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -15248,6 +15967,8 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     assignedToId: number
@@ -15256,6 +15977,9 @@ export namespace Prisma {
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -15281,11 +16005,16 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -15305,6 +16034,8 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     lastSentById?: number | null
@@ -15313,6 +16044,9 @@ export namespace Prisma {
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -15338,11 +16072,16 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -15362,6 +16101,8 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     assignedToId: number
@@ -15370,6 +16111,9 @@ export namespace Prisma {
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -15498,6 +16242,8 @@ export namespace Prisma {
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
     maxValue?: IntFilter<"Ticket"> | number
     baseXp?: IntFilter<"Ticket"> | number
+    isPoison?: BoolFilter<"Ticket"> | boolean
+    poisonEffect?: EnumPoisonEffectFilter<"Ticket"> | $Enums.PoisonEffect
     successMessage?: StringNullableFilter<"Ticket"> | string | null
     failureMessage?: StringNullableFilter<"Ticket"> | string | null
     assignedToId?: IntFilter<"Ticket"> | number
@@ -15507,6 +16253,9 @@ export namespace Prisma {
     bounceCount?: IntFilter<"Ticket"> | number
     abandonmentPenaltyApplied?: BoolFilter<"Ticket"> | boolean
     abandonmentPenaltyAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    slaAgeOffsetMinutes?: IntFilter<"Ticket"> | number
+    maintenanceUntil?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    maintenancePausedMinutes?: IntFilter<"Ticket"> | number
     resolvedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     expiredAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
@@ -15547,10 +16296,16 @@ export namespace Prisma {
 
   export type PlayerCreateWithoutAssignedTicketsInput = {
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -15575,10 +16330,16 @@ export namespace Prisma {
     id?: number
     userId: string
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -15605,10 +16366,16 @@ export namespace Prisma {
 
   export type PlayerCreateWithoutSentTicketsInput = {
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -15633,10 +16400,16 @@ export namespace Prisma {
     id?: number
     userId: string
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -15663,10 +16436,16 @@ export namespace Prisma {
 
   export type PlayerCreateWithoutAttackTicketsInput = {
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -15691,10 +16470,16 @@ export namespace Prisma {
     id?: number
     userId: string
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -15762,10 +16547,16 @@ export namespace Prisma {
 
   export type PlayerUpdateWithoutAssignedTicketsInput = {
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -15790,10 +16581,16 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     userId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -15826,10 +16623,16 @@ export namespace Prisma {
 
   export type PlayerUpdateWithoutSentTicketsInput = {
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -15854,10 +16657,16 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     userId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -15890,10 +16699,16 @@ export namespace Prisma {
 
   export type PlayerUpdateWithoutAttackTicketsInput = {
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -15918,10 +16733,16 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     userId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -15979,10 +16800,16 @@ export namespace Prisma {
 
   export type PlayerCreateWithoutAttacksSentInput = {
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -16007,10 +16834,16 @@ export namespace Prisma {
     id?: number
     userId: string
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -16037,10 +16870,16 @@ export namespace Prisma {
 
   export type PlayerCreateWithoutAttacksReceivedInput = {
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -16065,10 +16904,16 @@ export namespace Prisma {
     id?: number
     userId: string
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -16102,11 +16947,16 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -16126,6 +16976,8 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     assignedToId: number
@@ -16134,6 +16986,9 @@ export namespace Prisma {
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -16163,10 +17018,16 @@ export namespace Prisma {
 
   export type PlayerUpdateWithoutAttacksSentInput = {
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -16191,10 +17052,16 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     userId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -16227,10 +17094,16 @@ export namespace Prisma {
 
   export type PlayerUpdateWithoutAttacksReceivedInput = {
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -16255,10 +17128,16 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     userId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -16366,10 +17245,16 @@ export namespace Prisma {
 
   export type PlayerCreateWithoutUserInput = {
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -16393,10 +17278,16 @@ export namespace Prisma {
   export type PlayerUncheckedCreateWithoutUserInput = {
     id?: number
     username: string
+    usernameChangedAt?: Date | string | null
     level?: number
     xp?: number
     careerPath?: $Enums.CareerPath | null
+    careerAbilityReadyAt?: Date | string | null
     credits?: number
+    careerTicketsResolved?: number
+    careerCorrectBounces?: number
+    careerIncorrectBounces?: number
+    careerIncorrectResolves?: number
     kills?: number
     bankruptcies?: number
     ticketsResolved?: number
@@ -16500,10 +17391,16 @@ export namespace Prisma {
 
   export type PlayerUpdateWithoutUserInput = {
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -16527,10 +17424,16 @@ export namespace Prisma {
   export type PlayerUncheckedUpdateWithoutUserInput = {
     id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
+    usernameChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
     xp?: IntFieldUpdateOperationsInput | number
     careerPath?: NullableEnumCareerPathFieldUpdateOperationsInput | $Enums.CareerPath | null
+    careerAbilityReadyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     credits?: IntFieldUpdateOperationsInput | number
+    careerTicketsResolved?: IntFieldUpdateOperationsInput | number
+    careerCorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectBounces?: IntFieldUpdateOperationsInput | number
+    careerIncorrectResolves?: IntFieldUpdateOperationsInput | number
     kills?: IntFieldUpdateOperationsInput | number
     bankruptcies?: IntFieldUpdateOperationsInput | number
     ticketsResolved?: IntFieldUpdateOperationsInput | number
@@ -16713,6 +17616,8 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     assignedToId: number
@@ -16721,6 +17626,9 @@ export namespace Prisma {
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -16737,6 +17645,8 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     lastSentById?: number | null
@@ -16745,6 +17655,9 @@ export namespace Prisma {
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -16761,6 +17674,8 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     assignedToId: number
@@ -16769,6 +17684,9 @@ export namespace Prisma {
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -16858,11 +17776,16 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16882,6 +17805,8 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
@@ -16890,6 +17815,9 @@ export namespace Prisma {
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16906,6 +17834,8 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
@@ -16914,6 +17844,9 @@ export namespace Prisma {
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16929,11 +17862,16 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16953,6 +17891,8 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
@@ -16961,6 +17901,9 @@ export namespace Prisma {
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16977,6 +17920,8 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     lastSentById?: NullableIntFieldUpdateOperationsInput | number | null
@@ -16985,6 +17930,9 @@ export namespace Prisma {
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17000,11 +17948,16 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17024,6 +17977,8 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
@@ -17032,6 +17987,9 @@ export namespace Prisma {
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17048,6 +18006,8 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
@@ -17056,6 +18016,9 @@ export namespace Prisma {
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17072,6 +18035,8 @@ export namespace Prisma {
     status?: $Enums.TicketStatus
     maxValue: number
     baseXp?: number
+    isPoison?: boolean
+    poisonEffect?: $Enums.PoisonEffect
     successMessage?: string | null
     failureMessage?: string | null
     assignedToId: number
@@ -17080,6 +18045,9 @@ export namespace Prisma {
     bounceCount?: number
     abandonmentPenaltyApplied?: boolean
     abandonmentPenaltyAt?: Date | string | null
+    slaAgeOffsetMinutes?: number
+    maintenanceUntil?: Date | string | null
+    maintenancePausedMinutes?: number
     resolvedAt?: Date | string | null
     expiredAt?: Date | string | null
     createdAt?: Date | string
@@ -17095,11 +18063,16 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17119,6 +18092,8 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
@@ -17127,6 +18102,9 @@ export namespace Prisma {
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17143,6 +18121,8 @@ export namespace Prisma {
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     maxValue?: IntFieldUpdateOperationsInput | number
     baseXp?: IntFieldUpdateOperationsInput | number
+    isPoison?: BoolFieldUpdateOperationsInput | boolean
+    poisonEffect?: EnumPoisonEffectFieldUpdateOperationsInput | $Enums.PoisonEffect
     successMessage?: NullableStringFieldUpdateOperationsInput | string | null
     failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
     assignedToId?: IntFieldUpdateOperationsInput | number
@@ -17151,6 +18131,9 @@ export namespace Prisma {
     bounceCount?: IntFieldUpdateOperationsInput | number
     abandonmentPenaltyApplied?: BoolFieldUpdateOperationsInput | boolean
     abandonmentPenaltyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    slaAgeOffsetMinutes?: IntFieldUpdateOperationsInput | number
+    maintenanceUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenancePausedMinutes?: IntFieldUpdateOperationsInput | number
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

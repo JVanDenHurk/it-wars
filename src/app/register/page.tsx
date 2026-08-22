@@ -1,195 +1,352 @@
-import { headers } from "next/headers";
+"use client";
+
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 
-import GenerateTicketButton from "@/components/GenerateTicketButton";
-import ResolveTicketButton from "@/components/ResolveTicketButton";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { authClient } from "@/lib/auth-client";
 
-function calculateTicketValue(
-  maxValue: number,
-  createdAt: Date
-) {
-  const ageMs = Date.now() - createdAt.getTime();
-  const ageMinutes = Math.floor(ageMs / 60000);
+export default function RegisterPage() {
+  const router = useRouter();
 
-  // Ticket loses 2% of its maximum value every minute.
-  const lossPerMinute = maxValue * 0.02;
+  const [name, setName] =
+    useState("");
 
-  const currentValue = Math.floor(
-    maxValue - ageMinutes * lossPerMinute
-  );
+  const [email, setEmail] =
+    useState("");
 
-  // Ticket can never be worth less than 10% of its original value.
-  return Math.max(
-    Math.floor(maxValue * 0.1),
-    currentValue
-  );
-}
+  const [password, setPassword] =
+    useState("");
 
-export default async function TicketsPage() {
-  /*
-   * Check authentication
-   */
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const [confirmPassword, setConfirmPassword] =
+    useState("");
 
-  if (!session) {
-    redirect("/");
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [success, setSuccess] =
+    useState("");
+
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+
+    setError("");
+    setSuccess("");
+
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !password ||
+      !confirmPassword
+    ) {
+      setError(
+        "Please complete all fields."
+      );
+
+      return;
+    }
+
+    if (
+      password !==
+      confirmPassword
+    ) {
+      setError(
+        "Passwords do not match."
+      );
+
+      return;
+    }
+
+    if (
+      password.length < 8
+    ) {
+      setError(
+        "Password must be at least 8 characters."
+      );
+
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result =
+        await authClient.signUp.email({
+          name:
+            name.trim(),
+
+          email:
+            email.trim(),
+
+          password,
+        });
+
+      if (
+        result.error
+      ) {
+        setError(
+          result.error.message ??
+            "Unable to create account."
+        );
+
+        return;
+      }
+
+      setSuccess(
+        "Account created successfully."
+      );
+
+      /*
+       * Better Auth normally creates
+       * the session immediately after
+       * email/password registration.
+       *
+       * Send the new player to the
+       * dashboard where their Player
+       * record will be created.
+       */
+      router.push(
+        "/dashboard"
+      );
+
+      router.refresh();
+    } catch (error) {
+      console.error(
+        "Registration failed:",
+        error
+      );
+
+      setError(
+        "Unable to create account. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
-
-  /*
-   * Get current player
-   */
-  const player = await prisma.player.findUnique({
-    where: {
-      userId: session.user.id,
-    },
-  });
-
-  if (!player) {
-    redirect("/dashboard");
-  }
-
-  /*
-   * Get player's open tickets
-   */
-  const tickets = await prisma.ticket.findMany({
-    where: {
-      assignedToId: player.id,
-      status: "OPEN",
-    },
-    orderBy: {
-      createdAt: "asc",
-    },
-  });
 
   return (
-    <main className="min-h-screen bg-black p-8 text-white">
-      <div className="mx-auto max-w-5xl">
+    <main className="flex min-h-screen items-center justify-center bg-black px-4 py-12 text-white">
 
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-black">
-              Ticket Queue
+      <div className="w-full max-w-md">
+
+        <div className="border border-zinc-800 bg-zinc-950 p-8">
+
+          <div className="text-center">
+
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-zinc-500">
+              IT WARS
+            </p>
+
+            <h1 className="mt-3 text-3xl font-black">
+              Create Account
             </h1>
 
-            <p className="mt-2 text-zinc-400">
-              {tickets.length} open ticket
-              {tickets.length === 1 ? "" : "s"}
+            <p className="mt-2 text-sm text-zinc-400">
+              Join the Service Desk and try not to go bankrupt.
             </p>
+
           </div>
 
-          <Link
-            href="/dashboard"
-            className="border border-zinc-700 px-4 py-2 text-sm hover:bg-zinc-900"
+          <form
+            onSubmit={
+              handleSubmit
+            }
+            className="mt-8 space-y-5"
           >
-            Dashboard
-          </Link>
-        </div>
 
-        {/* Generate Ticket */}
-        <div className="mt-8">
-          <GenerateTicketButton />
-        </div>
+            {/* Username */}
+            <div>
 
-        {/* Ticket Queue */}
-        <div className="mt-8 space-y-4">
-
-          {/* Empty Queue */}
-          {tickets.length === 0 && (
-            <div className="border border-zinc-800 bg-zinc-950 p-8 text-center">
-              <h2 className="text-xl font-bold">
-                Queue Empty
-              </h2>
-
-              <p className="mt-2 text-zinc-400">
-                Pull a ticket to start working.
-              </p>
-            </div>
-          )}
-
-          {/* Tickets */}
-          {tickets.map((ticket) => {
-            const value = calculateTicketValue(
-              ticket.maxValue,
-              ticket.createdAt
-            );
-
-            const ageMinutes = Math.floor(
-              (Date.now() - ticket.createdAt.getTime()) /
-                60000
-            );
-
-            return (
-              <div
-                key={ticket.id}
-                className="border border-zinc-800 bg-zinc-950 p-6"
+              <label
+                htmlFor="name"
+                className="text-sm font-bold text-zinc-300"
               >
-                {/* Ticket Header */}
-                <div className="flex justify-between gap-4">
-                  <div>
-                    <p className="text-xs text-zinc-500">
-                      INC
-                      {ticket.id
-                        .toString()
-                        .padStart(5, "0")}
-                    </p>
+                Username
+              </label>
 
-                    <h2 className="mt-1 text-xl font-bold">
-                      {ticket.title}
-                    </h2>
-                  </div>
+              <input
+                id="name"
+                type="text"
+                value={
+                  name
+                }
+                onChange={(
+                  event
+                ) =>
+                  setName(
+                    event.target.value
+                  )
+                }
+                disabled={
+                  loading
+                }
+                autoComplete="username"
+                className="mt-2 w-full border border-zinc-700 bg-black px-4 py-3 text-white outline-none transition hover:border-zinc-600 focus:border-white disabled:opacity-50"
+                placeholder="ServiceDeskHero"
+              />
 
-                  {/* Current Value */}
-                  <div className="text-right">
-                    <p className="text-xl font-bold">
-                      {value} CR
-                    </p>
+            </div>
 
-                    <p className="text-xs text-zinc-500">
-                      Max {ticket.maxValue} CR
-                    </p>
-                  </div>
-                </div>
+            {/* Email */}
+            <div>
 
-                {/* Ticket Description */}
-                <p className="mt-4 text-zinc-300">
-                  {ticket.description}
+              <label
+                htmlFor="email"
+                className="text-sm font-bold text-zinc-300"
+              >
+                Email
+              </label>
+
+              <input
+                id="email"
+                type="email"
+                value={
+                  email
+                }
+                onChange={(
+                  event
+                ) =>
+                  setEmail(
+                    event.target.value
+                  )
+                }
+                disabled={
+                  loading
+                }
+                autoComplete="email"
+                className="mt-2 w-full border border-zinc-700 bg-black px-4 py-3 text-white outline-none transition hover:border-zinc-600 focus:border-white disabled:opacity-50"
+                placeholder="you@example.com"
+              />
+
+            </div>
+
+            {/* Password */}
+            <div>
+
+              <label
+                htmlFor="password"
+                className="text-sm font-bold text-zinc-300"
+              >
+                Password
+              </label>
+
+              <input
+                id="password"
+                type="password"
+                value={
+                  password
+                }
+                onChange={(
+                  event
+                ) =>
+                  setPassword(
+                    event.target.value
+                  )
+                }
+                disabled={
+                  loading
+                }
+                autoComplete="new-password"
+                className="mt-2 w-full border border-zinc-700 bg-black px-4 py-3 text-white outline-none transition hover:border-zinc-600 focus:border-white disabled:opacity-50"
+                placeholder="Minimum 8 characters"
+              />
+
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+
+              <label
+                htmlFor="confirmPassword"
+                className="text-sm font-bold text-zinc-300"
+              >
+                Confirm Password
+              </label>
+
+              <input
+                id="confirmPassword"
+                type="password"
+                value={
+                  confirmPassword
+                }
+                onChange={(
+                  event
+                ) =>
+                  setConfirmPassword(
+                    event.target.value
+                  )
+                }
+                disabled={
+                  loading
+                }
+                autoComplete="new-password"
+                className="mt-2 w-full border border-zinc-700 bg-black px-4 py-3 text-white outline-none transition hover:border-zinc-600 focus:border-white disabled:opacity-50"
+                placeholder="Enter password again"
+              />
+
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div className="border border-red-900 bg-red-950/20 p-4">
+
+                <p className="text-sm text-red-400">
+                  {error}
                 </p>
 
-                {/* Ticket Information */}
-                <div className="mt-4 flex gap-4 text-sm text-zinc-500">
-                  <span>
-                    Age: {ageMinutes}m
-                  </span>
-                </div>
-
-                {/* Actions */}
-                <div className="mt-6 flex items-start gap-3">
-
-                  <ResolveTicketButton
-                    ticketId={ticket.id}
-                  />
-
-                  {/* Bounce comes next */}
-                  <button
-                    type="button"
-                    disabled
-                    className="border border-zinc-700 px-4 py-2 font-bold opacity-40"
-                  >
-                    Bounce
-                  </button>
-
-                </div>
               </div>
-            );
-          })}
+            )}
+
+            {/* Success */}
+            {success && (
+              <div className="border border-green-900 bg-green-950/20 p-4">
+
+                <p className="text-sm text-green-400">
+                  {success}
+                </p>
+
+              </div>
+            )}
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={
+                loading
+              }
+              className="w-full bg-white px-5 py-3 font-bold text-black hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loading
+                ? "Creating Account..."
+                : "Create Account"}
+            </button>
+
+          </form>
+
+          <div className="mt-6 border-t border-zinc-800 pt-6 text-center">
+
+            <p className="text-sm text-zinc-500">
+              Already have an account?
+            </p>
+
+            <Link
+              href="/"
+              className="mt-2 inline-block font-bold text-white hover:text-zinc-300"
+            >
+              Sign In
+            </Link>
+
+          </div>
+
         </div>
+
       </div>
+
     </main>
   );
 }

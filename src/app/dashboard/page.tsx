@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import ClearQueuePenaltyButton from "@/components/ClearQueuePenaltyButton";
+import DashboardRefresh from "@/components/DashboardRefresh";
 import PlayerHeartbeat from "@/components/PlayerHeartbeat";
 import SignOutButton from "@/components/SignOutButton";
 import TicketTimer from "@/components/TicketTimer";
@@ -14,115 +15,103 @@ import { getRoleTitle } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
 
 export default async function DashboardPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session =
+    await auth.api.getSession({
+      headers:
+        await headers(),
+    });
 
   if (!session) {
     redirect("/");
   }
 
-  let player = await prisma.player.findUnique({
-    where: {
-      userId: session.user.id,
-    },
-  });
-
-  if (!player) {
-    player = await prisma.player.create({
-      data: {
-        userId: session.user.id,
-        username: session.user.name,
+  let player =
+    await prisma.player.findUnique({
+      where: {
+        userId:
+          session.user.id,
       },
     });
+
+  if (!player) {
+    player =
+      await prisma.player.create({
+        data: {
+          userId:
+            session.user.id,
+
+          username:
+            session.user.name,
+        },
+      });
   }
 
-  const now = new Date();
+  const now =
+    new Date();
 
-  /*
-   * Player is considered online if
-   * they have been active within
-   * the last 2 minutes.
-   */
-  const activeCutoff = new Date(
-    now.getTime() -
-      2 * 60 * 1000
-  );
+  const activeCutoff =
+    new Date(
+      now.getTime() -
+        2 *
+          60 *
+          1000
+    );
 
-  /*
-   * ============================
-   * CURRENT PLAYER STATS
-   * ============================
-   */
-  const openTickets = await prisma.ticket.count({
-    where: {
-      assignedToId: player.id,
-      status: "OPEN",
-    },
-  });
+  const openTickets =
+    await prisma.ticket.count({
+      where: {
+        assignedToId:
+          player.id,
 
-  const resolvedTickets = await prisma.ticket.count({
-    where: {
-      assignedToId: player.id,
-      status: "RESOLVED",
-    },
-  });
+        status:
+          "OPEN",
+      },
+    });
 
-  /*
-   * ============================
-   * ACTIVE PLAYERS
-   * ============================
-   *
-   * Online requires:
-   *
-   * 1. Valid authentication session
-   * 2. Heartbeat/activity within
-   *    the last 2 minutes
-   */
   const activePlayers =
-    await prisma.player.findMany({
+    await prisma.player.count({
       where: {
         lastActiveAt: {
-          gt: activeCutoff,
+          gt:
+            activeCutoff,
         },
 
         user: {
           sessions: {
             some: {
               expiresAt: {
-                gt: now,
+                gt:
+                  now,
               },
             },
           },
         },
       },
-
-      select: {
-        id: true,
-      },
     });
 
-  /*
-   * ============================
-   * LEADERBOARD
-   * ============================
-   */
   const leaderboardPlayers =
     await prisma.player.findMany({
       select: {
-        username: true,
+        username:
+          true,
 
-        xp: true,
+        xp:
+          true,
 
-        lifetimeCreditsEarned: true,
+        lifetimeCreditsEarned:
+          true,
 
-        ticketsResolved: true,
+        ticketsResolved:
+          true,
 
-        correctBounces: true,
+        correctBounces:
+          true,
 
-        kills: true,
+        kills:
+          true,
 
-        bankruptcies: true,
+        bankruptcies:
+          true,
       },
     });
 
@@ -163,30 +152,25 @@ export default async function DashboardPage() {
       )
       .sort(
         (a, b) =>
-          b.score - a.score
+          b.score -
+          a.score
       );
 
   const leaderboardLeader =
-    leaderboard[0] ?? null;
+    leaderboard[0] ??
+    null;
 
-  /*
-   * ============================
-   * ROLE
-   * ============================
-   */
-  const roleTitle = getRoleTitle(
-    player.level,
-    player.careerPath
-  );
+  const roleTitle =
+    getRoleTitle(
+      player.level,
+      player.careerPath
+    );
 
-  /*
-   * ============================
-   * QUEUE PENALTY
-   * ============================
-   */
   const queuePenaltyActive =
-    player.queuePenaltyUntil !== null &&
-    player.queuePenaltyUntil > now;
+    player.queuePenaltyUntil !==
+      null &&
+    player.queuePenaltyUntil >
+      now;
 
   const queuePenaltyMinutesRemaining =
     queuePenaltyActive &&
@@ -195,7 +179,9 @@ export default async function DashboardPage() {
           1,
           Math.ceil(
             (
-              player.queuePenaltyUntil.getTime() -
+              player
+                .queuePenaltyUntil
+                .getTime() -
               now.getTime()
             ) /
               60000
@@ -204,336 +190,99 @@ export default async function DashboardPage() {
       : 0;
 
   return (
-    <main className="min-h-screen bg-black p-8 text-white">
+    <main className="min-h-screen bg-black px-4 py-5 text-white md:px-6">
 
-      {/*
-       * Sends a heartbeat immediately,
-       * then every 60 seconds while
-       * this dashboard is open.
-       */}
       <PlayerHeartbeat />
+
+      <DashboardRefresh />
 
       <div className="mx-auto max-w-6xl">
 
         {/* ============================
             HEADER
             ============================ */}
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap items-start justify-between gap-3">
 
           <div>
-            <h1 className="text-4xl font-black">
+
+            <h1 className="text-3xl font-black">
               IT WARS
             </h1>
 
-            <p className="mt-2 text-zinc-400">
-              Welcome back, {player.username}
+            <p className="mt-1 text-sm text-zinc-400">
+              Welcome back,{" "}
+              {
+                player.username
+              }
             </p>
 
-            <p className="mt-1 text-sm font-semibold text-zinc-500">
-              {roleTitle}
-            </p>
-          </div>
-
-          <SignOutButton />
-
-        </div>
-
-        {/* ============================
-            CORE STATS
-            ============================ */}
-        <div className="mt-8 grid gap-4 md:grid-cols-4">
-
-          <div className="border border-zinc-800 bg-zinc-950 p-5">
-
-            <p className="text-xs uppercase tracking-wide text-zinc-500">
-              Level
-            </p>
-
-            <p className="mt-2 text-3xl font-bold">
-              {player.level}
+            <p className="text-xs font-semibold text-zinc-500">
+              {
+                roleTitle
+              }
             </p>
 
           </div>
 
-          <div className="border border-zinc-800 bg-zinc-950 p-5">
+          <div className="flex flex-wrap items-center gap-2">
 
-            <p className="text-xs uppercase tracking-wide text-zinc-500">
-              Career XP
-            </p>
+            <Link
+              href="/profile"
+              className="border border-zinc-700 px-3 py-2 text-sm font-bold hover:bg-zinc-900"
+            >
+              Profile
+            </Link>
 
-            <p className="mt-2 text-3xl font-bold">
-              {player.xp}
-            </p>
+            <Link
+              href="/pvp"
+              className="border border-purple-700 bg-purple-950/20 px-3 py-2 text-sm font-bold text-purple-300 hover:bg-purple-950/40"
+            >
+              ☣ Poison Store
+            </Link>
 
-          </div>
-
-          <div className="border border-zinc-800 bg-zinc-950 p-5">
-
-            <p className="text-xs uppercase tracking-wide text-zinc-500">
-              Credits
-            </p>
-
-            <p className="mt-2 text-3xl font-bold">
-              {player.credits}
-            </p>
-
-            <p className="text-xs text-zinc-500">
-              CR
-            </p>
-
-          </div>
-
-          <div className="border border-zinc-800 bg-zinc-950 p-5">
-
-            <p className="text-xs uppercase tracking-wide text-zinc-500">
-              Open Tickets
-            </p>
-
-            <p className="mt-2 text-3xl font-bold">
-              {openTickets}
-            </p>
+            <SignOutButton />
 
           </div>
 
         </div>
 
         {/* ============================
-            OWNERSHIP WARNING
+            YOUR QUEUE
             ============================ */}
-        {queuePenaltyActive && (
-          <div className="mt-4 border border-yellow-900 bg-yellow-950/20 p-6">
+        <div className="mt-4 border border-zinc-700 bg-zinc-950 p-4">
 
-            <p className="text-xs uppercase tracking-wide text-yellow-500">
-              Ownership Warning
-            </p>
-
-            <h2 className="mt-2 text-xl font-bold text-yellow-300">
-              Your queue priority has been reduced
-            </h2>
-
-            <p className="mt-2 text-sm text-zinc-300">
-              You transferred a ticket that you could have resolved.
-            </p>
-
-            <p className="mt-2 text-sm text-zinc-400">
-              New tickets will arrive less frequently while this warning is active.
-            </p>
-
-            <p className="mt-3 text-sm font-bold text-yellow-400">
-              Approximately{" "}
-              {queuePenaltyMinutesRemaining} minute
-              {queuePenaltyMinutesRemaining === 1
-                ? ""
-                : "s"}{" "}
-              remaining.
-            </p>
-
-            <ClearQueuePenaltyButton />
-
-          </div>
-        )}
-
-        {/* ============================
-            PVP / PERFORMANCE
-            ============================ */}
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-
-          <div className="border border-zinc-800 bg-zinc-950 p-6">
-
-            <p className="text-xs uppercase tracking-wide text-zinc-500">
-              PvP Record
-            </p>
-
-            <div className="mt-4 grid grid-cols-2 gap-4">
-
-              <div>
-                <p className="text-sm text-zinc-500">
-                  Kills
-                </p>
-
-                <p className="text-3xl font-bold">
-                  {player.kills}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-zinc-500">
-                  Bankruptcies
-                </p>
-
-                <p className="text-3xl font-bold">
-                  {player.bankruptcies}
-                </p>
-              </div>
-
-            </div>
-
-          </div>
-
-          <div className="border border-zinc-800 bg-zinc-950 p-6">
-
-            <p className="text-xs uppercase tracking-wide text-zinc-500">
-              Ticket Performance
-            </p>
-
-            <div className="mt-4 space-y-2">
-
-              <p>
-                Resolved: {resolvedTickets}
-              </p>
-
-              <p>
-                Correct Bounces:{" "}
-                {player.correctBounces}
-              </p>
-
-              <p>
-                Incorrect Bounces:{" "}
-                {player.incorrectBounces}
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* ============================
-            PLAYERS / LEADERBOARD
-            ============================ */}
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-
-          {/* Active Players */}
-          <div className="border border-zinc-800 bg-zinc-950 p-6">
-
-            <div className="flex items-start justify-between gap-6">
-
-              <div>
-
-                <p className="text-xs uppercase tracking-wide text-zinc-500">
-                  Active Players
-                </p>
-
-                <div className="mt-3 flex items-center gap-3">
-
-                  <span className="h-3 w-3 rounded-full bg-green-400" />
-
-                  <p className="text-3xl font-black">
-                    {activePlayers.length}
-                  </p>
-
-                </div>
-
-                <p className="mt-1 text-sm text-zinc-500">
-                  Online now
-                </p>
-
-              </div>
-
-              <Link
-                href="/players"
-                className="border border-zinc-700 px-4 py-2 text-sm font-bold hover:bg-zinc-900"
-              >
-                View Players
-              </Link>
-
-            </div>
-
-            <p className="mt-5 border-t border-zinc-800 pt-4 text-xs text-zinc-600">
-              Online specialist players affect which ticket types can enter the global queue.
-            </p>
-
-          </div>
-
-          {/* Leaderboard */}
-          <div className="border border-zinc-800 bg-zinc-950 p-6">
-
-            <div className="flex items-start justify-between gap-6">
-
-              <div>
-
-                <p className="text-xs uppercase tracking-wide text-zinc-500">
-                  Leaderboard
-                </p>
-
-                {leaderboardLeader ? (
-                  <>
-                    <div className="mt-3 flex items-center gap-3">
-
-                      <span className="text-2xl font-black text-yellow-400">
-                        #1
-                      </span>
-
-                      <p className="text-2xl font-black">
-                        {
-                          leaderboardLeader.username
-                        }
-                      </p>
-
-                    </div>
-
-                    <p className="mt-2 text-sm text-zinc-500">
-                      {
-                        leaderboardLeader.score
-                      }{" "}
-                      Score
-                    </p>
-                  </>
-                ) : (
-                  <p className="mt-3 text-zinc-500">
-                    No rankings yet.
-                  </p>
-                )}
-
-              </div>
-
-              <Link
-                href="/leaderboard"
-                className="border border-zinc-700 px-4 py-2 text-sm font-bold hover:bg-zinc-900"
-              >
-                View Leaderboard
-              </Link>
-
-            </div>
-
-            <p className="mt-5 border-t border-zinc-800 pt-4 text-xs text-zinc-600">
-              Earn score from XP, resolved tickets, correct routing, credits and PvP.
-            </p>
-
-          </div>
-
-        </div>
-
-        {/* ============================
-            QUEUE
-            ============================ */}
-        <div className="mt-4 border border-zinc-800 bg-zinc-950 p-6">
-
-          <div className="flex items-start justify-between gap-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
 
             <div>
 
-              <p className="text-xs uppercase tracking-wide text-zinc-500">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
                 Your Queue
               </p>
 
-              <h2 className="mt-2 text-3xl font-bold">
-                {openTickets} Open Ticket
-                {openTickets === 1
-                  ? ""
-                  : "s"}
+              <h2 className="mt-1 text-3xl font-black">
+                {
+                  openTickets
+                }{" "}
+                Open Ticket
+                {
+                  openTickets ===
+                  1
+                    ? ""
+                    : "s"
+                }
               </h2>
 
-              <p className="mt-2 text-zinc-400">
-                Ticket value decreases while it remains in your queue.
+              <p className="mt-1 text-sm text-zinc-400">
+                Keep the queue moving. Ticket value drops while work remains unresolved.
               </p>
 
-              <div className="mt-5 border-t border-zinc-800 pt-4">
+              <div className="mt-3 border-t border-zinc-800 pt-3">
 
                 <TicketTimer
                   nextTicketAt={
                     player.nextTicketAt
                   }
+
                   queuePenaltyActive={
                     queuePenaltyActive
                   }
@@ -545,7 +294,7 @@ export default async function DashboardPage() {
 
             <Link
               href="/tickets"
-              className="rounded bg-white px-5 py-3 font-bold text-black hover:bg-zinc-200"
+              className="rounded bg-white px-5 py-2.5 text-sm font-black text-black hover:bg-zinc-200"
             >
               Open Queue
             </Link>
@@ -555,45 +304,350 @@ export default async function DashboardPage() {
         </div>
 
         {/* ============================
-            CAREER
+            OWNERSHIP WARNING
             ============================ */}
-        <div className="mt-4 border border-zinc-800 bg-zinc-950 p-6">
+        {queuePenaltyActive && (
+          <div className="mt-3 border border-yellow-900 bg-yellow-950/20 p-4">
 
-          <p className="text-xs uppercase tracking-wide text-zinc-500">
-            Career
-          </p>
-
-          <h2 className="mt-2 text-2xl font-bold">
-            {roleTitle}
-          </h2>
-
-          {player.level < 4 && (
-            <p className="mt-2 text-sm text-zinc-400">
-              Reach Level 4 to choose your specialist career path.
+            <p className="text-xs uppercase tracking-wide text-yellow-500">
+              Ownership Warning
             </p>
-          )}
 
-          {player.level >= 4 &&
-            !player.careerPath && (
-              <div className="mt-4">
+            <h2 className="mt-1 text-lg font-bold text-yellow-300">
+              Your queue priority has been reduced
+            </h2>
 
-                <p className="text-sm text-yellow-400">
-                  Career specialisation available.
+            <p className="mt-1 text-sm text-zinc-300">
+              You transferred a ticket that you could have resolved.
+            </p>
+
+            <p className="mt-1 text-sm text-zinc-400">
+              New tickets will arrive less frequently while this warning is active.
+            </p>
+
+            <p className="mt-2 text-sm font-bold text-yellow-400">
+              Approximately{" "}
+              {
+                queuePenaltyMinutesRemaining
+              }{" "}
+              minute
+              {
+                queuePenaltyMinutesRemaining ===
+                1
+                  ? ""
+                  : "s"
+              }{" "}
+              remaining.
+            </p>
+
+            <ClearQueuePenaltyButton />
+
+          </div>
+        )}
+
+        {/* ============================
+            CURRENT CAREER CORE
+            ============================ */}
+        <div className="mt-3 grid gap-3 md:grid-cols-4">
+
+          <div className="border border-zinc-800 bg-zinc-950 p-4">
+
+            <p className="text-xs uppercase tracking-wide text-zinc-500">
+              Level
+            </p>
+
+            <p className="mt-1 text-2xl font-black">
+              {
+                player.level
+              }
+            </p>
+
+          </div>
+
+          <div className="border border-zinc-800 bg-zinc-950 p-4">
+
+            <p className="text-xs uppercase tracking-wide text-zinc-500">
+              Career XP
+            </p>
+
+            <p className="mt-1 text-2xl font-black">
+              {
+                player.xp
+              }
+            </p>
+
+          </div>
+
+          <div className="border border-zinc-800 bg-zinc-950 p-4">
+
+            <p className="text-xs uppercase tracking-wide text-zinc-500">
+              Credits
+            </p>
+
+            <p className="mt-1 text-2xl font-black">
+              {
+                player.credits
+              }
+            </p>
+
+            <p className="text-[10px] text-zinc-500">
+              CR
+            </p>
+
+          </div>
+
+          <div className="border border-zinc-800 bg-zinc-950 p-4">
+
+            <p className="text-xs uppercase tracking-wide text-zinc-500">
+              Position
+            </p>
+
+            <p className="mt-1 text-lg font-black">
+              {
+                roleTitle
+              }
+            </p>
+
+          </div>
+
+        </div>
+
+        {/* ============================
+            CURRENT RUN STATS
+            ============================ */}
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+
+          <div className="border border-zinc-800 bg-zinc-950 p-4">
+
+            <p className="text-xs uppercase tracking-wide text-zinc-500">
+              Resolved This Run
+            </p>
+
+            <p className="mt-1 text-2xl font-black text-green-400">
+              {
+                player
+                  .careerTicketsResolved
+              }
+            </p>
+
+          </div>
+
+          <div className="border border-zinc-800 bg-zinc-950 p-4">
+
+            <p className="text-xs uppercase tracking-wide text-zinc-500">
+              Correct Bounces
+            </p>
+
+            <p className="mt-1 text-2xl font-black text-green-400">
+              {
+                player
+                  .careerCorrectBounces
+              }
+            </p>
+
+          </div>
+
+          <div className="border border-zinc-800 bg-zinc-950 p-4">
+
+            <p className="text-xs uppercase tracking-wide text-zinc-500">
+              Wrong Bounces
+            </p>
+
+            <p className="mt-1 text-2xl font-black text-red-400">
+              {
+                player
+                  .careerIncorrectBounces
+              }
+            </p>
+
+          </div>
+
+          <div className="border border-zinc-800 bg-zinc-950 p-4">
+
+            <p className="text-xs uppercase tracking-wide text-zinc-500">
+              Wrong Resolves
+            </p>
+
+            <p className="mt-1 text-2xl font-black text-red-400">
+              {
+                player
+                  .careerIncorrectResolves
+              }
+            </p>
+
+          </div>
+
+        </div>
+
+        {/* ============================
+            ACTIVE PLAYERS / LEADERBOARD
+            ============================ */}
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
+
+          <div className="border border-zinc-800 bg-zinc-950 p-4">
+
+            <div className="flex items-start justify-between gap-4">
+
+              <div>
+
+                <p className="text-xs uppercase tracking-wide text-zinc-500">
+                  Active Players
                 </p>
 
+                <div className="mt-2 flex items-center gap-2">
+
+                  <span className="h-2.5 w-2.5 rounded-full bg-green-400" />
+
+                  <p className="text-2xl font-black">
+                    {
+                      activePlayers
+                    }
+                  </p>
+
+                </div>
+
+                <p className="text-xs text-zinc-500">
+                  Online now
+                </p>
+
+              </div>
+
+              <Link
+                href="/players"
+                className="border border-zinc-700 px-3 py-2 text-xs font-bold hover:bg-zinc-900"
+              >
+                View Players
+              </Link>
+
+            </div>
+
+            <p className="mt-3 border-t border-zinc-800 pt-3 text-[11px] text-zinc-600">
+              Online specialists affect which resolver teams are available.
+            </p>
+
+          </div>
+
+          <div className="border border-zinc-800 bg-zinc-950 p-4">
+
+            <div className="flex items-start justify-between gap-4">
+
+              <div>
+
+                <p className="text-xs uppercase tracking-wide text-zinc-500">
+                  Leaderboard
+                </p>
+
+                {leaderboardLeader ? (
+                  <>
+
+                    <div className="mt-2 flex items-center gap-2">
+
+                      <span className="text-xl font-black text-yellow-400">
+                        #1
+                      </span>
+
+                      <p className="text-xl font-black">
+                        {
+                          leaderboardLeader
+                            .username
+                        }
+                      </p>
+
+                    </div>
+
+                    <p className="mt-1 text-xs text-zinc-500">
+                      {
+                        leaderboardLeader
+                          .score
+                      }{" "}
+                      Score
+                    </p>
+
+                  </>
+                ) : (
+                  <p className="mt-2 text-sm text-zinc-500">
+                    No rankings yet.
+                  </p>
+                )}
+
+              </div>
+
+              <Link
+                href="/leaderboard"
+                className="border border-zinc-700 px-3 py-2 text-xs font-bold hover:bg-zinc-900"
+              >
+                View Leaderboard
+              </Link>
+
+            </div>
+
+            <p className="mt-3 border-t border-zinc-800 pt-3 text-[11px] text-zinc-600">
+              Lifetime performance, Credits, routing and PvP contribute to score.
+            </p>
+
+          </div>
+
+        </div>
+
+        {/* ============================
+            CAREER
+            ============================ */}
+        <div className="mt-3 border border-zinc-800 bg-zinc-950 p-4">
+
+          <div className="flex flex-wrap items-start justify-between gap-3">
+
+            <div>
+
+              <p className="text-xs uppercase tracking-wide text-zinc-500">
+                Career
+              </p>
+
+              <h2 className="mt-1 text-xl font-black">
+                {
+                  roleTitle
+                }
+              </h2>
+
+              {player.level <
+                4 && (
+                <p className="mt-1 text-xs text-zinc-400">
+                  Reach Level 4 to choose your specialist career path.
+                </p>
+              )}
+
+              {player.level >=
+                4 &&
+                !player.careerPath && (
+                  <p className="mt-1 text-xs text-yellow-400">
+                    Career specialisation available.
+                  </p>
+                )}
+
+              {player.careerPath && (
+                <p className="mt-1 text-xs text-zinc-400">
+                  Specialist passive and active abilities are active.
+                </p>
+              )}
+
+            </div>
+
+            {player.level >=
+              4 &&
+              !player.careerPath && (
                 <Link
                   href="/choose-career"
-                  className="mt-3 inline-block border border-zinc-700 px-4 py-2 font-bold hover:bg-zinc-900"
+                  className="border border-zinc-700 px-3 py-2 text-sm font-bold hover:bg-zinc-900"
                 >
                   Choose Career Path
                 </Link>
+              )}
 
-              </div>
-            )}
+          </div>
 
         </div>
 
       </div>
+
     </main>
   );
 }

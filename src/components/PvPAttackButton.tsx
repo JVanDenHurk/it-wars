@@ -1,13 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
-import type {
-    PvPAttackType,
-} from "@/lib/pvp-attacks";
+import { getRoleTitle } from "@/lib/player-level";
 
-interface TargetOption {
+interface PvPAttackButtonProps {
+  attackType: string;
+  attackName: string;
+  attackCost: number;
+  playerCredits: number;
+}
+
+interface PlayerOption {
   id: number;
   username: string;
   level: number;
@@ -16,88 +24,214 @@ interface TargetOption {
   queueSize: number;
 }
 
-interface PvPAttackButtonProps {
-  attackType: PvPAttackType;
-  attackName: string;
-  attackCost: number;
-  playerCredits: number;
-  targets: TargetOption[];
-}
-
-type AttackResponse = {
-  success?: boolean;
-
-  attackId?: number;
-  attackType?: string;
-  attackName?: string;
-
-  target?: string;
-
-  cost?: number;
-
-  ticketsCreated?: number;
-
-  message?: string;
-
-  error?: string;
-};
+type SortOption =
+  | "queue"
+  | "credits-low"
+  | "credits-high"
+  | "username";
 
 export default function PvPAttackButton({
   attackType,
   attackName,
   attackCost,
   playerCredits,
-  targets,
 }: PvPAttackButtonProps) {
-  const router = useRouter();
+  const router =
+    useRouter();
 
   const [open, setOpen] =
     useState(false);
 
-  const [
-    selectedTarget,
-    setSelectedTarget,
-  ] = useState<number | null>(
-    null
-  );
+  const [players, setPlayers] =
+    useState<PlayerOption[]>(
+      []
+    );
 
-  const [loading, setLoading] =
+  const [selectedPlayer, setSelectedPlayer] =
+    useState<number | null>(
+      null
+    );
+
+  const [search, setSearch] =
+    useState("");
+
+  const [debouncedSearch, setDebouncedSearch] =
+    useState("");
+
+  const [sort, setSort] =
+    useState<SortOption>(
+      "queue"
+    );
+
+  const [page, setPage] =
+    useState(1);
+
+  const [totalPages, setTotalPages] =
+    useState(1);
+
+  const [totalPlayers, setTotalPlayers] =
+    useState(0);
+
+  const [loadingPlayers, setLoadingPlayers] =
     useState(false);
+
+  const [submitting, setSubmitting] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState("");
 
   const [error, setError] =
     useState("");
 
-  const [success, setSuccess] =
-    useState<{
-      target: string;
-      attackName: string;
-      cost: number;
-      ticketsCreated: number;
-      message: string;
-    } | null>(null);
-
   const affordable =
-    playerCredits >=
+    playerCredits >
     attackCost;
 
-  function toggleOpen() {
-    if (!affordable) {
+  /*
+   * ============================
+   * SEARCH DEBOUNCE
+   * ============================
+   */
+  useEffect(() => {
+    const timer =
+      window.setTimeout(
+        () => {
+          setDebouncedSearch(
+            search
+          );
+
+          setPage(1);
+        },
+        300
+      );
+
+    return () => {
+      window.clearTimeout(
+        timer
+      );
+    };
+  }, [search]);
+
+  /*
+   * ============================
+   * LOAD TARGETS
+   * ============================
+   */
+  useEffect(() => {
+    if (!open) {
       return;
     }
 
-    setOpen(
-      (current) =>
-        !current
-    );
+    async function loadPlayers() {
+      setLoadingPlayers(
+        true
+      );
 
-    setError("");
-    setSelectedTarget(
-      null
-    );
-  }
+      setError("");
 
-  async function launchAttack() {
-    if (!selectedTarget) {
+      try {
+        const params =
+          new URLSearchParams({
+            page:
+              page.toString(),
+
+            sort,
+
+            search:
+              debouncedSearch,
+          });
+
+        const response =
+          await fetch(
+            `/api/pvp/targets?${params.toString()}`
+          );
+
+        const responseText =
+          await response.text();
+
+        let data: {
+          error?: string;
+
+          players?: PlayerOption[];
+
+          page?: number;
+
+          totalPages?: number;
+
+          total?: number;
+        } = {};
+
+        if (responseText) {
+          data =
+            JSON.parse(
+              responseText
+            );
+        }
+
+        if (!response.ok) {
+          setError(
+            data.error ??
+              "Unable to load players."
+          );
+
+          return;
+        }
+
+        setPlayers(
+          data.players ??
+            []
+        );
+
+        setTotalPages(
+          data.totalPages ??
+            1
+        );
+
+        setTotalPlayers(
+          data.total ??
+            0
+        );
+
+        /*
+         * Selection should disappear
+         * if the selected player is no
+         * longer on the current page.
+         */
+        setSelectedPlayer(
+          null
+        );
+      } catch (error) {
+        console.error(
+          "Unable to load PvP targets:",
+          error
+        );
+
+        setError(
+          "Unable to load players."
+        );
+      } finally {
+        setLoadingPlayers(
+          false
+        );
+      }
+    }
+
+    loadPlayers();
+  }, [
+    open,
+    page,
+    sort,
+    debouncedSearch,
+  ]);
+
+  /*
+   * ============================
+   * LAUNCH POISON
+   * ============================
+   */
+  async function launchPoison() {
+    if (!selectedPlayer) {
       setError(
         "Choose a target first."
       );
@@ -105,8 +239,12 @@ export default function PvPAttackButton({
       return;
     }
 
-    setLoading(true);
+    setSubmitting(
+      true
+    );
+
     setError("");
+    setMessage("");
 
     try {
       const response =
@@ -126,7 +264,7 @@ export default function PvPAttackButton({
                 attackType,
 
                 targetPlayerId:
-                  selectedTarget,
+                  selectedPlayer,
               }),
           }
         );
@@ -134,63 +272,56 @@ export default function PvPAttackButton({
       const responseText =
         await response.text();
 
-      let data: AttackResponse =
-        {};
+      let data: {
+        error?: string;
+        message?: string;
+      } = {};
 
       if (responseText) {
-        try {
-          data =
-            JSON.parse(
-              responseText
-            );
-        } catch {
-          setError(
-            `Server returned an invalid response (${response.status}).`
+        data =
+          JSON.parse(
+            responseText
           );
-
-          return;
-        }
       }
 
       if (!response.ok) {
         setError(
           data.error ??
-            `Server error (${response.status})`
+            "Unable to launch poison."
         );
 
         return;
       }
 
-      setOpen(false);
+      setMessage(
+        data.message ??
+          `${attackName} launched.`
+      );
 
-      setSuccess({
-        target:
-          data.target ??
-          "Unknown Player",
-
-        attackName:
-          data.attackName ??
-          attackName,
-
-        cost:
-          data.cost ??
-          attackCost,
-
-        ticketsCreated:
-          data.ticketsCreated ??
-          0,
-
-        message:
-          data.message ??
-          `${attackName} launched successfully.`,
-      });
-
-      setSelectedTarget(
+      setSelectedPlayer(
         null
+      );
+
+      /*
+       * Refresh PvP page so Credits
+       * and other server data update.
+       */
+      router.refresh();
+
+      /*
+       * Close picker shortly after
+       * successful attack.
+       */
+      window.setTimeout(
+        () => {
+          setOpen(false);
+          setMessage("");
+        },
+        1200
       );
     } catch (error) {
       console.error(
-        "PvP attack request failed:",
+        "Poison attack failed:",
         error
       );
 
@@ -198,290 +329,332 @@ export default function PvPAttackButton({
         "Unable to contact the server."
       );
     } finally {
-      setLoading(false);
+      setSubmitting(
+        false
+      );
     }
   }
 
-  function acknowledgeSuccess() {
-    setSuccess(null);
-
-    router.refresh();
-  }
-
   return (
-    <>
-      {/* ============================
-          ATTACK BUTTON
-          ============================ */}
+    <div className="mt-5">
+
       <button
         type="button"
-        onClick={toggleOpen}
         disabled={
-          !affordable ||
-          targets.length === 0 ||
-          loading
+          !affordable
         }
-        className="mt-5 w-full bg-red-600 px-5 py-3 font-black text-white hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-500"
+        onClick={() => {
+          setOpen(
+            (current) =>
+              !current
+          );
+
+          setError("");
+          setMessage("");
+        }}
+        className="w-full bg-purple-600 px-4 py-3 font-bold text-white hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {!affordable
-          ? "Not Enough Credits"
-          : targets.length === 0
-            ? "No Online Targets"
-            : "Launch Attack"}
+        {affordable
+          ? "Choose Target"
+          : "Not Enough Credits"}
       </button>
 
-      {/* ============================
-          TARGET PICKER
-          ============================ */}
       {open && (
-        <div className="mt-4 border border-red-900 bg-black p-4">
+        <div className="mt-4 border border-purple-900 bg-black p-4">
 
-          <p className="text-xs font-bold uppercase tracking-wide text-red-500">
-            Choose Target
-          </p>
+          <div className="flex items-start justify-between gap-4">
 
-          <p className="mt-2 text-sm text-zinc-500">
-            This attack costs{" "}
-            <span className="font-bold text-white">
-              {attackCost} CR
-            </span>
-            .
-          </p>
+            <div>
 
-          <div className="mt-4 space-y-2">
-
-            {targets.map(
-              (target) => (
-                <button
-                  key={
-                    target.id
-                  }
-                  type="button"
-                  onClick={() =>
-                    setSelectedTarget(
-                      target.id
-                    )
-                  }
-                  className={`w-full border p-4 text-left ${
-                    selectedTarget ===
-                    target.id
-                      ? "border-red-500 bg-red-950/20"
-                      : "border-zinc-800 hover:border-zinc-600"
-                  }`}
-                >
-
-                  <div className="flex items-start justify-between gap-4">
-
-                    <div>
-
-                      <div className="flex items-center gap-2">
-
-                        <span className="h-2 w-2 rounded-full bg-green-400" />
-
-                        <p className="font-bold text-white">
-                          {
-                            target.username
-                          }
-                        </p>
-
-                      </div>
-
-                      <p className="mt-1 text-xs text-zinc-500">
-                        Level{" "}
-                        {
-                          target.level
-                        }
-                        {target.careerPath
-                          ? ` · ${target.careerPath}`
-                          : ""}
-                      </p>
-
-                    </div>
-
-                    <div className="text-right">
-
-                      <p className="text-xs uppercase tracking-wide text-zinc-600">
-                        Queue
-                      </p>
-
-                      <p
-                        className={`font-bold ${
-                          target.queueSize >= 8
-                            ? "text-red-400"
-                            : target.queueSize >= 4
-                              ? "text-yellow-400"
-                              : "text-zinc-300"
-                        }`}
-                      >
-                        {
-                          target.queueSize
-                        }
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                  <div className="mt-3 border-t border-zinc-900 pt-3">
-
-                    <p className="text-xs uppercase tracking-wide text-zinc-600">
-                      Credits
-                    </p>
-
-                    <p
-                      className={`mt-1 font-bold ${
-                        target.credits <= 300
-                          ? "text-red-400"
-                          : "text-zinc-300"
-                      }`}
-                    >
-                      {
-                        target.credits
-                      }{" "}
-                      CR
-                    </p>
-
-                  </div>
-
-                </button>
-              )
-            )}
-
-          </div>
-
-          {error && (
-            <p className="mt-4 text-sm text-red-400">
-              {error}
-            </p>
-          )}
-
-          <div className="mt-4 flex gap-3">
-
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                setSelectedTarget(
-                  null
-                );
-                setError("");
-              }}
-              disabled={loading}
-              className="flex-1 border border-zinc-700 px-4 py-3 font-bold text-zinc-300 hover:bg-zinc-900 disabled:opacity-50"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="button"
-              onClick={
-                launchAttack
-              }
-              disabled={
-                !selectedTarget ||
-                loading
-              }
-              className="flex-1 bg-red-600 px-4 py-3 font-black text-white hover:bg-red-500 disabled:opacity-40"
-            >
-              {loading
-                ? "Launching..."
-                : `Spend ${attackCost} CR`}
-            </button>
-
-          </div>
-
-        </div>
-      )}
-
-      {/* ============================
-          SUCCESS MODAL
-          ============================ */}
-      {success && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 px-4">
-
-          <div className="w-full max-w-md border border-red-800 bg-zinc-950 p-8 shadow-2xl">
-
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-500">
-              Attack Launched
-            </p>
-
-            <h2 className="mt-3 text-3xl font-black text-white">
-              {
-                success.attackName
-              }
-            </h2>
-
-            <p className="mt-3 text-zinc-300">
-              Target:{" "}
-              <span className="font-bold text-white">
-                {
-                  success.target
-                }
-              </span>
-            </p>
-
-            <div className="mt-6 border border-red-900/70 bg-red-950/20 p-5">
-
-              <p className="text-zinc-200">
-                {
-                  success.message
-                }
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-purple-500">
+                Choose Target
               </p>
 
-              <div className="mt-5 grid grid-cols-2 gap-3 border-t border-red-900/60 pt-5">
-
-                <div className="border border-zinc-800 bg-black p-4 text-center">
-
-                  <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
-                    Cost
-                  </p>
-
-                  <p className="mt-2 text-2xl font-black text-red-400">
-                    -
-                    {
-                      success.cost
-                    }{" "}
-                    CR
-                  </p>
-
-                </div>
-
-                <div className="border border-zinc-800 bg-black p-4 text-center">
-
-                  <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
-                    Tickets Sent
-                  </p>
-
-                  <p className="mt-2 text-2xl font-black text-white">
-                    {
-                      success.ticketsCreated
-                    }
-                  </p>
-
-                </div>
-
-              </div>
+              <p className="mt-1 text-sm text-zinc-500">
+                {totalPlayers} player
+                {totalPlayers === 1
+                  ? ""
+                  : "s"}{" "}
+                online
+              </p>
 
             </div>
 
-            <p className="mt-5 text-sm text-zinc-500">
-              Their queue is now somebody else&apos;s problem.
-            </p>
-
             <button
               type="button"
-              onClick={
-                acknowledgeSuccess
+              onClick={() =>
+                setOpen(false)
               }
-              className="mt-6 w-full bg-white px-5 py-3 font-bold text-black hover:bg-zinc-200"
+              className="text-sm text-zinc-500 hover:text-white"
             >
-              Excellent
+              Close
             </button>
 
           </div>
 
+          {/* Search */}
+          <input
+            type="text"
+            value={
+              search
+            }
+            onChange={(
+              event
+            ) =>
+              setSearch(
+                event.target.value
+              )
+            }
+            placeholder="Search players..."
+            className="mt-4 w-full border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-white outline-none focus:border-purple-600"
+          />
+
+          {/* Sort */}
+          <select
+            value={
+              sort
+            }
+            onChange={(
+              event
+            ) => {
+              setSort(
+                event.target
+                  .value as SortOption
+              );
+
+              setPage(1);
+            }}
+            className="mt-3 w-full border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-white outline-none focus:border-purple-600"
+          >
+            <option value="queue">
+              Biggest Queue
+            </option>
+
+            <option value="credits-low">
+              Lowest Credits
+            </option>
+
+            <option value="credits-high">
+              Highest Credits
+            </option>
+
+            <option value="username">
+              Username
+            </option>
+          </select>
+
+          {/* Loading */}
+          {loadingPlayers && (
+            <p className="mt-5 text-sm text-zinc-500">
+              Loading targets...
+            </p>
+          )}
+
+          {/* Empty */}
+          {!loadingPlayers &&
+            players.length ===
+              0 && (
+              <div className="mt-5 border border-zinc-800 p-4 text-sm text-zinc-500">
+                No matching online players.
+              </div>
+            )}
+
+          {/* Players */}
+          {!loadingPlayers && (
+            <div className="mt-4 space-y-2">
+
+              {players.map(
+                (player) => {
+                  const vulnerable =
+                    player.credits <=
+                      300 ||
+                    player.queueSize >=
+                      8;
+
+                  return (
+                    <button
+                      key={
+                        player.id
+                      }
+                      type="button"
+                      onClick={() =>
+                        setSelectedPlayer(
+                          player.id
+                        )
+                      }
+                      className={`w-full border p-3 text-left ${
+                        selectedPlayer ===
+                        player.id
+                          ? "border-purple-500 bg-purple-950/30"
+                          : "border-zinc-800 bg-zinc-950 hover:border-zinc-600"
+                      }`}
+                    >
+
+                      <div className="flex items-start justify-between gap-3">
+
+                        <div className="min-w-0">
+
+                          <div className="flex items-center gap-2">
+
+                            <span className="h-2 w-2 rounded-full bg-green-400" />
+
+                            <p className="truncate font-bold">
+                              {
+                                player.username
+                              }
+                            </p>
+
+                            {vulnerable && (
+                              <span className="border border-purple-900 px-2 py-0.5 text-[10px] font-bold uppercase text-purple-400">
+                                Vulnerable
+                              </span>
+                            )}
+
+                          </div>
+
+                          <p className="mt-1 text-xs text-zinc-500">
+                            {getRoleTitle(
+                              player.level,
+                              player.careerPath
+                            )}
+                          </p>
+
+                        </div>
+
+                        <div className="shrink-0 text-right">
+
+                          <p
+                            className={
+                              player.credits <=
+                              300
+                                ? "font-bold text-red-400"
+                                : "font-bold text-zinc-300"
+                            }
+                          >
+                            {
+                              player.credits
+                            }{" "}
+                            CR
+                          </p>
+
+                          <p
+                            className={`mt-1 text-xs ${
+                              player.queueSize >=
+                              8
+                                ? "text-purple-400"
+                                : "text-zinc-500"
+                            }`}
+                          >
+                            Queue:{" "}
+                            {
+                              player.queueSize
+                            }
+                          </p>
+
+                        </div>
+
+                      </div>
+
+                    </button>
+                  );
+                }
+              )}
+
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-4 flex items-center justify-between border-t border-zinc-800 pt-4">
+
+              <button
+                type="button"
+                disabled={
+                  page <= 1 ||
+                  loadingPlayers
+                }
+                onClick={() =>
+                  setPage(
+                    (current) =>
+                      Math.max(
+                        1,
+                        current -
+                          1
+                      )
+                  )
+                }
+                className="border border-zinc-700 px-3 py-2 text-xs font-bold hover:bg-zinc-900 disabled:opacity-30"
+              >
+                Previous
+              </button>
+
+              <p className="text-xs text-zinc-500">
+                Page {page} of{" "}
+                {
+                  totalPages
+                }
+              </p>
+
+              <button
+                type="button"
+                disabled={
+                  page >=
+                    totalPages ||
+                  loadingPlayers
+                }
+                onClick={() =>
+                  setPage(
+                    (current) =>
+                      Math.min(
+                        totalPages,
+                        current +
+                          1
+                      )
+                  )
+                }
+                className="border border-zinc-700 px-3 py-2 text-xs font-bold hover:bg-zinc-900 disabled:opacity-30"
+              >
+                Next
+              </button>
+
+            </div>
+          )}
+
+          {/* Confirm */}
+          {players.length >
+            0 && (
+            <button
+              type="button"
+              disabled={
+                !selectedPlayer ||
+                submitting
+              }
+              onClick={
+                launchPoison
+              }
+              className="mt-4 w-full bg-purple-600 px-4 py-3 font-bold text-white hover:bg-purple-500 disabled:opacity-40"
+            >
+              {submitting
+                ? "Launching..."
+                : `Launch ${attackName}`}
+            </button>
+          )}
+
+          {error && (
+            <div className="mt-4 border border-red-900 bg-red-950/20 p-3 text-sm text-red-400">
+              {error}
+            </div>
+          )}
+
+          {message && (
+            <div className="mt-4 border border-purple-900 bg-purple-950/20 p-3 text-sm text-purple-300">
+              {message}
+            </div>
+          )}
+
         </div>
       )}
-    </>
+
+    </div>
   );
 }

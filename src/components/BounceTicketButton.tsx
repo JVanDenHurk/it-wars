@@ -1,12 +1,26 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import { getRoleTitle } from "@/lib/player-level";
 
 interface BounceTicketButtonProps {
   ticketId: number;
+
+  /*
+   * Optional for now so the existing
+   * ticket page does not break.
+   *
+   * Next we will pass these from
+   * /tickets/page.tsx.
+   */
+  playerLevel?: number;
+  playerCareerPath?: string | null;
+  careerAbilityReadyAt?: string | null;
 }
 
 interface PlayerOption {
@@ -17,6 +31,10 @@ interface PlayerOption {
   queueSize: number;
 }
 
+type ActionMode =
+  | "BOUNCE"
+  | "ROUTE_FLAP";
+
 type BounceResponse = {
   error?: string;
 
@@ -24,23 +42,55 @@ type BounceResponse = {
     | "CORRECT_BOUNCE"
     | "WRONG_BOUNCE"
     | "OWNERSHIP_WARNING"
-    | "SERVICE_DESK_HANDOFF";
+    | "SERVICE_DESK_HANDOFF"
+    | "DNS_BOUNCE_FAILURE";
 
   correct?: boolean;
+  transferred?: boolean;
+
   reward?: number;
   xp?: number;
   penalty?: number;
   credits?: number;
+
   bankrupt?: boolean;
   resetToServiceDesk?: boolean;
+
   target?: string;
 
   queuePenaltyUntil?: string;
+
   message?: string;
 
   level?: number;
   levelledUp?: boolean;
   careerUnlocked?: boolean;
+
+  isPoison?: boolean;
+  poisonEffect?: string;
+
+  dnsFailureActive?: boolean;
+};
+
+type RouteFlapResponse = {
+  error?: string;
+
+  success?: boolean;
+
+  outcome?:
+    "ROUTE_FLAP";
+
+  ability?: string;
+
+  ticketId?: number;
+
+  target?: string;
+
+  readyAt?: string;
+
+  cooldownMinutes?: number;
+
+  message?: string;
 };
 
 type WrongBounceInfo = {
@@ -49,84 +99,192 @@ type WrongBounceInfo = {
   message: string;
 } | null;
 
+type DnsFailureInfo = {
+  target: string;
+  message: string;
+} | null;
+
+type RouteFlapInfo = {
+  target: string;
+  message: string;
+  readyAt: string | null;
+} | null;
+
 export default function BounceTicketButton({
   ticketId,
+  playerLevel = 0,
+  playerCareerPath = null,
+  careerAbilityReadyAt = null,
 }: BounceTicketButtonProps) {
-  const router = useRouter();
+  const router =
+    useRouter();
 
   const [open, setOpen] =
     useState(false);
 
+  const [actionMode, setActionMode] =
+    useState<ActionMode>(
+      "BOUNCE"
+    );
+
   const [players, setPlayers] =
-    useState<PlayerOption[]>([]);
+    useState<PlayerOption[]>(
+      []
+    );
 
-  const [selectedPlayer, setSelectedPlayer] =
-    useState<number | null>(null);
+  const [
+    selectedPlayer,
+    setSelectedPlayer,
+  ] =
+    useState<number | null>(
+      null
+    );
 
-  const [loadingPlayers, setLoadingPlayers] =
+  const [
+    loadingPlayers,
+    setLoadingPlayers,
+  ] =
     useState(false);
 
-  const [submitting, setSubmitting] =
+  const [
+    submitting,
+    setSubmitting,
+  ] =
     useState(false);
 
-  const [clearingPenalty, setClearingPenalty] =
+  const [
+    clearingPenalty,
+    setClearingPenalty,
+  ] =
     useState(false);
 
   const [message, setMessage] =
     useState("");
 
-  const [result, setResult] = useState<
-    "success" | "error" | null
-  >(null);
+  const [result, setResult] =
+    useState<
+      "success" | "error" | null
+    >(null);
 
   /*
-   * Ownership Warning
+   * ============================
+   * OWNERSHIP WARNING
+   * ============================
    */
-  const [ownershipWarning, setOwnershipWarning] =
+  const [
+    ownershipWarning,
+    setOwnershipWarning,
+  ] =
     useState(false);
 
-  const [ownershipError, setOwnershipError] =
+  const [
+    ownershipError,
+    setOwnershipError,
+  ] =
     useState("");
 
   /*
-   * Wrong Team popup
+   * ============================
+   * WRONG TEAM
+   * ============================
    */
-  const [wrongBounce, setWrongBounce] =
-    useState<WrongBounceInfo>(null);
+  const [
+    wrongBounce,
+    setWrongBounce,
+  ] =
+    useState<WrongBounceInfo>(
+      null
+    );
 
   /*
-   * Bankruptcy / demotion popup
+   * ============================
+   * DNS FAILURE
+   * ============================
    */
-  const [demoted, setDemoted] =
+  const [
+    dnsFailure,
+    setDnsFailure,
+  ] =
+    useState<DnsFailureInfo>(
+      null
+    );
+
+  /*
+   * ============================
+   * ROUTE FLAP SUCCESS
+   * ============================
+   */
+  const [
+    routeFlapResult,
+    setRouteFlapResult,
+  ] =
+    useState<RouteFlapInfo>(
+      null
+    );
+
+  /*
+   * ============================
+   * BANKRUPTCY
+   * ============================
+   */
+  const [
+    demoted,
+    setDemoted,
+  ] =
     useState(false);
 
   /*
-   * Global modal flag.
-   *
-   * Prevents TicketTimer from refreshing
-   * underneath one of these popups.
+   * ============================
+   * NETWORK ABILITY
+   * ============================
+   */
+  const routeFlapUnlocked =
+    playerCareerPath ===
+      "NETWORK" &&
+    playerLevel >=
+      6;
+
+  const routeFlapReady =
+    !careerAbilityReadyAt ||
+    new Date(
+      careerAbilityReadyAt
+    ).getTime() <=
+      Date.now();
+
+  /*
+   * ============================
+   * GLOBAL MODAL FLAG
+   * ============================
    */
   useEffect(() => {
     const modalOpen =
       ownershipWarning ||
       wrongBounce !== null ||
+      dnsFailure !== null ||
+      routeFlapResult !==
+        null ||
       demoted;
 
     if (modalOpen) {
-      document.body.dataset.gameModalOpen =
+      document.body.dataset
+        .gameModalOpen =
         "true";
     } else {
-      delete document.body.dataset
+      delete document.body
+        .dataset
         .gameModalOpen;
     }
 
     return () => {
-      delete document.body.dataset
+      delete document.body
+        .dataset
         .gameModalOpen;
     };
   }, [
     ownershipWarning,
     wrongBounce,
+    dnsFailure,
+    routeFlapResult,
     demoted,
   ]);
 
@@ -138,20 +296,25 @@ export default function BounceTicketButton({
   useEffect(() => {
     if (
       !open ||
-      players.length > 0
+      players.length >
+        0
     ) {
       return;
     }
 
     async function loadPlayers() {
-      setLoadingPlayers(true);
+      setLoadingPlayers(
+        true
+      );
+
       setMessage("");
       setResult(null);
 
       try {
-        const response = await fetch(
-          "/api/players/available"
-        );
+        const response =
+          await fetch(
+            "/api/players/available"
+          );
 
         const responseText =
           await response.text();
@@ -168,7 +331,9 @@ export default function BounceTicketButton({
                 responseText
               );
           } catch {
-            setResult("error");
+            setResult(
+              "error"
+            );
 
             setMessage(
               `Server returned an invalid response (${response.status}).`
@@ -179,7 +344,9 @@ export default function BounceTicketButton({
         }
 
         if (!response.ok) {
-          setResult("error");
+          setResult(
+            "error"
+          );
 
           setMessage(
             data.error ??
@@ -190,7 +357,8 @@ export default function BounceTicketButton({
         }
 
         setPlayers(
-          data.players ?? []
+          data.players ??
+            []
         );
       } catch (error) {
         console.error(
@@ -198,17 +366,21 @@ export default function BounceTicketButton({
           error
         );
 
-        setResult("error");
+        setResult(
+          "error"
+        );
 
         setMessage(
           "Unable to load players."
         );
       } finally {
-        setLoadingPlayers(false);
+        setLoadingPlayers(
+          false
+        );
       }
     }
 
-    loadPlayers();
+    void loadPlayers();
   }, [
     open,
     players.length,
@@ -216,12 +388,16 @@ export default function BounceTicketButton({
 
   /*
    * ============================
-   * BOUNCE TICKET
+   * NORMAL BOUNCE
    * ============================
    */
   async function bounceTicket() {
-    if (!selectedPlayer) {
-      setResult("error");
+    if (
+      !selectedPlayer
+    ) {
+      setResult(
+        "error"
+      );
 
       setMessage(
         "Choose a player first."
@@ -230,34 +406,39 @@ export default function BounceTicketButton({
       return;
     }
 
-    setSubmitting(true);
+    setSubmitting(
+      true
+    );
+
     setMessage("");
     setResult(null);
 
     try {
-      const response = await fetch(
-        `/api/tickets/${ticketId}/bounce`,
-        {
-          method:
-            "POST",
+      const response =
+        await fetch(
+          `/api/tickets/${ticketId}/bounce`,
+          {
+            method:
+              "POST",
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-          body:
-            JSON.stringify({
-              targetPlayerId:
-                selectedPlayer,
-            }),
-        }
-      );
+            body:
+              JSON.stringify({
+                targetPlayerId:
+                  selectedPlayer,
+              }),
+          }
+        );
 
       const responseText =
         await response.text();
 
-      let data: BounceResponse = {};
+      let data: BounceResponse =
+        {};
 
       if (responseText) {
         try {
@@ -266,7 +447,9 @@ export default function BounceTicketButton({
               responseText
             );
         } catch {
-          setResult("error");
+          setResult(
+            "error"
+          );
 
           setMessage(
             `Server returned an invalid response (${response.status}).`
@@ -277,7 +460,9 @@ export default function BounceTicketButton({
       }
 
       if (!response.ok) {
-        setResult("error");
+        setResult(
+          "error"
+        );
 
         setMessage(
           data.error ??
@@ -288,17 +473,29 @@ export default function BounceTicketButton({
       }
 
       /*
-       * ===========================
+       * DNS FAILURE
+       */
+      if (
+        data.outcome ===
+        "DNS_BOUNCE_FAILURE"
+      ) {
+        setOpen(false);
+
+        setDnsFailure({
+          target:
+            data.target ??
+            "the resolver team",
+
+          message:
+            data.message ??
+            "The ticket transfer failed.",
+        });
+
+        return;
+      }
+
+      /*
        * SERVICE DESK HANDOFF
-       * ===========================
-       *
-       * Specialist sends a Service Desk
-       * ticket back to an SDA.
-       *
-       * No reward.
-       * No XP.
-       * No slowdown.
-       * No penalty.
        */
       if (
         data.outcome ===
@@ -306,17 +503,22 @@ export default function BounceTicketButton({
       ) {
         setOpen(false);
 
-        setResult("success");
+        setResult(
+          "success"
+        );
 
         setMessage(
           data.message ??
-            `Ticket handed back to ${
+            `Ticket handed to ${
               data.target ??
               "Service Desk"
             }.`
         );
 
-        setSelectedPlayer(null);
+        setSelectedPlayer(
+          null
+        );
+
         setPlayers([]);
 
         setTimeout(() => {
@@ -327,9 +529,7 @@ export default function BounceTicketButton({
       }
 
       /*
-       * ===========================
        * OWNERSHIP WARNING
-       * ===========================
        */
       if (
         data.outcome ===
@@ -337,33 +537,52 @@ export default function BounceTicketButton({
       ) {
         setOpen(false);
 
-        setOwnershipError("");
-        setOwnershipWarning(true);
+        setOwnershipError(
+          ""
+        );
+
+        setOwnershipWarning(
+          true
+        );
 
         return;
       }
 
       /*
-       * ===========================
-       * CORRECT ESCALATION
-       * ===========================
+       * CORRECT BOUNCE
        */
       if (
         data.outcome ===
         "CORRECT_BOUNCE"
       ) {
-        setResult("success");
-
-        setMessage(
-          `Correctly routed to ${
-            data.target ??
-            "player"
-          }! +${
-            data.reward ?? 0
-          } CR / +${
-            data.xp ?? 0
-          } XP`
+        setResult(
+          "success"
         );
+
+        if (
+          data.isPoison
+        ) {
+          setMessage(
+            data.message ??
+              `Poison Ticket successfully routed to ${
+                data.target ??
+                "the resolver team"
+              }.`
+          );
+        } else {
+          setMessage(
+            `Correctly routed to ${
+              data.target ??
+              "player"
+            }! +${
+              data.reward ??
+              0
+            } CR / +${
+              data.xp ??
+              0
+            } XP`
+          );
+        }
 
         setTimeout(() => {
           router.refresh();
@@ -373,29 +592,37 @@ export default function BounceTicketButton({
       }
 
       /*
-       * ===========================
-       * WRONG BOUNCE + BANKRUPTCY
-       * ===========================
+       * BANKRUPTCY
        */
       if (
-        data.bankrupt === true ||
-        data.resetToServiceDesk === true
+        data.bankrupt ===
+          true ||
+        data.resetToServiceDesk ===
+          true
       ) {
         setOpen(false);
 
-        setOwnershipWarning(false);
+        setOwnershipWarning(
+          false
+        );
 
-        setWrongBounce(null);
+        setWrongBounce(
+          null
+        );
 
-        setDemoted(true);
+        setDnsFailure(
+          null
+        );
+
+        setDemoted(
+          true
+        );
 
         return;
       }
 
       /*
-       * ===========================
        * WRONG TEAM
-       * ===========================
        */
       if (
         data.outcome ===
@@ -420,10 +647,9 @@ export default function BounceTicketButton({
         return;
       }
 
-      /*
-       * Unexpected server outcome.
-       */
-      setResult("error");
+      setResult(
+        "error"
+      );
 
       setMessage(
         "Unknown bounce result."
@@ -434,13 +660,140 @@ export default function BounceTicketButton({
         error
       );
 
-      setResult("error");
+      setResult(
+        "error"
+      );
 
       setMessage(
         "Unable to contact the server."
       );
     } finally {
-      setSubmitting(false);
+      setSubmitting(
+        false
+      );
+    }
+  }
+
+  /*
+   * ============================
+   * ROUTE FLAP
+   * ============================
+   */
+  async function useRouteFlap() {
+    if (
+      !selectedPlayer
+    ) {
+      setResult(
+        "error"
+      );
+
+      setMessage(
+        "Choose a player first."
+      );
+
+      return;
+    }
+
+    setSubmitting(
+      true
+    );
+
+    setMessage("");
+    setResult(null);
+
+    try {
+      const response =
+        await fetch(
+          "/api/career/network/route-flap",
+          {
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify({
+                ticketId,
+
+                targetPlayerId:
+                  selectedPlayer,
+              }),
+          }
+        );
+
+      const responseText =
+        await response.text();
+
+      let data: RouteFlapResponse =
+        {};
+
+      if (responseText) {
+        try {
+          data =
+            JSON.parse(
+              responseText
+            );
+        } catch {
+          setResult(
+            "error"
+          );
+
+          setMessage(
+            `Server returned an invalid response (${response.status}).`
+          );
+
+          return;
+        }
+      }
+
+      if (!response.ok) {
+        setResult(
+          "error"
+        );
+
+        setMessage(
+          data.error ??
+            "Unable to use Route Flap."
+        );
+
+        return;
+      }
+
+      setOpen(false);
+
+      setRouteFlapResult({
+        target:
+          data.target ??
+          "the selected player",
+
+        message:
+          data.message ??
+          "Route Flap successfully transferred the ticket.",
+
+        readyAt:
+          data.readyAt ??
+          null,
+      });
+    } catch (error) {
+      console.error(
+        "Route Flap failed:",
+        error
+      );
+
+      setResult(
+        "error"
+      );
+
+      setMessage(
+        "Unable to contact the server."
+      );
+    } finally {
+      setSubmitting(
+        false
+      );
     }
   }
 
@@ -450,29 +803,31 @@ export default function BounceTicketButton({
    * ============================
    */
   async function clearQueuePenalty() {
-    setClearingPenalty(true);
-    setOwnershipError("");
+    setClearingPenalty(
+      true
+    );
+
+    setOwnershipError(
+      ""
+    );
 
     try {
-      const response = await fetch(
-        "/api/players/clear-queue-penalty",
-        {
-          method:
-            "POST",
-        }
-      );
+      const response =
+        await fetch(
+          "/api/players/clear-queue-penalty",
+          {
+            method:
+              "POST",
+          }
+        );
 
       const responseText =
         await response.text();
 
       let data: {
         error?: string;
-        success?: boolean;
-        cost?: number;
-        credits?: number;
         bankrupt?: boolean;
         resetToServiceDesk?: boolean;
-        message?: string;
       } = {};
 
       if (responseText) {
@@ -499,32 +854,28 @@ export default function BounceTicketButton({
         return;
       }
 
-      /*
-       * Buying out the penalty
-       * caused bankruptcy.
-       */
       if (
-        data.bankrupt === true ||
+        data.bankrupt ===
+          true ||
         data.resetToServiceDesk ===
           true
       ) {
-        setOwnershipWarning(false);
+        setOwnershipWarning(
+          false
+        );
 
-        setDemoted(true);
+        setDemoted(
+          true
+        );
 
         return;
       }
 
-      /*
-       * Normal successful buyout.
-       */
-      setOwnershipWarning(false);
+      setOwnershipWarning(
+        false
+      );
 
-      setSelectedPlayer(null);
-
-      setPlayers([]);
-
-      setOwnershipError("");
+      resetPicker();
 
       router.refresh();
     } catch (error) {
@@ -537,84 +888,190 @@ export default function BounceTicketButton({
         "Unable to contact the server."
       );
     } finally {
-      setClearingPenalty(false);
+      setClearingPenalty(
+        false
+      );
     }
   }
 
   /*
-   * Accept ownership slowdown.
+   * ============================
+   * HELPERS
+   * ============================
    */
-  function acknowledgeOwnershipWarning() {
-    setOwnershipWarning(false);
+  function resetPicker() {
+    setOpen(false);
 
-    setSelectedPlayer(null);
+    setSelectedPlayer(
+      null
+    );
 
     setPlayers([]);
 
-    setOwnershipError("");
+    setMessage("");
+    setResult(null);
 
-    router.refresh();
+    setActionMode(
+      "BOUNCE"
+    );
   }
 
-  /*
-   * Accept wrong-team penalty.
-   */
-  function acknowledgeWrongBounce() {
-    setWrongBounce(null);
+  function openBounce() {
+    setActionMode(
+      "BOUNCE"
+    );
 
-    setSelectedPlayer(null);
+    setOpen(true);
 
-    setPlayers([]);
-
-    router.refresh();
-  }
-
-  /*
-   * Accept bankruptcy / demotion.
-   */
-  function acknowledgeDemotion() {
-    window.location.href =
-      "/dashboard";
-  }
-
-  function toggleOpen() {
-    setOpen(
-      (current) =>
-        !current
+    setSelectedPlayer(
+      null
     );
 
     setMessage("");
     setResult(null);
   }
 
+  function openRouteFlap() {
+    setActionMode(
+      "ROUTE_FLAP"
+    );
+
+    setOpen(true);
+
+    setSelectedPlayer(
+      null
+    );
+
+    setMessage("");
+    setResult(null);
+  }
+
+  function acknowledgeOwnershipWarning() {
+    setOwnershipWarning(
+      false
+    );
+
+    resetPicker();
+
+    router.refresh();
+  }
+
+  function acknowledgeWrongBounce() {
+    setWrongBounce(
+      null
+    );
+
+    resetPicker();
+
+    router.refresh();
+  }
+
+  function acknowledgeDnsFailure() {
+    setDnsFailure(
+      null
+    );
+
+    resetPicker();
+
+    router.refresh();
+  }
+
+  function acknowledgeRouteFlap() {
+    setRouteFlapResult(
+      null
+    );
+
+    resetPicker();
+
+    router.refresh();
+  }
+
+  function acknowledgeDemotion() {
+    window.location.href =
+      "/dashboard";
+  }
+
   return (
     <>
-      {/* Bounce Button */}
+      {/* ============================
+          ACTION BUTTONS
+          ============================ */}
       <div>
-        <button
-          type="button"
-          onClick={
-            toggleOpen
-          }
-          disabled={
-            submitting
-          }
-          className="border border-zinc-700 px-4 py-2 font-bold hover:bg-zinc-900 disabled:opacity-50"
-        >
-          Bounce
-        </button>
 
-        {/* Player Picker */}
+        <div className="flex flex-wrap gap-2">
+
+          <button
+            type="button"
+            onClick={
+              openBounce
+            }
+            disabled={
+              submitting
+            }
+            className="border border-zinc-700 px-4 py-2 font-bold hover:bg-zinc-900 disabled:opacity-50"
+          >
+            Bounce
+          </button>
+
+          {routeFlapUnlocked && (
+            <button
+              type="button"
+              onClick={
+                openRouteFlap
+              }
+              disabled={
+                submitting ||
+                !routeFlapReady
+              }
+              className="border border-cyan-800 bg-cyan-950/20 px-4 py-2 font-bold text-cyan-300 hover:bg-cyan-950/40 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {routeFlapReady
+                ? "Route Flap"
+                : "Route Flap — Cooldown"}
+            </button>
+          )}
+
+        </div>
+
+        {/* ============================
+            PLAYER PICKER
+            ============================ */}
         {open && (
-          <div className="mt-3 w-80 border border-zinc-800 bg-black p-4">
+          <div
+            className={`mt-3 w-80 border bg-black p-4 ${
+              actionMode ===
+              "ROUTE_FLAP"
+                ? "border-cyan-900"
+                : "border-zinc-800"
+            }`}
+          >
 
-            <p className="font-bold">
-              Choose player
-            </p>
+            {actionMode ===
+            "ROUTE_FLAP" ? (
+              <>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-500">
+                  Network Ability
+                </p>
 
-            <p className="mt-1 text-xs text-zinc-500">
-              Pick carefully. The ticket category is hidden.
-            </p>
+                <p className="mt-2 text-lg font-black text-cyan-200">
+                  Route Flap
+                </p>
+
+                <p className="mt-2 text-xs text-zinc-400">
+                  Force-transfer this ticket without a wrong-team penalty, ownership warning or DNS failure.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="font-bold">
+                  Choose player
+                </p>
+
+                <p className="mt-1 text-xs text-zinc-500">
+                  Pick carefully. The ticket category is hidden.
+                </p>
+              </>
+            )}
 
             {loadingPlayers && (
               <p className="mt-4 text-sm text-zinc-500">
@@ -623,7 +1080,8 @@ export default function BounceTicketButton({
             )}
 
             {!loadingPlayers &&
-              players.length === 0 &&
+              players.length ===
+                0 &&
               !message && (
                 <p className="mt-4 text-sm text-zinc-500">
                   No other players are currently available.
@@ -631,6 +1089,7 @@ export default function BounceTicketButton({
               )}
 
             <div className="mt-4 space-y-2">
+
               {players.map(
                 (player) => (
                   <button
@@ -646,10 +1105,14 @@ export default function BounceTicketButton({
                     className={`w-full border p-3 text-left ${
                       selectedPlayer ===
                       player.id
-                        ? "border-white bg-zinc-900"
+                        ? actionMode ===
+                          "ROUTE_FLAP"
+                          ? "border-cyan-500 bg-cyan-950/20"
+                          : "border-white bg-zinc-900"
                         : "border-zinc-800 hover:border-zinc-600"
                     }`}
                   >
+
                     <div className="flex justify-between gap-3">
 
                       <span className="font-bold">
@@ -677,25 +1140,51 @@ export default function BounceTicketButton({
                   </button>
                 )
               )}
+
             </div>
 
-            {players.length > 0 && (
+            {players.length >
+              0 && (
               <button
                 type="button"
                 onClick={
-                  bounceTicket
+                  actionMode ===
+                  "ROUTE_FLAP"
+                    ? useRouteFlap
+                    : bounceTicket
                 }
                 disabled={
                   !selectedPlayer ||
                   submitting
                 }
-                className="mt-4 w-full bg-white px-4 py-2 font-bold text-black hover:bg-zinc-200 disabled:opacity-40"
+                className={`mt-4 w-full px-4 py-2 font-bold disabled:opacity-40 ${
+                  actionMode ===
+                  "ROUTE_FLAP"
+                    ? "bg-cyan-500 text-black hover:bg-cyan-400"
+                    : "bg-white text-black hover:bg-zinc-200"
+                }`}
               >
                 {submitting
                   ? "Transferring..."
-                  : "Confirm Bounce"}
+                  : actionMode ===
+                      "ROUTE_FLAP"
+                    ? "Execute Route Flap"
+                    : "Confirm Bounce"}
               </button>
             )}
+
+            <button
+              type="button"
+              onClick={
+                resetPicker
+              }
+              disabled={
+                submitting
+              }
+              className="mt-2 w-full border border-zinc-800 px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-900"
+            >
+              Cancel
+            </button>
 
             {message && (
               <div
@@ -706,17 +1195,154 @@ export default function BounceTicketButton({
                     : "border-red-900 text-red-400"
                 }`}
               >
-                {message}
+                {
+                  message
+                }
               </div>
             )}
 
           </div>
         )}
+
       </div>
 
-      {/* ===========================
-          OWNERSHIP WARNING MODAL
-          =========================== */}
+      {/* ============================
+          ROUTE FLAP SUCCESS
+          ============================ */}
+      {routeFlapResult && (
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/90 px-4">
+
+          <div className="w-full max-w-md border border-cyan-800 bg-zinc-950 p-8 shadow-2xl">
+
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-500">
+              Network Ability
+            </p>
+
+            <h2 className="mt-3 text-3xl font-black text-white">
+              ROUTE FLAP
+            </h2>
+
+            <p className="mt-5 text-zinc-300">
+              {
+                routeFlapResult.message
+              }
+            </p>
+
+            <div className="mt-6 border border-cyan-900/70 bg-cyan-950/20 p-5">
+
+              <p className="text-xs font-bold uppercase tracking-wide text-cyan-400">
+                Forced Transfer
+              </p>
+
+              <p className="mt-2 text-xl font-black text-white">
+                {
+                  routeFlapResult.target
+                }
+              </p>
+
+              <p className="mt-3 text-sm text-zinc-400">
+                No routing penalty.
+              </p>
+
+              <p className="mt-1 text-sm text-zinc-400">
+                No ownership slowdown.
+              </p>
+
+              <p className="mt-1 text-sm text-zinc-400">
+                DNS bypassed.
+              </p>
+
+            </div>
+
+            <p className="mt-5 text-sm text-zinc-500">
+              Route Flap is now on a 10 minute cooldown.
+            </p>
+
+            <button
+              type="button"
+              onClick={
+                acknowledgeRouteFlap
+              }
+              className="mt-6 w-full bg-cyan-500 px-5 py-3 font-black text-black hover:bg-cyan-400"
+            >
+              OK
+            </button>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ============================
+          DNS FAILURE MODAL
+          ============================ */}
+      {dnsFailure && (
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/90 px-4">
+
+          <div className="w-full max-w-md border border-purple-800 bg-zinc-950 p-8 shadow-2xl">
+
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-purple-500">
+              Poison Effect
+            </p>
+
+            <h2 className="mt-3 text-3xl font-black text-white">
+              BOUNCE FAILED
+            </h2>
+
+            <p className="mt-5 text-zinc-300">
+              {
+                dnsFailure.message
+              }
+            </p>
+
+            <div className="mt-6 border border-purple-900/70 bg-purple-950/20 p-5">
+
+              <p className="text-xs font-bold uppercase tracking-wide text-purple-400">
+                DNS Failure
+              </p>
+
+              <p className="mt-3 text-lg font-black text-white">
+                Ticket Not Transferred
+              </p>
+
+              <p className="mt-3 text-sm text-zinc-400">
+                The attempted transfer to{" "}
+                <span className="font-bold text-white">
+                  {
+                    dnsFailure.target
+                  }
+                </span>{" "}
+                failed.
+              </p>
+
+              <p className="mt-3 text-sm text-purple-300">
+                The ticket remains in your queue.
+              </p>
+
+            </div>
+
+            <p className="mt-5 text-xs text-zinc-500">
+              While DNS Failure remains open, each bounce attempt has a 50% chance to fail.
+            </p>
+
+            <button
+              type="button"
+              onClick={
+                acknowledgeDnsFailure
+              }
+              className="mt-6 w-full bg-purple-600 px-5 py-3 font-black text-white hover:bg-purple-500"
+            >
+              Of Course It&apos;s DNS
+            </button>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ============================
+          OWNERSHIP WARNING
+          ============================ */}
       {ownershipWarning && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4">
 
@@ -742,10 +1368,6 @@ export default function BounceTicketButton({
 
               <p className="mt-2 text-sm text-zinc-300">
                 Your personal ticket intake will be slower for the next 5 minutes.
-              </p>
-
-              <p className="mt-2 text-xs text-zinc-500">
-                This only affects your queue.
               </p>
 
             </div>
@@ -787,12 +1409,13 @@ export default function BounceTicketButton({
             </button>
 
           </div>
+
         </div>
       )}
 
-      {/* ===========================
-          WRONG TEAM MODAL
-          =========================== */}
+      {/* ============================
+          WRONG TEAM
+          ============================ */}
       {wrongBounce && (
         <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/85 px-4">
 
@@ -849,12 +1472,13 @@ export default function BounceTicketButton({
             </button>
 
           </div>
+
         </div>
       )}
 
-      {/* ===========================
-          BANKRUPTCY / DEMOTION MODAL
-          =========================== */}
+      {/* ============================
+          BANKRUPTCY
+          ============================ */}
       {demoted && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 px-4">
 
@@ -919,6 +1543,7 @@ export default function BounceTicketButton({
                 </div>
 
               </div>
+
             </div>
 
             <p className="mt-5 text-sm text-zinc-500">
@@ -936,6 +1561,7 @@ export default function BounceTicketButton({
             </button>
 
           </div>
+
         </div>
       )}
     </>

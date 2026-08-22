@@ -124,10 +124,16 @@ exports.Prisma.PlayerScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   username: 'username',
+  usernameChangedAt: 'usernameChangedAt',
   level: 'level',
   xp: 'xp',
   careerPath: 'careerPath',
+  careerAbilityReadyAt: 'careerAbilityReadyAt',
   credits: 'credits',
+  careerTicketsResolved: 'careerTicketsResolved',
+  careerCorrectBounces: 'careerCorrectBounces',
+  careerIncorrectBounces: 'careerIncorrectBounces',
+  careerIncorrectResolves: 'careerIncorrectResolves',
   kills: 'kills',
   bankruptcies: 'bankruptcies',
   ticketsResolved: 'ticketsResolved',
@@ -153,6 +159,8 @@ exports.Prisma.TicketScalarFieldEnum = {
   status: 'status',
   maxValue: 'maxValue',
   baseXp: 'baseXp',
+  isPoison: 'isPoison',
+  poisonEffect: 'poisonEffect',
   successMessage: 'successMessage',
   failureMessage: 'failureMessage',
   assignedToId: 'assignedToId',
@@ -162,6 +170,9 @@ exports.Prisma.TicketScalarFieldEnum = {
   bounceCount: 'bounceCount',
   abandonmentPenaltyApplied: 'abandonmentPenaltyApplied',
   abandonmentPenaltyAt: 'abandonmentPenaltyAt',
+  slaAgeOffsetMinutes: 'slaAgeOffsetMinutes',
+  maintenanceUntil: 'maintenanceUntil',
+  maintenancePausedMinutes: 'maintenancePausedMinutes',
   resolvedAt: 'resolvedAt',
   expiredAt: 'expiredAt',
   createdAt: 'createdAt',
@@ -285,13 +296,30 @@ exports.TicketStatus = exports.$Enums.TicketStatus = {
   EXPIRED: 'EXPIRED'
 };
 
+exports.PoisonEffect = exports.$Enums.PoisonEffect = {
+  NONE: 'NONE',
+  QUEUE_SPEED: 'QUEUE_SPEED',
+  SLA_PRESSURE: 'SLA_PRESSURE',
+  VALUE_DECAY: 'VALUE_DECAY',
+  RESOLUTION_PENALTY: 'RESOLUTION_PENALTY',
+  MONITORING_FAILURE: 'MONITORING_FAILURE',
+  BOUNCE_FAILURE: 'BOUNCE_FAILURE',
+  ABANDONMENT_PENALTY: 'ABANDONMENT_PENALTY',
+  EXECUTIVE_ESCALATION: 'EXECUTIVE_ESCALATION',
+  MAIL_BACKLOG: 'MAIL_BACKLOG'
+};
+
 exports.PvPAttackType = exports.$Enums.PvPAttackType = {
   PASSWORD_RESET_FLOOD: 'PASSWORD_RESET_FLOOD',
+  SELF_SERVICE_PORTAL_OUTAGE: 'SELF_SERVICE_PORTAL_OUTAGE',
   NETWORK_OUTAGE: 'NETWORK_OUTAGE',
   FAILED_DEPLOYMENT: 'FAILED_DEPLOYMENT',
   PHISHING_CAMPAIGN: 'PHISHING_CAMPAIGN',
-  TICKET_STORM: 'TICKET_STORM',
-  MAJOR_INCIDENT: 'MAJOR_INCIDENT'
+  MONITORING_FAILURE: 'MONITORING_FAILURE',
+  DNS_FAILURE: 'DNS_FAILURE',
+  MAJOR_INCIDENT: 'MAJOR_INCIDENT',
+  EXECUTIVE_ESCALATION: 'EXECUTIVE_ESCALATION',
+  MAIL_QUEUE_BACKLOG: 'MAIL_QUEUE_BACKLOG'
 };
 
 exports.PvPAttackStatus = exports.$Enums.PvPAttackStatus = {

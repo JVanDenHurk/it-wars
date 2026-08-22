@@ -1,10 +1,26 @@
 export type PvPAttackType =
   | "PASSWORD_RESET_FLOOD"
+  | "SELF_SERVICE_PORTAL_OUTAGE"
   | "NETWORK_OUTAGE"
   | "FAILED_DEPLOYMENT"
   | "PHISHING_CAMPAIGN"
-  | "TICKET_STORM"
-  | "MAJOR_INCIDENT";
+  | "MONITORING_FAILURE"
+  | "DNS_FAILURE"
+  | "MAJOR_INCIDENT"
+  | "EXECUTIVE_ESCALATION"
+  | "MAIL_QUEUE_BACKLOG";
+
+export type PoisonEffect =
+  | "NONE"
+  | "QUEUE_SPEED"
+  | "SLA_PRESSURE"
+  | "VALUE_DECAY"
+  | "RESOLUTION_PENALTY"
+  | "MONITORING_FAILURE"
+  | "BOUNCE_FAILURE"
+  | "ABANDONMENT_PENALTY"
+  | "EXECUTIVE_ESCALATION"
+  | "MAIL_BACKLOG";
 
 export type PvPAttackDefinition = {
   type: PvPAttackType;
@@ -33,23 +49,48 @@ export type PvPAttackDefinition = {
 
   difficulty: number;
 
+  /*
+   * Poison tickets themselves
+   * give no Credits or XP.
+   *
+   * These remain here for display/
+   * future tuning but the attack API
+   * should create poison tickets with
+   * maxValue = 0 and baseXp = 0.
+   */
   maxValue: number;
-
   baseXp: number;
 
-  /*
-   * Optional delay between tickets.
-   *
-   * Useful later for attacks like
-   * Ticket Storm where tickets arrive
-   * over time instead of instantly.
-   */
-  deliverySpacingSeconds?: number;
+  poisonEffect: PoisonEffect;
 
   /*
-   * Short text shown in the attack store.
+   * Human-readable explanation shown
+   * in the Poison Store and eventually
+   * on the Poison Ticket itself.
    */
+  effectDescription: string;
+
   flavourText: string;
+
+  /*
+   * Extra config used by certain
+   * poison effects.
+   */
+  queueSpeedMultiplier?: number;
+
+  slaAgeMinutes?: number;
+
+  slaAffectedTicketCount?: number;
+
+  valueDecayMultiplier?: number;
+
+  resolutionPenaltyMultiplier?: number;
+
+  bounceFailureChance?: number;
+
+  abandonmentPenaltyMultiplier?: number;
+
+  backlogTicketCount?: number;
 };
 
 export const PVP_ATTACKS: PvPAttackDefinition[] = [
@@ -61,13 +102,13 @@ export const PVP_ATTACKS: PvPAttackDefinition[] = [
       "Password Reset Flood",
 
     description:
-      "Flood another player's queue with a pile of low-level Service Desk work.",
+      "Dump several useless password reset tickets directly into another player's queue.",
 
     cost:
-      350,
+      200,
 
     ticketCount:
-      4,
+      3,
 
     category:
       "SERVICE_DESK",
@@ -79,13 +120,63 @@ export const PVP_ATTACKS: PvPAttackDefinition[] = [
       1,
 
     maxValue:
-      60,
+      0,
 
     baseXp:
-      5,
+      0,
+
+    poisonEffect:
+      "NONE",
+
+    effectDescription:
+      "Immediately adds 3 zero-value Poison Tickets to the target's queue.",
 
     flavourText:
-      "Apparently everyone forgot their password at exactly the same time.",
+      "Three users forgot their passwords at the exact same time. Completely normal.",
+  },
+
+  {
+    type:
+      "SELF_SERVICE_PORTAL_OUTAGE",
+
+    name:
+      "Self-Service Portal Outage",
+
+    description:
+      "Take away the thing users were supposed to use before calling IT.",
+
+    cost:
+      250,
+
+    ticketCount:
+      1,
+
+    category:
+      "SYSTEMS",
+
+    severity:
+      "P3",
+
+    difficulty:
+      2,
+
+    maxValue:
+      0,
+
+    baseXp:
+      0,
+
+    poisonEffect:
+      "QUEUE_SPEED",
+
+    effectDescription:
+      "Normal system tickets arrive 30% faster while this Poison Ticket remains open.",
+
+    queueSpeedMultiplier:
+      0.7,
+
+    flavourText:
+      "The self-service portal is down. Every problem is now officially a Service Desk problem.",
   },
 
   {
@@ -96,10 +187,10 @@ export const PVP_ATTACKS: PvPAttackDefinition[] = [
       "Network Outage",
 
     description:
-      "Send a difficult Network incident directly into another player's queue.",
+      "Apply immediate SLA pressure to a handful of tickets already sitting in the victim's queue.",
 
     cost:
-      600,
+      300,
 
     ticketCount:
       1,
@@ -114,13 +205,25 @@ export const PVP_ATTACKS: PvPAttackDefinition[] = [
       3,
 
     maxValue:
-      250,
+      0,
 
     baseXp:
-      20,
+      0,
+
+    poisonEffect:
+      "SLA_PRESSURE",
+
+    effectDescription:
+      "Immediately ages up to 3 random open tickets by 5 minutes.",
+
+    slaAgeMinutes:
+      5,
+
+    slaAffectedTicketCount:
+      3,
 
     flavourText:
-      "Half the office is offline. Networking says it definitely wasn't them.",
+      "The network issue has spread. So has everyone's urgency.",
   },
 
   {
@@ -131,10 +234,10 @@ export const PVP_ATTACKS: PvPAttackDefinition[] = [
       "Failed Deployment",
 
     description:
-      "Drop a broken Systems deployment into somebody else's queue.",
+      "Make the victim's legitimate queue worth less the longer this problem remains unresolved.",
 
     cost:
-      600,
+      150,
 
     ticketCount:
       1,
@@ -143,19 +246,28 @@ export const PVP_ATTACKS: PvPAttackDefinition[] = [
       "SYSTEMS",
 
     severity:
-      "P2",
+      "P3",
 
     difficulty:
       3,
 
     maxValue:
-      250,
+      0,
 
     baseXp:
-      20,
+      0,
+
+    poisonEffect:
+      "VALUE_DECAY",
+
+    effectDescription:
+      "Normal ticket Credit rewards decay 25% faster while this Poison Ticket remains open.",
+
+    valueDecayMultiplier:
+      1.25,
 
     flavourText:
-      "The deployment succeeded perfectly, except for the part where everything stopped working.",
+      "The deployment passed testing. Production has chosen not to recognise those results.",
   },
 
   {
@@ -166,10 +278,10 @@ export const PVP_ATTACKS: PvPAttackDefinition[] = [
       "Phishing Campaign",
 
     description:
-      "Send a serious Security incident to another player and let them deal with the consequences.",
+      "Make panic-driven resolution mistakes much more expensive.",
 
     cost:
-      650,
+      200,
 
     ticketCount:
       1,
@@ -184,51 +296,107 @@ export const PVP_ATTACKS: PvPAttackDefinition[] = [
       3,
 
     maxValue:
-      275,
+      0,
 
     baseXp:
-      20,
+      0,
+
+    poisonEffect:
+      "RESOLUTION_PENALTY",
+
+    effectDescription:
+      "Wrong-resolution penalties are increased by 50% while this Poison Ticket remains open.",
+
+    resolutionPenaltyMultiplier:
+      1.5,
 
     flavourText:
-      "Someone clicked the link. Then forwarded it to Finance. Then Finance clicked it too.",
+      "Sales clicked it. Finance clicked it. Someone forwarded it to Payroll for verification.",
   },
 
   {
     type:
-      "TICKET_STORM",
+      "MONITORING_FAILURE",
 
     name:
-      "Ticket Storm",
+      "Monitoring Failure",
 
     description:
-      "Send a burst of mixed tickets over a short period to overload another player's queue.",
+      "Remove one of the victim's most useful visual warnings while their queue keeps ageing.",
 
     cost:
-      1000,
+      100,
 
     ticketCount:
-      5,
+      1,
 
     category:
-      "MIXED",
+      "SYSTEMS",
 
     severity:
-      "MIXED",
+      "P3",
 
     difficulty:
       2,
 
     maxValue:
-      100,
+      0,
 
     baseXp:
-      10,
+      0,
 
-    deliverySpacingSeconds:
-      25,
+    poisonEffect:
+      "MONITORING_FAILURE",
+
+    effectDescription:
+      "BREACHING warnings are hidden while this Poison Ticket remains open.",
 
     flavourText:
-      "One ticket is work. Five tickets arriving back-to-back is character development.",
+      "Monitoring is green. Everything is on fire, but monitoring is definitely green.",
+  },
+
+  {
+    type:
+      "DNS_FAILURE",
+
+    name:
+      "DNS Failure",
+
+    description:
+      "Make routing tickets away less reliable while the DNS problem remains in the queue.",
+
+    cost:
+      250,
+
+    ticketCount:
+      1,
+
+    category:
+      "NETWORK",
+
+    severity:
+      "P2",
+
+    difficulty:
+      3,
+
+    maxValue:
+      0,
+
+    baseXp:
+      0,
+
+    poisonEffect:
+      "BOUNCE_FAILURE",
+
+    effectDescription:
+      "Bounce attempts have a 50% chance to fail while this Poison Ticket remains open.",
+
+    bounceFailureChance:
+      0.5,
+
+    flavourText:
+      "It's always DNS. This time it is also preventing you from escaping your own tickets.",
   },
 
   {
@@ -239,10 +407,10 @@ export const PVP_ATTACKS: PvPAttackDefinition[] = [
       "Major Incident",
 
     description:
-      "Launch a brutal high-severity incident with a short SLA and a huge abandonment penalty.",
+      "Turn every SLA breach into a much more dangerous financial problem.",
 
     cost:
-      1500,
+      400,
 
     ticketCount:
       1,
@@ -254,16 +422,110 @@ export const PVP_ATTACKS: PvPAttackDefinition[] = [
       "P1",
 
     difficulty:
-      5,
+      4,
 
     maxValue:
-      500,
+      0,
 
     baseXp:
-      40,
+      0,
+
+    poisonEffect:
+      "ABANDONMENT_PENALTY",
+
+    effectDescription:
+      "Abandonment penalties are increased by 50% while this Poison Ticket remains open.",
+
+    abandonmentPenaltyMultiplier:
+      1.5,
 
     flavourText:
-      "Management has joined the Teams call. Things are now officially bad.",
+      "Management has joined the bridge call. Your evening plans have been reassigned.",
+  },
+
+  {
+    type:
+      "EXECUTIVE_ESCALATION",
+
+    name:
+      "Executive Escalation",
+
+    description:
+      "Send one dangerous high-pressure ticket designed to demand immediate attention.",
+
+    cost:
+      500,
+
+    ticketCount:
+      1,
+
+    category:
+      "SERVICE_DESK",
+
+    severity:
+      "P2",
+
+    difficulty:
+      4,
+
+    maxValue:
+      0,
+
+    baseXp:
+      0,
+
+    poisonEffect:
+      "EXECUTIVE_ESCALATION",
+
+    effectDescription:
+      "Adds a dangerous P2 Poison Ticket with a short SLA and a heavy abandonment penalty.",
+
+    flavourText:
+      "The executive has used the phrase 'business critical'. Three managers are already typing.",
+  },
+
+  {
+    type:
+      "MAIL_QUEUE_BACKLOG",
+
+    name:
+      "Mail Queue Backlog",
+
+    description:
+      "Build up the target's next few normal tickets and release them as one unpleasant burst.",
+
+    cost:
+      300,
+
+    ticketCount:
+      1,
+
+    category:
+      "SYSTEMS",
+
+    severity:
+      "P3",
+
+    difficulty:
+      3,
+
+    maxValue:
+      0,
+
+    baseXp:
+      0,
+
+    poisonEffect:
+      "MAIL_BACKLOG",
+
+    effectDescription:
+      "The target's next 3 normal system tickets arrive together instead of separately.",
+
+    backlogTicketCount:
+      3,
+
+    flavourText:
+      "The mail queue finally started moving. Unfortunately, it moved everything at once.",
   },
 ];
 
@@ -276,4 +538,41 @@ export function getPvPAttackDefinition(
         attack.type === type
     ) ?? null
   );
+}
+
+export function getPoisonEffectLabel(
+  effect: PoisonEffect
+) {
+  switch (effect) {
+    case "QUEUE_SPEED":
+      return "Queue Speed";
+
+    case "SLA_PRESSURE":
+      return "SLA Pressure";
+
+    case "VALUE_DECAY":
+      return "Reward Decay";
+
+    case "RESOLUTION_PENALTY":
+      return "Resolution Penalty";
+
+    case "MONITORING_FAILURE":
+      return "Monitoring Failure";
+
+    case "BOUNCE_FAILURE":
+      return "Bounce Failure";
+
+    case "ABANDONMENT_PENALTY":
+      return "Abandonment Penalty";
+
+    case "EXECUTIVE_ESCALATION":
+      return "Executive Escalation";
+
+    case "MAIL_BACKLOG":
+      return "Mail Backlog";
+
+    case "NONE":
+    default:
+      return "Queue Poison";
+  }
 }

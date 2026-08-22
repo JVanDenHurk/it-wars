@@ -2,6 +2,13 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
+import {
+  getCareerValueDecayMultiplier,
+  getPoisonPenalty,
+} from "@/lib/career-abilities";
+import {
+  finalizeExpiredMaintenanceWindows,
+} from "@/lib/maintenance-window";
 import { applyCreditPenalty } from "@/lib/player-bankruptcy";
 import { getLevelFromXp } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
@@ -12,22 +19,10 @@ function canPlayerResolve(
   careerPath: string | null,
   ticketCategory: string
 ) {
-  /*
-   * Everyone can resolve
-   * Service Desk tickets.
-   */
-  if (
-    ticketCategory ===
-    "SERVICE_DESK"
-  ) {
+  if (ticketCategory === "SERVICE_DESK") {
     return true;
   }
 
-  /*
-   * Players who have not yet
-   * selected a specialist path
-   * cannot resolve specialist work.
-   */
   if (
     level < 4 ||
     !careerPath
@@ -35,11 +30,6 @@ function canPlayerResolve(
     return false;
   }
 
-  /*
-   * Specialists can resolve
-   * tickets belonging to their
-   * own career path.
-   */
   if (
     careerPath === "NETWORK" &&
     ticketCategory === "NETWORK"
@@ -67,18 +57,16 @@ function canPlayerResolve(
 export async function POST(
   _request: Request,
   context: {
-    params: Promise<{ id: string }>;
+    params: Promise<{
+      id: string;
+    }>;
   }
 ) {
   try {
-    /*
-     * ============================
-     * AUTHENTICATION
-     * ============================
-     */
     const session =
       await auth.api.getSession({
-        headers: await headers(),
+        headers:
+          await headers(),
       });
 
     if (!session) {
@@ -93,18 +81,17 @@ export async function POST(
       );
     }
 
-    /*
-     * ============================
-     * TICKET ID
-     * ============================
-     */
     const { id } =
       await context.params;
 
     const ticketId =
       Number(id);
 
-    if (!Number.isInteger(ticketId)) {
+    if (
+      !Number.isInteger(
+        ticketId
+      )
+    ) {
       return NextResponse.json(
         {
           error:
@@ -116,11 +103,6 @@ export async function POST(
       );
     }
 
-    /*
-     * ============================
-     * CURRENT PLAYER
-     * ============================
-     */
     const player =
       await prisma.player.findUnique({
         where: {
@@ -141,11 +123,10 @@ export async function POST(
       );
     }
 
-    /*
-     * ============================
-     * TICKET
-     * ============================
-     */
+    await finalizeExpiredMaintenanceWindows(
+      player.id
+    );
+
     const ticket =
       await prisma.ticket.findUnique({
         where: {
@@ -166,10 +147,6 @@ export async function POST(
       );
     }
 
-    /*
-     * Ticket must belong to
-     * the current player.
-     */
     if (
       ticket.assignedToId !==
       player.id
@@ -185,9 +162,6 @@ export async function POST(
       );
     }
 
-    /*
-     * Ticket must still be open.
-     */
     if (
       ticket.status !==
       "OPEN"
@@ -203,11 +177,86 @@ export async function POST(
       );
     }
 
-    /*
-     * ============================
-     * RESOLVER CHECK
-     * ============================
-     */
+    const valueDecayPoison =
+      await prisma.ticket.findFirst({
+        where: {
+          assignedToId:
+            player.id,
+
+          status:
+            "OPEN",
+
+          isPoison:
+            true,
+
+          poisonEffect:
+            "VALUE_DECAY",
+        },
+
+        select: {
+          id:
+            true,
+        },
+      });
+
+    const valueDecayActive =
+      valueDecayPoison !==
+      null;
+
+    const resolutionPenaltyPoison =
+      await prisma.ticket.findFirst({
+        where: {
+          assignedToId:
+            player.id,
+
+          status:
+            "OPEN",
+
+          isPoison:
+            true,
+
+          poisonEffect:
+            "RESOLUTION_PENALTY",
+        },
+
+        select: {
+          id:
+            true,
+        },
+      });
+
+    const resolutionPenaltyActive =
+      resolutionPenaltyPoison !==
+      null;
+
+    const careerDecayMultiplier =
+      getCareerValueDecayMultiplier(
+        player.careerPath
+      );
+
+    const poisonDecayMultiplier =
+      valueDecayActive
+        ? 1.25
+        : 1;
+
+    const finalDecayMultiplier =
+      careerDecayMultiplier *
+      poisonDecayMultiplier;
+
+    const systemsPassiveActive =
+      player.careerPath ===
+      "SYSTEMS";
+
+    const securityPassiveActive =
+      player.careerPath ===
+      "SECURITY";
+
+    const maintenanceActive =
+      ticket.maintenanceUntil !==
+        null &&
+      ticket.maintenanceUntil >
+        new Date();
+
     const correct =
       canPlayerResolve(
         player.level,
@@ -218,22 +267,31 @@ export async function POST(
     const ticketNumber =
       `INC${ticket.id
         .toString()
-        .padStart(5, "0")}`;
+        .padStart(
+          5,
+          "0"
+        )}`;
 
-    /*
-     * ============================
-     * CORRECT RESOLUTION
-     * ============================
-     */
     if (correct) {
       const reward =
-        calculateTicketValue(
-          ticket.maxValue,
-          ticket.createdAt
-        );
+        ticket.isPoison
+          ? 0
+          : calculateTicketValue(
+              ticket.maxValue,
+              ticket.createdAt,
+              finalDecayMultiplier,
+              ticket
+                .slaAgeOffsetMinutes,
+              ticket
+                .maintenanceUntil,
+              ticket
+                .maintenancePausedMinutes
+            );
 
       const xpReward =
-        ticket.baseXp;
+        ticket.isPoison
+          ? 0
+          : ticket.baseXp;
 
       const newXp =
         player.xp +
@@ -253,6 +311,9 @@ export async function POST(
         newLevel >= 4 &&
         !player.careerPath;
 
+      const resolvedAt =
+        new Date();
+
       await prisma.$transaction([
         prisma.ticket.update({
           where: {
@@ -264,8 +325,7 @@ export async function POST(
             status:
               "RESOLVED",
 
-            resolvedAt:
-              new Date(),
+            resolvedAt,
           },
         }),
 
@@ -292,6 +352,11 @@ export async function POST(
                 1,
             },
 
+            careerTicketsResolved: {
+              increment:
+                1,
+            },
+
             lifetimeTicketsHandled: {
               increment:
                 1,
@@ -303,16 +368,11 @@ export async function POST(
             },
 
             lastActiveAt:
-              new Date(),
+              resolvedAt,
           },
         }),
       ]);
 
-      /*
-       * ============================
-       * SUCCESS RESPONSE
-       * ============================
-       */
       return NextResponse.json({
         success:
           true,
@@ -334,6 +394,26 @@ export async function POST(
         severity:
           ticket.severity,
 
+        isPoison:
+          ticket.isPoison,
+
+        poisonEffect:
+          ticket.poisonEffect,
+
+        slaAgeOffsetMinutes:
+          ticket
+            .slaAgeOffsetMinutes,
+
+        maintenanceActive,
+
+        maintenanceUntil:
+          ticket
+            .maintenanceUntil,
+
+        maintenancePausedMinutes:
+          ticket
+            .maintenancePausedMinutes,
+
         reward,
 
         xp:
@@ -349,27 +429,69 @@ export async function POST(
 
         careerUnlocked,
 
+        valueDecayActive,
+
+        poisonDecayMultiplier,
+
+        systemsPassiveActive,
+
+        systemsPassiveName:
+          systemsPassiveActive
+            ? "Automation"
+            : null,
+
+        careerDecayMultiplier,
+
+        finalDecayMultiplier,
+
+        securityPassiveActive,
+
+        securityPassiveName:
+          securityPassiveActive
+            ? "Incident Hardened"
+            : null,
+
         successMessage:
           ticket.successMessage ??
           undefined,
       });
     }
 
-    /*
-     * ============================
-     * WRONG RESOLUTION
-     * ============================
-     */
-    const penalty =
+    const basePenalty =
       100;
+
+    const poisonAdjustedPenalty =
+      resolutionPenaltyActive
+        ? Math.floor(
+            basePenalty *
+              1.5
+          )
+        : basePenalty;
+
+    const penalty =
+      ticket.isPoison
+        ? getPoisonPenalty(
+            player.careerPath,
+            poisonAdjustedPenalty
+          )
+        : poisonAdjustedPenalty;
+
+    const securityPenaltyReduced =
+      ticket.isPoison &&
+      securityPassiveActive &&
+      penalty <
+        poisonAdjustedPenalty;
+
+    const securityPenaltySaved =
+      securityPenaltyReduced
+        ? poisonAdjustedPenalty -
+          penalty
+        : 0;
 
     const failureMessage =
       ticket.failureMessage ??
       "Your attempted resolution somehow made the situation worse.";
 
-    /*
-     * Close ticket as FAILED.
-     */
     await prisma.ticket.update({
       where: {
         id:
@@ -382,20 +504,6 @@ export async function POST(
       },
     });
 
-    /*
-     * ============================
-     * APPLY CREDIT PENALTY
-     * ============================
-     *
-     * If this ticket originated
-     * from a PvP attack, pass the
-     * original attack information
-     * to the bankruptcy helper.
-     *
-     * If this penalty reduces the
-     * player to 0 Credits, the
-     * attacker receives the kill.
-     */
     const penaltyResult =
       await applyCreditPenalty(
         player.id,
@@ -403,45 +511,67 @@ export async function POST(
         penalty,
         {
           attackSourcePlayerId:
-            ticket.attackSourcePlayerId,
+            ticket
+              .attackSourcePlayerId,
 
           pvpAttackId:
             ticket.pvpAttackId,
         }
       );
 
-    /*
-     * ============================
-     * RECORD FAILED RESOLUTION
-     * ============================
-     */
-    await prisma.player.update({
-      where: {
-        id:
-          player.id,
-      },
-
-      data: {
-        incorrectResolves: {
-          increment:
-            1,
+    if (
+      penaltyResult.bankrupt
+    ) {
+      await prisma.player.update({
+        where: {
+          id:
+            player.id,
         },
 
-        lifetimeTicketsHandled: {
-          increment:
-            1,
+        data: {
+          incorrectResolves: {
+            increment:
+              1,
+          },
+
+          lifetimeTicketsHandled: {
+            increment:
+              1,
+          },
+
+          lastActiveAt:
+            new Date(),
+        },
+      });
+    } else {
+      await prisma.player.update({
+        where: {
+          id:
+            player.id,
         },
 
-        lastActiveAt:
-          new Date(),
-      },
-    });
+        data: {
+          incorrectResolves: {
+            increment:
+              1,
+          },
 
-    /*
-     * ============================
-     * FAILURE RESPONSE
-     * ============================
-     */
+          careerIncorrectResolves: {
+            increment:
+              1,
+          },
+
+          lifetimeTicketsHandled: {
+            increment:
+              1,
+          },
+
+          lastActiveAt:
+            new Date(),
+        },
+      });
+    }
+
     return NextResponse.json({
       success:
         true,
@@ -466,7 +596,44 @@ export async function POST(
       severity:
         ticket.severity,
 
+      isPoison:
+        ticket.isPoison,
+
+      poisonEffect:
+        ticket.poisonEffect,
+
+      slaAgeOffsetMinutes:
+        ticket
+          .slaAgeOffsetMinutes,
+
+      maintenanceActive,
+
+      maintenanceUntil:
+        ticket
+          .maintenanceUntil,
+
+      maintenancePausedMinutes:
+        ticket
+          .maintenancePausedMinutes,
+
+      basePenalty,
+
+      poisonAdjustedPenalty,
+
       penalty,
+
+      resolutionPenaltyActive,
+
+      securityPassiveActive,
+
+      securityPassiveName:
+        securityPassiveActive
+          ? "Incident Hardened"
+          : null,
+
+      securityPenaltyReduced,
+
+      securityPenaltySaved,
 
       credits:
         penaltyResult.player
@@ -480,19 +647,12 @@ export async function POST(
       resetToServiceDesk:
         penaltyResult.bankrupt,
 
-      /*
-       * PvP information.
-       *
-       * We can use this later for
-       * messages such as:
-       *
-       * "Justin caused your bankruptcy."
-       */
       killAwarded:
         penaltyResult.killAwarded,
 
       attackSourcePlayerId:
-        ticket.attackSourcePlayerId,
+        ticket
+          .attackSourcePlayerId,
 
       pvpAttackId:
         ticket.pvpAttackId,

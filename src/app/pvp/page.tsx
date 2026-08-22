@@ -5,10 +5,9 @@ import { redirect } from "next/navigation";
 import PlayerHeartbeat from "@/components/PlayerHeartbeat";
 import PvPAttackButton from "@/components/PvPAttackButton";
 import { auth } from "@/lib/auth";
-import { getRoleTitle } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
 import {
-    PVP_ATTACKS,
+  PVP_ATTACKS,
 } from "@/lib/pvp-attacks";
 
 export default async function PvPPage() {
@@ -33,102 +32,8 @@ export default async function PvPPage() {
     redirect("/dashboard");
   }
 
-  const now =
-    new Date();
-
-  const activeCutoff =
-    new Date(
-      now.getTime() -
-        2 * 60 * 1000
-    );
-
-  /*
-   * ============================
-   * ONLINE TARGETS
-   * ============================
-   */
-  const targets =
-    await prisma.player.findMany({
-      where: {
-        id: {
-          not:
-            player.id,
-        },
-
-        lastActiveAt: {
-          gt:
-            activeCutoff,
-        },
-
-        user: {
-          sessions: {
-            some: {
-              expiresAt: {
-                gt:
-                  now,
-              },
-            },
-          },
-        },
-      },
-
-      select: {
-        id: true,
-        username: true,
-
-        level: true,
-        careerPath: true,
-
-        credits: true,
-
-        assignedTickets: {
-          where: {
-            status:
-              "OPEN",
-          },
-
-          select: {
-            id: true,
-          },
-        },
-      },
-
-      orderBy: {
-        username:
-          "asc",
-      },
-    });
-
-  /*
-   * Convert Prisma target data into
-   * the shape expected by the client
-   * attack button.
-   */
-  const targetOptions =
-    targets.map(
-      (target) => ({
-        id:
-          target.id,
-
-        username:
-          target.username,
-
-        level:
-          target.level,
-
-        careerPath:
-          target.careerPath,
-
-        credits:
-          target.credits,
-
-        queueSize:
-          target.assignedTickets.length,
-      })
-    );
-
   return (
-    <main className="min-h-screen bg-black p-8 text-white">
+    <main className="min-h-screen bg-black px-4 py-8 text-white md:px-8">
 
       <PlayerHeartbeat />
 
@@ -141,18 +46,18 @@ export default async function PvPPage() {
 
           <div>
 
-            <p className="text-xs font-bold uppercase tracking-[0.25em] text-red-500">
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-purple-500">
               PvP
             </p>
 
             <h1 className="mt-2 text-4xl font-black">
-              Queue Warfare
+              Queue Poisoning
             </h1>
 
             <p className="mt-2 max-w-2xl text-zinc-400">
-              Spend Credits to poison another player&apos;s queue.
-              Pick your victim carefully — every attack costs you
-              survival money too.
+              Spend Credits to inject Poison Tickets into another
+              player&apos;s queue. Overwhelm their workload while
+              keeping your own queue under control.
             </p>
 
           </div>
@@ -169,7 +74,7 @@ export default async function PvPPage() {
         {/* ============================
             PLAYER SUMMARY
             ============================ */}
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
 
           <div className="border border-zinc-800 bg-zinc-950 p-5">
 
@@ -190,18 +95,6 @@ export default async function PvPPage() {
           <div className="border border-zinc-800 bg-zinc-950 p-5">
 
             <p className="text-xs uppercase tracking-wide text-zinc-500">
-              Online Targets
-            </p>
-
-            <p className="mt-2 text-3xl font-black">
-              {targets.length}
-            </p>
-
-          </div>
-
-          <div className="border border-zinc-800 bg-zinc-950 p-5">
-
-            <p className="text-xs uppercase tracking-wide text-zinc-500">
               PvP Kills
             </p>
 
@@ -214,136 +107,24 @@ export default async function PvPPage() {
         </div>
 
         {/* ============================
-            TARGETS
+            POISON STORE
             ============================ */}
-        <div className="mt-4 border border-zinc-800 bg-zinc-950 p-6">
-
-          <p className="text-xs uppercase tracking-wide text-zinc-500">
-            Potential Victims
-          </p>
-
-          <h2 className="mt-2 text-2xl font-bold">
-            Online Players
-          </h2>
-
-          {targets.length === 0 ? (
-            <div className="mt-5 border border-zinc-800 bg-black p-5 text-sm text-zinc-500">
-              Nobody else is online right now. Your coworkers have escaped.
-            </div>
-          ) : (
-            <div className="mt-5 grid gap-3 md:grid-cols-2">
-
-              {targets.map((target) => {
-                const role =
-                  getRoleTitle(
-                    target.level,
-                    target.careerPath
-                  );
-
-                const queueSize =
-                  target.assignedTickets.length;
-
-                return (
-                  <div
-                    key={
-                      target.id
-                    }
-                    className="border border-zinc-800 bg-black p-4"
-                  >
-
-                    <div className="flex items-start justify-between gap-4">
-
-                      <div className="min-w-0">
-
-                        <div className="flex items-center gap-2">
-
-                          <span className="h-2 w-2 rounded-full bg-green-400" />
-
-                          <p className="truncate font-bold">
-                            {
-                              target.username
-                            }
-                          </p>
-
-                        </div>
-
-                        <p className="mt-1 text-sm text-zinc-500">
-                          {role}
-                        </p>
-
-                      </div>
-
-                      <div className="text-right">
-
-                        <p className="text-xs uppercase tracking-wide text-zinc-600">
-                          Credits
-                        </p>
-
-                        <p
-                          className={`mt-1 font-bold ${
-                            target.credits <= 300
-                              ? "text-red-400"
-                              : "text-zinc-300"
-                          }`}
-                        >
-                          {
-                            target.credits
-                          }{" "}
-                          CR
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                    <div className="mt-4 border-t border-zinc-900 pt-4">
-
-                      <p className="text-xs uppercase tracking-wide text-zinc-600">
-                        Queue
-                      </p>
-
-                      <p
-                        className={`mt-1 text-xl font-black ${
-                          queueSize >= 8
-                            ? "text-red-400"
-                            : queueSize >= 4
-                              ? "text-yellow-400"
-                              : "text-zinc-300"
-                        }`}
-                      >
-                        {
-                          queueSize
-                        }
-                      </p>
-
-                    </div>
-
-                  </div>
-                );
-              })}
-
-            </div>
-          )}
-
-        </div>
-
-        {/* ============================
-            ATTACK STORE
-            ============================ */}
-        <div className="mt-4">
+        <div className="mt-8">
 
           <div className="mb-4">
 
-            <p className="text-xs uppercase tracking-wide text-zinc-500">
-              Attack Store
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-purple-500">
+              Poison Store
             </p>
 
             <h2 className="mt-2 text-2xl font-bold">
-              Choose Your Weapon
+              Choose Your Poison
             </h2>
 
-            <p className="mt-2 text-sm text-zinc-500">
-              Spend carefully. Those Credits are also keeping your own career alive.
+            <p className="mt-2 max-w-2xl text-sm text-zinc-500">
+              Choose an attack, then search for an online target.
+              Every poison costs Credits, so spending aggressively
+              can make you vulnerable too.
             </p>
 
           </div>
@@ -352,8 +133,13 @@ export default async function PvPPage() {
 
             {PVP_ATTACKS.map(
               (attack) => {
+                /*
+                 * PvP API requires the
+                 * player to retain at least
+                 * 1 Credit after purchase.
+                 */
                 const affordable =
-                  player.credits >=
+                  player.credits >
                   attack.cost;
 
                 return (
@@ -361,14 +147,17 @@ export default async function PvPPage() {
                     key={
                       attack.type
                     }
-                    className="border border-zinc-800 bg-zinc-950 p-6"
+                    className="border border-zinc-800 bg-zinc-950 p-6 transition hover:border-purple-800"
                   >
 
+                    {/* ============================
+                        POISON HEADER
+                        ============================ */}
                     <div className="flex items-start justify-between gap-4">
 
                       <div>
 
-                        <p className="text-xs font-bold uppercase tracking-wide text-red-500">
+                        <p className="text-xs font-bold uppercase tracking-wide text-purple-500">
                           {attack.type.replaceAll(
                             "_",
                             " "
@@ -388,7 +177,7 @@ export default async function PvPPage() {
                         <p
                           className={`text-xl font-black ${
                             affordable
-                              ? "text-white"
+                              ? "text-purple-300"
                               : "text-red-400"
                           }`}
                         >
@@ -402,21 +191,27 @@ export default async function PvPPage() {
 
                     </div>
 
+                    {/* ============================
+                        DESCRIPTION
+                        ============================ */}
                     <p className="mt-4 text-zinc-400">
                       {
                         attack.description
                       }
                     </p>
 
+                    {/* ============================
+                        POISON DETAILS
+                        ============================ */}
                     <div className="mt-5 grid grid-cols-2 gap-3">
 
                       <div className="border border-zinc-800 bg-black p-3">
 
                         <p className="text-xs uppercase tracking-wide text-zinc-600">
-                          Tickets
+                          Poison Tickets
                         </p>
 
-                        <p className="mt-1 font-bold">
+                        <p className="mt-1 font-bold text-purple-300">
                           {
                             attack.ticketCount
                           }
@@ -440,9 +235,29 @@ export default async function PvPPage() {
 
                     </div>
 
-                    <div className="mt-5 border border-zinc-800 bg-black p-4">
+                    {/* ============================
+                        EFFECT
+                        ============================ */}
+                    <div className="mt-3 border border-purple-900/70 bg-purple-950/20 p-4">
 
-                      <p className="text-sm italic text-zinc-500">
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-purple-500">
+                        Poison Effect
+                      </p>
+
+                      <p className="mt-2 text-sm text-zinc-300">
+                        {
+                          attack.effectDescription
+                        }
+                      </p>
+
+                    </div>
+
+                    {/* ============================
+                        FLAVOUR TEXT
+                        ============================ */}
+                    <div className="mt-3 border border-purple-950 bg-purple-950/10 p-4">
+
+                      <p className="text-sm italic text-purple-300/70">
                         {
                           attack.flavourText
                         }
@@ -450,11 +265,15 @@ export default async function PvPPage() {
 
                     </div>
 
-                    {/*
-                     * ============================
-                     * ATTACK CONTROL
-                     * ============================
-                     */}
+                    {!affordable && (
+                      <p className="mt-4 text-sm font-bold text-red-400">
+                        You cannot afford this poison without spending your final Credits.
+                      </p>
+                    )}
+
+                    {/* ============================
+                        TARGET SELECTOR
+                        ============================ */}
                     <PvPAttackButton
                       attackType={
                         attack.type
@@ -468,9 +287,6 @@ export default async function PvPPage() {
                       playerCredits={
                         player.credits
                       }
-                      targets={
-                        targetOptions
-                      }
                     />
 
                   </div>
@@ -483,6 +299,7 @@ export default async function PvPPage() {
         </div>
 
       </div>
+
     </main>
   );
 }

@@ -2,6 +2,13 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
+import {
+  getCareerValueDecayMultiplier,
+  getWrongBouncePenalty,
+} from "@/lib/career-abilities";
+import {
+  finalizeExpiredMaintenanceWindows,
+} from "@/lib/maintenance-window";
 import { applyCreditPenalty } from "@/lib/player-bankruptcy";
 import { getLevelFromXp } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
@@ -12,19 +19,10 @@ function canPlayerResolve(
   careerPath: string | null,
   ticketCategory: string
 ) {
-  /*
-   * Everyone can resolve
-   * Service Desk tickets.
-   */
   if (ticketCategory === "SERVICE_DESK") {
     return true;
   }
 
-  /*
-   * Players without a specialist
-   * path cannot resolve specialist
-   * tickets.
-   */
   if (
     level < 4 ||
     !careerPath
@@ -32,11 +30,6 @@ function canPlayerResolve(
     return false;
   }
 
-  /*
-   * Specialists can resolve
-   * tickets belonging to their
-   * own career path.
-   */
   if (
     careerPath === "NETWORK" &&
     ticketCategory === "NETWORK"
@@ -81,56 +74,50 @@ function isSpecialistPlayer(
   );
 }
 
-/*
- * ============================
- * WRONG TEAM MESSAGES
- * ============================
- *
- * Randomised so the player
- * doesn't see the exact same
- * message every time.
- */
 function getWrongBounceMessage() {
   const messages = [
     "You successfully routed the ticket to a team that has absolutely nothing to do with it. Impressive, in a way.",
-
     "The receiving team opened the ticket, sighed, and immediately started a private Teams chat about your routing skills.",
-
     "Wrong queue. The receiving team would like to know which part of their job title made this look like their problem.",
-
     "You have created unnecessary cross-team collaboration. Nobody asked for this.",
-
     "The ticket reached the wrong team. Their response was professional. Their internal chat was not.",
-
     "Routing failed successfully. The ticket moved somewhere, just nowhere useful.",
-
     "The receiving team has reviewed the ticket and politely requested that you never do this again.",
-
     "You bounced the ticket into the wrong queue. Somewhere, someone just typed 'why is this with us?' into Teams.",
-
     "The ticket is now owned by people who cannot fix it. Your contribution to operational efficiency has been noted.",
-
     "Congratulations. You have turned one person's problem into two teams' problem.",
-
     "The wrong team now owns the ticket. They are currently deciding whether to send it back or frame it as evidence.",
-
     "You routed the ticket confidently, quickly, and completely incorrectly.",
-
     "The ticket has arrived at the wrong resolver group. Everyone involved is now slightly more annoyed than before.",
-
     "Your routing decision has been reviewed by the receiving team. The review contained several question marks.",
-
     "The ticket went to the wrong team. They would bounce it back immediately, but they're still laughing.",
-
     "You have successfully demonstrated why resolver groups exist.",
-
     "The ticket has been transferred to a team that cannot help. At least the bounce count went up.",
-
     "Wrong team. Somebody has already added 'please educate Service Desk' to the internal notes.",
-
     "The receiving team has accepted the ticket in the same way someone accepts an unexpected parking fine.",
-
     "You routed the ticket somewhere. Technically, that is half of routing.",
+  ];
+
+  return messages[
+    Math.floor(
+      Math.random() *
+        messages.length
+    )
+  ];
+}
+
+function getDnsFailureMessage() {
+  const messages = [
+    "DNS failed to resolve the destination. The ticket has gone absolutely nowhere.",
+    "The bounce failed. DNS has decided the other resolver group does not exist.",
+    "Unable to route ticket. Apparently DNS is now responsible for Service Management too.",
+    "The ticket tried to leave your queue. DNS had other plans.",
+    "Routing request failed. It's DNS. Of course it's DNS.",
+    "The destination could not be resolved. Your ticket remains exactly where you did not want it.",
+    "Bounce failed successfully. DNS cannot find the team, the server, or apparently the will to continue.",
+    "The resolver group is definitely real. DNS simply disagrees.",
+    "Ticket transfer failed. Have you tried flushing DNS and lowering your expectations?",
+    "DNS has prevented the bounce. The ticket remains your problem for at least a little longer.",
   ];
 
   return messages[
@@ -144,18 +131,16 @@ function getWrongBounceMessage() {
 export async function POST(
   request: Request,
   context: {
-    params: Promise<{ id: string }>;
+    params: Promise<{
+      id: string;
+    }>;
   }
 ) {
   try {
-    /*
-     * ============================
-     * AUTHENTICATION
-     * ============================
-     */
     const session =
       await auth.api.getSession({
-        headers: await headers(),
+        headers:
+          await headers(),
       });
 
     if (!session) {
@@ -170,11 +155,6 @@ export async function POST(
       );
     }
 
-    /*
-     * ============================
-     * TICKET ID + TARGET
-     * ============================
-     */
     const { id } =
       await context.params;
 
@@ -190,7 +170,9 @@ export async function POST(
       );
 
     if (
-      !Number.isInteger(ticketId) ||
+      !Number.isInteger(
+        ticketId
+      ) ||
       !Number.isInteger(
         targetPlayerId
       )
@@ -206,11 +188,6 @@ export async function POST(
       );
     }
 
-    /*
-     * ============================
-     * CURRENT PLAYER
-     * ============================
-     */
     const player =
       await prisma.player.findUnique({
         where: {
@@ -231,9 +208,6 @@ export async function POST(
       );
     }
 
-    /*
-     * Cannot bounce to yourself.
-     */
     if (
       player.id ===
       targetPlayerId
@@ -249,11 +223,10 @@ export async function POST(
       );
     }
 
-    /*
-     * ============================
-     * TICKET
-     * ============================
-     */
+    await finalizeExpiredMaintenanceWindows(
+      player.id
+    );
+
     const ticket =
       await prisma.ticket.findUnique({
         where: {
@@ -274,10 +247,6 @@ export async function POST(
       );
     }
 
-    /*
-     * Ticket must belong to the
-     * current player and be OPEN.
-     */
     if (
       ticket.assignedToId !==
         player.id ||
@@ -295,11 +264,6 @@ export async function POST(
       );
     }
 
-    /*
-     * ============================
-     * TARGET PLAYER
-     * ============================
-     */
     const target =
       await prisma.player.findUnique({
         where: {
@@ -320,11 +284,130 @@ export async function POST(
       );
     }
 
-    /*
-     * ============================
-     * RESOLVER CAPABILITY
-     * ============================
-     */
+    const dnsFailurePoison =
+      await prisma.ticket.findFirst({
+        where: {
+          assignedToId:
+            player.id,
+
+          status:
+            "OPEN",
+
+          isPoison:
+            true,
+
+          poisonEffect:
+            "BOUNCE_FAILURE",
+        },
+
+        select: {
+          id:
+            true,
+        },
+      });
+
+    const dnsFailureActive =
+      dnsFailurePoison !==
+      null;
+
+    if (
+      dnsFailureActive
+    ) {
+      const bounceFailed =
+        Math.random() <
+        0.5;
+
+      if (
+        bounceFailed
+      ) {
+        await prisma.player.update({
+          where: {
+            id:
+              player.id,
+          },
+
+          data: {
+            lastActiveAt:
+              new Date(),
+          },
+        });
+
+        return NextResponse.json({
+          success:
+            true,
+
+          outcome:
+            "DNS_BOUNCE_FAILURE",
+
+          transferred:
+            false,
+
+          dnsFailureActive:
+            true,
+
+          target:
+            target.username,
+
+          message:
+            getDnsFailureMessage(),
+        });
+      }
+    }
+
+    const valueDecayPoison =
+      await prisma.ticket.findFirst({
+        where: {
+          assignedToId:
+            player.id,
+
+          status:
+            "OPEN",
+
+          isPoison:
+            true,
+
+          poisonEffect:
+            "VALUE_DECAY",
+        },
+
+        select: {
+          id:
+            true,
+        },
+      });
+
+    const valueDecayActive =
+      valueDecayPoison !==
+      null;
+
+    const careerDecayMultiplier =
+      getCareerValueDecayMultiplier(
+        player.careerPath
+      );
+
+    const poisonDecayMultiplier =
+      valueDecayActive
+        ? 1.25
+        : 1;
+
+    const finalDecayMultiplier =
+      careerDecayMultiplier *
+      poisonDecayMultiplier;
+
+    const systemsPassiveActive =
+      player.careerPath ===
+      "SYSTEMS";
+
+    const networkPassiveActive =
+      player.careerPath ===
+      "NETWORK";
+
+    const maintenanceActive =
+      ticket.maintenanceUntil !==
+        null &&
+      ticket.maintenanceUntil >
+        new Date();
+
     const senderCanResolve =
       canPlayerResolve(
         player.level,
@@ -339,11 +422,6 @@ export async function POST(
         ticket.category
       );
 
-    /*
-     * ============================
-     * PLAYER TYPES
-     * ============================
-     */
     const senderIsSpecialist =
       isSpecialistPlayer(
         player.level,
@@ -356,11 +434,6 @@ export async function POST(
         target.careerPath
       );
 
-    /*
-     * ==================================
-     * SPECIALIST -> SERVICE DESK HANDOFF
-     * ==================================
-     */
     const specialistReturningToServiceDesk =
       ticket.category ===
         "SERVICE_DESK" &&
@@ -385,7 +458,8 @@ export async function POST(
               player.id,
 
             bounceCount: {
-              increment: 1,
+              increment:
+                1,
             },
           },
         }),
@@ -398,7 +472,8 @@ export async function POST(
 
           data: {
             lifetimeTicketsHandled: {
-              increment: 1,
+              increment:
+                1,
             },
 
             lastActiveAt:
@@ -408,7 +483,8 @@ export async function POST(
       ]);
 
       return NextResponse.json({
-        success: true,
+        success:
+          true,
 
         outcome:
           "SERVICE_DESK_HANDOFF",
@@ -425,16 +501,29 @@ export async function POST(
         xp:
           0,
 
+        isPoison:
+          ticket.isPoison,
+
+        poisonEffect:
+          ticket.poisonEffect,
+
+        maintenanceActive,
+
+        maintenanceUntil:
+          ticket
+            .maintenanceUntil,
+
+        maintenancePausedMinutes:
+          ticket
+            .maintenancePausedMinutes,
+
         message:
-          `Service Desk ticket handed to ${target.username}.`,
+          ticket.isPoison
+            ? `Poison Ticket routed to ${target.username}. Its effect now follows the ticket.`
+            : `Service Desk ticket handed to ${target.username}.`,
       });
     }
 
-    /*
-     * ==================================
-     * OWNERSHIP WARNING
-     * ==================================
-     */
     if (
       senderCanResolve &&
       targetCanResolve
@@ -442,7 +531,9 @@ export async function POST(
       const queuePenaltyUntil =
         new Date(
           Date.now() +
-            5 * 60 * 1000
+            5 *
+              60 *
+              1000
         );
 
       await prisma.$transaction([
@@ -460,7 +551,8 @@ export async function POST(
               player.id,
 
             bounceCount: {
-              increment: 1,
+              increment:
+                1,
             },
           },
         }),
@@ -475,7 +567,8 @@ export async function POST(
             queuePenaltyUntil,
 
             lifetimeTicketsHandled: {
-              increment: 1,
+              increment:
+                1,
             },
 
             lastActiveAt:
@@ -485,7 +578,8 @@ export async function POST(
       ]);
 
       return NextResponse.json({
-        success: true,
+        success:
+          true,
 
         outcome:
           "OWNERSHIP_WARNING",
@@ -495,37 +589,61 @@ export async function POST(
 
         queuePenaltyUntil,
 
+        isPoison:
+          ticket.isPoison,
+
+        poisonEffect:
+          ticket.poisonEffect,
+
+        maintenanceActive,
+
+        maintenanceUntil:
+          ticket
+            .maintenanceUntil,
+
+        maintenancePausedMinutes:
+          ticket
+            .maintenancePausedMinutes,
+
         message:
           "You transferred a ticket that you could have resolved. Your queue priority has been reduced for 5 minutes.",
       });
     }
 
-    /*
-     * ==================================
-     * CORRECT ESCALATION
-     * ==================================
-     */
     if (
       !senderCanResolve &&
       targetCanResolve
     ) {
       const currentValue =
-        calculateTicketValue(
-          ticket.maxValue,
-          ticket.createdAt
-        );
+        ticket.isPoison
+          ? 0
+          : calculateTicketValue(
+              ticket.maxValue,
+              ticket.createdAt,
+              finalDecayMultiplier,
+              ticket
+                .slaAgeOffsetMinutes,
+              ticket
+                .maintenanceUntil,
+              ticket
+                .maintenancePausedMinutes
+            );
 
       const reward =
-        Math.max(
-          0,
-          Math.floor(
-            currentValue *
-              0.25
-          )
-        );
+        ticket.isPoison
+          ? 0
+          : Math.max(
+              0,
+              Math.floor(
+                currentValue *
+                  0.25
+              )
+            );
 
       const xpReward =
-        5;
+        ticket.isPoison
+          ? 0
+          : 5;
 
       const newXp =
         player.xp +
@@ -560,7 +678,8 @@ export async function POST(
               player.id,
 
             bounceCount: {
-              increment: 1,
+              increment:
+                1,
             },
           },
         }),
@@ -584,11 +703,18 @@ export async function POST(
               newLevel,
 
             correctBounces: {
-              increment: 1,
+              increment:
+                1,
+            },
+
+            careerCorrectBounces: {
+              increment:
+                1,
             },
 
             lifetimeTicketsHandled: {
-              increment: 1,
+              increment:
+                1,
             },
 
             lifetimeCreditsEarned: {
@@ -603,7 +729,8 @@ export async function POST(
       ]);
 
       return NextResponse.json({
-        success: true,
+        success:
+          true,
 
         outcome:
           "CORRECT_BOUNCE",
@@ -613,6 +740,26 @@ export async function POST(
 
         target:
           target.username,
+
+        isPoison:
+          ticket.isPoison,
+
+        poisonEffect:
+          ticket.poisonEffect,
+
+        slaAgeOffsetMinutes:
+          ticket
+            .slaAgeOffsetMinutes,
+
+        maintenanceActive,
+
+        maintenanceUntil:
+          ticket
+            .maintenanceUntil,
+
+        maintenancePausedMinutes:
+          ticket
+            .maintenancePausedMinutes,
 
         reward,
 
@@ -625,20 +772,49 @@ export async function POST(
         levelledUp,
 
         careerUnlocked,
+
+        valueDecayActive,
+
+        poisonDecayMultiplier,
+
+        systemsPassiveActive,
+
+        systemsPassiveName:
+          systemsPassiveActive
+            ? "Automation"
+            : null,
+
+        careerDecayMultiplier,
+
+        finalDecayMultiplier,
+
+        message:
+          ticket.isPoison
+            ? `Poison Ticket successfully routed to ${target.username}. You escaped it, but there is no reward for passing the problem along.`
+            : undefined,
       });
     }
 
-    /*
-     * ==================================
-     * WRONG TEAM
-     * ==================================
-     */
-    const penalty =
+    const basePenalty =
       100;
 
-    /*
-     * Transfer the ticket first.
-     */
+    const penalty =
+      getWrongBouncePenalty(
+        player.careerPath,
+        basePenalty
+      );
+
+    const networkPenaltyReduced =
+      networkPassiveActive &&
+      penalty <
+        basePenalty;
+
+    const networkPenaltySaved =
+      networkPenaltyReduced
+        ? basePenalty -
+          penalty
+        : 0;
+
     await prisma.ticket.update({
       where: {
         id:
@@ -653,52 +829,102 @@ export async function POST(
           player.id,
 
         bounceCount: {
-          increment: 1,
+          increment:
+            1,
         },
       },
     });
 
-    /*
-     * Apply penalty.
-     */
     const penaltyResult =
       await applyCreditPenalty(
         player.id,
         player.credits,
-        penalty
+        penalty,
+        {
+          attackSourcePlayerId:
+            ticket
+              .attackSourcePlayerId,
+
+          pvpAttackId:
+            ticket.pvpAttackId,
+        }
       );
 
     /*
-     * Record incorrect bounce.
+     * ============================
+     * RECORD WRONG BOUNCE
+     * ============================
+     *
+     * Lifetime stat always increases.
+     *
+     * Current-career stat increases
+     * only if this mistake did NOT
+     * bankrupt the player.
+     *
+     * If bankruptcy happened,
+     * applyCreditPenalty has already
+     * reset careerIncorrectBounces
+     * back to 0 for the new run.
      */
-    await prisma.player.update({
-      where: {
-        id:
-          player.id,
-      },
-
-      data: {
-        incorrectBounces: {
-          increment: 1,
+    if (
+      penaltyResult.bankrupt
+    ) {
+      await prisma.player.update({
+        where: {
+          id:
+            player.id,
         },
 
-        lifetimeTicketsHandled: {
-          increment: 1,
+        data: {
+          incorrectBounces: {
+            increment:
+              1,
+          },
+
+          lifetimeTicketsHandled: {
+            increment:
+              1,
+          },
+
+          lastActiveAt:
+            new Date(),
+        },
+      });
+    } else {
+      await prisma.player.update({
+        where: {
+          id:
+            player.id,
         },
 
-        lastActiveAt:
-          new Date(),
-      },
-    });
+        data: {
+          incorrectBounces: {
+            increment:
+              1,
+          },
 
-    /*
-     * Pick a random funny message.
-     */
+          careerIncorrectBounces: {
+            increment:
+              1,
+          },
+
+          lifetimeTicketsHandled: {
+            increment:
+              1,
+          },
+
+          lastActiveAt:
+            new Date(),
+        },
+      });
+    }
+
     const wrongBounceMessage =
       getWrongBounceMessage();
 
     return NextResponse.json({
-      success: true,
+      success:
+        true,
 
       outcome:
         "WRONG_BOUNCE",
@@ -709,7 +935,40 @@ export async function POST(
       target:
         target.username,
 
+      isPoison:
+        ticket.isPoison,
+
+      poisonEffect:
+        ticket.poisonEffect,
+
+      slaAgeOffsetMinutes:
+        ticket
+          .slaAgeOffsetMinutes,
+
+      maintenanceActive,
+
+      maintenanceUntil:
+        ticket
+          .maintenanceUntil,
+
+      maintenancePausedMinutes:
+        ticket
+          .maintenancePausedMinutes,
+
+      basePenalty,
+
       penalty,
+
+      networkPassiveActive,
+
+      networkPassiveName:
+        networkPassiveActive
+          ? "Routing Specialist"
+          : null,
+
+      networkPenaltyReduced,
+
+      networkPenaltySaved,
 
       credits:
         penaltyResult.player
@@ -721,10 +980,22 @@ export async function POST(
       resetToServiceDesk:
         penaltyResult.bankrupt,
 
+      killAwarded:
+        penaltyResult.killAwarded,
+
+      attackSourcePlayerId:
+        ticket
+          .attackSourcePlayerId,
+
+      pvpAttackId:
+        ticket.pvpAttackId,
+
       message:
         penaltyResult.bankrupt
           ? "You bounced the ticket to the wrong team, lost your remaining Credits, and got yourself sent back to Service Desk. Outstanding work."
-          : wrongBounceMessage,
+          : networkPenaltyReduced
+            ? `${wrongBounceMessage} Routing Specialist reduced the penalty by ${networkPenaltySaved} CR.`
+            : wrongBounceMessage,
     });
   } catch (error) {
     console.error(
