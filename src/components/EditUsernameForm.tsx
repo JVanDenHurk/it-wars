@@ -136,7 +136,7 @@ export default function EditUsernameForm({
       />
 
       <p className="mt-2 text-xs text-zinc-500">
-        3-24 characters. Letters, numbers, underscores and hyphens only.
+        3-24 characters. Letters, numbers, underscores and hyphens only. Workplace-friendly names only.
       </p>
 
       {error && (

@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 
+import { STARTING_CREDITS } from "@/lib/game-balance";
 import { getRoleTitle } from "@/lib/player-level";
 
 interface BounceTicketButtonProps {
@@ -987,8 +988,7 @@ export default function BounceTicketButton({
   }
 
   function acknowledgeDemotion() {
-    window.location.href =
-      "/dashboard";
+    router.replace("/dashboard");
   }
 
   return (
@@ -1538,7 +1538,7 @@ export default function BounceTicketButton({
                   </p>
 
                   <p className="mt-1 text-xl font-bold">
-                    1000
+                    {STARTING_CREDITS}
                   </p>
                 </div>
 

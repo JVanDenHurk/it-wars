@@ -105,7 +105,7 @@ export const PVP_ATTACKS: PvPAttackDefinition[] = [
       "Dump several useless password reset tickets directly into another player's queue.",
 
     cost:
-      200,
+      350,
 
     ticketCount:
       3,

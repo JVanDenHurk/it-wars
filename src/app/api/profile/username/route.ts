@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { validateUsername } from "@/lib/username";
 
 const USERNAME_CHANGE_COOLDOWN_DAYS =
   30;
@@ -42,49 +43,25 @@ export async function PATCH(
      * VALIDATION
      * ============================
      */
-    if (
-      username.length < 3
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Username must be at least 3 characters.",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-    if (
-      username.length > 24
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Username must be 24 characters or fewer.",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-    if (
-      !/^[a-zA-Z0-9_-]+$/.test(
+    const validation =
+      validateUsername(
         username
-      )
-    ) {
+      );
+
+    if (!validation.valid) {
       return NextResponse.json(
         {
           error:
-            "Username can only contain letters, numbers, underscores and hyphens.",
+            validation.error,
         },
         {
           status: 400,
         }
       );
     }
+
+    const validatedUsername =
+      validation.username;
 
     /*
      * ============================
@@ -116,7 +93,7 @@ export async function PATCH(
      */
     if (
       player.username ===
-      username
+      validatedUsername
     ) {
       return NextResponse.json({
         success:
@@ -214,7 +191,7 @@ export async function PATCH(
         where: {
           username: {
             equals:
-              username,
+              validatedUsername,
 
             mode:
               "insensitive",
@@ -269,7 +246,8 @@ export async function PATCH(
               },
 
               data: {
-                username,
+                username:
+                  validatedUsername,
 
                 usernameChangedAt:
                   now,
@@ -287,7 +265,7 @@ export async function PATCH(
 
             data: {
               name:
-                username,
+                validatedUsername,
             },
           });
 

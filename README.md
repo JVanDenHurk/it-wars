@@ -155,17 +155,23 @@ Except the Service Desk Analyst.
 
 Tickets are delivered automatically rather than manually pulled.
 
-Players can see when their next ticket is expected:
+The exact next-ticket timer is intentionally hidden from the player. Tickets simply arrive while the player is active, making the queue feel less predictable and closer to a real Service Desk.
 
-```text
-NEXT TICKET
-
-01:24
-```
-
-Ticket generation is tied to the player's current session and queue state.
+Ticket generation is tied to the player's current session and queue state. Delivery pacing is dynamic: work arrives quickly when the queue is empty and slows as the queue grows, with additional modifiers from ownership warnings and PvP effects.
 
 Queue management is an important part of the game because ticket value continuously decreases while work remains untouched.
+
+---
+
+## 🎲 Ticket Variety and Pacing
+
+The ticket catalogue is stored as reusable templates in PostgreSQL and seeded from `src/data/ticket-templates.json`. The catalogue contains Service Desk, Networking, Systems, and Security work rather than relying on a tiny hard-coded pool.
+
+Normal ticket selection also suppresses recently delivered ticket titles where possible. This reduces obvious repetition while still allowing common incidents to return naturally later. Mail Queue Backlog bursts use the same suppression so a burst does not normally contain duplicate templates.
+
+Queue pacing is intentionally variable. An empty queue receives work quickly, while a growing backlog increases the delay before another normal ticket arrives. Ownership warnings slow personal intake and Poison effects can modify delivery speed.
+
+The player is not shown an exact countdown. The queue simply indicates that more work is coming.
 
 ---
 
@@ -332,7 +338,7 @@ Service Desk Analyst
 
 Level:   1
 XP:      0
-Credits: 1000
+Credits: Starting balance
 ```
 
 The player's specialist career is removed and they must climb the IT ladder again.
@@ -349,9 +355,7 @@ IT Wars is designed around turning ordinary IT processes into multiplayer weapon
 
 Ticket bouncing already allows players to affect other players' queues.
 
-The larger PvP system will expand this considerably.
-
-Planned mechanics include purchasing specialist incidents and assigning them directly to another player.
+The PvP system expands this considerably. Players can purchase Poison Tickets and send disruptive incidents directly to another player.
 
 For example:
 
@@ -384,7 +388,7 @@ Kills
 Bankruptcies
 ```
 
-The PvP system will continue expanding as offensive ticket mechanics are introduced.
+PvP kills and bankruptcies contribute to lifetime competitive statistics.
 
 ---
 
@@ -394,7 +398,6 @@ IT Wars includes a competitive leaderboard for comparing players across the IT d
 
 Leaderboard scoring can incorporate performance such as:
 
-- Career XP
 - Tickets resolved
 - Correct routing
 - Lifetime Credits earned
@@ -434,19 +437,18 @@ It also lets you see exactly who has been avoiding their queue all afternoon.
 
 ## 📊 Player Statistics
 
-IT Wars tracks both current progression and lifetime statistics.
+IT Wars focuses its statistics on lifetime performance so bankruptcy resets the current career without erasing the player's history.
 
 Examples include:
 
 - Tickets resolved
 - Correct ticket routes
 - Incorrect ticket routes
-- Lifetime tickets handled
 - Lifetime Credits earned
 - PvP kills
 - Bankruptcies
 
-Some statistics survive bankruptcy so a player's complete history of questionable IT decisions remains visible.
+Lifetime statistics survive bankruptcy so a player's complete history of questionable IT decisions remains visible.
 
 ---
 
@@ -454,7 +456,7 @@ Some statistics survive bankruptcy so a player's complete history of questionabl
 
 IT Wars is under active development.
 
-### Implemented / In Development
+### Implemented
 
 ```text
 Authentication
@@ -486,6 +488,14 @@ Active Players
 Player Directory
       ↓
 Leaderboard
+      ↓
+PvP Poison Tickets
+      ↓
+Career Abilities
+      ↓
+Dynamic Queue Pacing
+      ↓
+Recent-Ticket Variety Suppression
 ```
 
 ---
@@ -494,19 +504,15 @@ Leaderboard
 
 Major systems still planned or being expanded include:
 
-- Full PvP ticket attacks
-- Purchasable specialist incidents
-- PvP kill attribution
-- Queue overload mechanics
-- Queue pressure penalties
-- Additional ticket templates
+- Continued PvP balancing and additional attack types
+- Specialist demand incentives and career-path balancing
+- Optional specialist switching / retraining mechanics
 - More ticket severities and consequences
-- Career-specific bonuses
-- Specialist progression bonuses
-- Player profiles
-- Expanded leaderboard statistics
-- Game balancing
-- Improved mobile interface
+- Continued ticket-template expansion and polish
+- Expanded leaderboard and lifetime statistics
+- Economy and progression balancing
+- Improved onboarding and username moderation
+- Continued mobile interface polish
 - Production deployment
 - Administration tools
 - Seasonal or long-term progression systems

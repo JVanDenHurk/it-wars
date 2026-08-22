@@ -71,6 +71,9 @@ export default function MaintenanceWindowButton({
   const [message, setMessage] =
     useState("");
 
+  const [nowMs, setNowMs] =
+    useState(0);
+
   const [result, setResult] =
     useState<
       "success" | "error" | null
@@ -92,16 +95,14 @@ export default function MaintenanceWindowButton({
 
   const ready =
     !careerAbilityReadyAt ||
-    new Date(
-      careerAbilityReadyAt
-    ).getTime() <=
-      Date.now();
+    (nowMs > 0 &&
+      new Date(
+        careerAbilityReadyAt
+      ).getTime() <=
+        nowMs);
 
   const availableTickets =
     useMemo(() => {
-      const now =
-        Date.now();
-
       return tickets.filter(
         (ticket) =>
           !ticket
@@ -110,9 +111,25 @@ export default function MaintenanceWindowButton({
             ticket
               .maintenanceUntil
           ).getTime() <=
-            now
+            nowMs
       );
-    }, [tickets]);
+    }, [tickets, nowMs]);
+
+
+  useEffect(() => {
+    const updateNow = () =>
+      setNowMs(Date.now());
+
+    updateNow();
+
+    const interval = window.setInterval(
+      updateNow,
+      1000
+    );
+
+    return () =>
+      window.clearInterval(interval);
+  }, []);
 
   /*
    * ============================

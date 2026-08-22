@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
+import { validateUsername } from "@/lib/username";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -51,6 +52,16 @@ export default function RegisterPage() {
       return;
     }
 
+    const usernameValidation =
+      validateUsername(name);
+
+    if (!usernameValidation.valid) {
+      setError(
+        usernameValidation.error
+      );
+      return;
+    }
+
     if (
       password !==
       confirmPassword
@@ -78,7 +89,7 @@ export default function RegisterPage() {
       const result =
         await authClient.signUp.email({
           name:
-            name.trim(),
+            usernameValidation.username,
 
           email:
             email.trim(),
@@ -187,8 +198,14 @@ export default function RegisterPage() {
                 }
                 autoComplete="username"
                 className="mt-2 w-full border border-zinc-700 bg-black px-4 py-3 text-white outline-none transition hover:border-zinc-600 focus:border-white disabled:opacity-50"
+                minLength={3}
+                maxLength={24}
                 placeholder="ServiceDeskHero"
               />
+
+              <p className="mt-2 text-xs text-zinc-500">
+                3-24 characters. Letters, numbers, underscores and hyphens only. Keep it workplace-friendly.
+              </p>
 
             </div>
 

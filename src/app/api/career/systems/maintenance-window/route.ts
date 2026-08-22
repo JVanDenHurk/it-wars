@@ -50,10 +50,8 @@ export async function POST(
     const body =
       await request.json();
 
-    const rawTicketIds =
-      Array.isArray(
-        body.ticketIds
-      )
+    const rawTicketIds: unknown[] =
+      Array.isArray(body.ticketIds)
         ? body.ticketIds
         : [];
 
@@ -64,10 +62,8 @@ export async function POST(
             Number(id)
         )
         .filter(
-          (id) =>
-            Number.isInteger(
-              id
-            )
+          (id): id is number =>
+            Number.isInteger(id)
         );
 
     const uniqueTicketIds =

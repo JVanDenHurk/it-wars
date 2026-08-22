@@ -1,8 +1,10 @@
 import { betterAuth } from "better-auth";
+import { APIError } from "better-auth/api";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 
 import { resend } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { validateUsername } from "@/lib/username";
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
@@ -15,6 +17,80 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          const validation =
+            validateUsername(
+              user.name
+            );
+
+          if (!validation.valid) {
+            throw new APIError(
+              "BAD_REQUEST",
+              {
+                message:
+                  validation.error,
+              }
+            );
+          }
+
+          const existingPlayer =
+            await prisma.player.findFirst({
+              where: {
+                username: {
+                  equals:
+                    validation.username,
+                  mode:
+                    "insensitive",
+                },
+              },
+              select: {
+                id: true,
+              },
+            });
+
+          const existingUser =
+            await prisma.user.findFirst({
+              where: {
+                name: {
+                  equals:
+                    validation.username,
+                  mode:
+                    "insensitive",
+                },
+              },
+              select: {
+                id: true,
+              },
+            });
+
+          if (
+            existingPlayer ||
+            existingUser
+          ) {
+            throw new APIError(
+              "CONFLICT",
+              {
+                message:
+                  "That username is already taken.",
+              }
+            );
+          }
+
+          return {
+            data: {
+              ...user,
+              name:
+                validation.username,
+            },
+          };
+        },
+      },
+    },
+  },
 
   emailAndPassword: {
     enabled: true,

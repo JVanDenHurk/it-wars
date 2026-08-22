@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -143,21 +142,8 @@ model Player {
    * Reset to starting Credits
    * after bankruptcy.
    */
-  credits Int @default(1000)
+  credits Int @default(750)
 
-  /**
-   * ============================
-   * CURRENT RUN PERFORMANCE
-   * ============================
-   * These are displayed on the
-   * dashboard.
-   * They reset when the player
-   * becomes bankrupt.
-   */
-  careerTicketsResolved   Int @default(0)
-  careerCorrectBounces    Int @default(0)
-  careerIncorrectBounces  Int @default(0)
-  careerIncorrectResolves Int @default(0)
 
   /**
    * ============================

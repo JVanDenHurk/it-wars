@@ -12,67 +12,12 @@ import {
 import { applyCreditPenalty } from "@/lib/player-bankruptcy";
 import { getLevelFromXp } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
+import {
+  canPlayerResolve,
+  isServiceDeskPlayer,
+  isSpecialistPlayer,
+} from "@/lib/resolver-capability";
 import { calculateTicketValue } from "@/lib/ticket-value";
-
-function canPlayerResolve(
-  level: number,
-  careerPath: string | null,
-  ticketCategory: string
-) {
-  if (ticketCategory === "SERVICE_DESK") {
-    return true;
-  }
-
-  if (
-    level < 4 ||
-    !careerPath
-  ) {
-    return false;
-  }
-
-  if (
-    careerPath === "NETWORK" &&
-    ticketCategory === "NETWORK"
-  ) {
-    return true;
-  }
-
-  if (
-    careerPath === "SYSTEMS" &&
-    ticketCategory === "SYSTEMS"
-  ) {
-    return true;
-  }
-
-  if (
-    careerPath === "SECURITY" &&
-    ticketCategory === "SECURITY"
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
-function isServiceDeskPlayer(
-  level: number,
-  careerPath: string | null
-) {
-  return (
-    level < 4 ||
-    !careerPath
-  );
-}
-
-function isSpecialistPlayer(
-  level: number,
-  careerPath: string | null
-) {
-  return (
-    level >= 4 &&
-    careerPath !== null
-  );
-}
 
 function getWrongBounceMessage() {
   const messages = [
@@ -707,11 +652,6 @@ export async function POST(
                 1,
             },
 
-            careerCorrectBounces: {
-              increment:
-                1,
-            },
-
             lifetimeTicketsHandled: {
               increment:
                 1,
@@ -857,67 +797,28 @@ export async function POST(
      *
      * Lifetime stat always increases.
      *
-     * Current-career stat increases
-     * only if this mistake did NOT
-     * bankrupt the player.
-     *
-     * If bankruptcy happened,
-     * applyCreditPenalty has already
-     * reset careerIncorrectBounces
-     * back to 0 for the new run.
      */
-    if (
-      penaltyResult.bankrupt
-    ) {
-      await prisma.player.update({
-        where: {
-          id:
-            player.id,
+    await prisma.player.update({
+      where: {
+        id:
+          player.id,
+      },
+
+      data: {
+        incorrectBounces: {
+          increment:
+            1,
         },
 
-        data: {
-          incorrectBounces: {
-            increment:
-              1,
-          },
-
-          lifetimeTicketsHandled: {
-            increment:
-              1,
-          },
-
-          lastActiveAt:
-            new Date(),
-        },
-      });
-    } else {
-      await prisma.player.update({
-        where: {
-          id:
-            player.id,
+        lifetimeTicketsHandled: {
+          increment:
+            1,
         },
 
-        data: {
-          incorrectBounces: {
-            increment:
-              1,
-          },
-
-          careerIncorrectBounces: {
-            increment:
-              1,
-          },
-
-          lifetimeTicketsHandled: {
-            increment:
-              1,
-          },
-
-          lastActiveAt:
-            new Date(),
-        },
-      });
-    }
+        lastActiveAt:
+          new Date(),
+      },
+    });
 
     const wrongBounceMessage =
       getWrongBounceMessage();

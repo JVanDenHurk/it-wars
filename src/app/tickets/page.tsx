@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import BounceTicketButton from "@/components/BounceTicketButton";
 import MaintenanceWindowButton from "@/components/MaintenanceWindowButton";
 import PlayerHeartbeat from "@/components/PlayerHeartbeat";
+import QuarantineButton from "@/components/QuarantineButton";
 import ResolveTicketButton from "@/components/ResolveTicketButton";
 import TicketTimer from "@/components/TicketTimer";
 import { auth } from "@/lib/auth";
@@ -15,30 +16,17 @@ import {
   finalizeExpiredMaintenanceWindows,
 } from "@/lib/maintenance-window";
 import { prisma } from "@/lib/prisma";
-import { getPoisonEffectLabel } from "@/lib/pvp-attacks";
+import {
+  getPoisonEffectLabel,
+} from "@/lib/pvp-attacks";
+import {
+  getAbandonmentMinutes,
+} from "@/lib/ticket-abandonment";
 import {
   calculateTicketAgeMinutes,
   calculateTicketValue,
+  getTicketMaximumReward,
 } from "@/lib/ticket-value";
-
-function getAbandonmentMinutes(
-  severity: "P1" | "P2" | "P3" | "P4"
-) {
-  switch (severity) {
-    case "P1":
-      return 10;
-
-    case "P2":
-      return 20;
-
-    case "P3":
-      return 30;
-
-    case "P4":
-    default:
-      return 44;
-  }
-}
 
 function getSeverityClasses(
   severity: "P1" | "P2" | "P3" | "P4"
@@ -91,7 +79,7 @@ function getPoisonEffectDescription(
         attackStatus ===
         "COMPLETED"
       ) {
-        return "The mail backlog has already released its burst of normal tickets. This Poison Ticket remains in your queue but cannot trigger another burst.";
+        return "The mail backlog has already released its burst. This Poison Ticket can no longer trigger another burst.";
       }
 
       return "Your next normal ticket delivery will release 3 tickets at once.";
@@ -103,6 +91,11 @@ function getPoisonEffectDescription(
 }
 
 export default async function TicketsPage() {
+  /*
+   * ============================
+   * AUTHENTICATION
+   * ============================
+   */
   const session =
     await auth.api.getSession({
       headers:
@@ -113,6 +106,11 @@ export default async function TicketsPage() {
     redirect("/");
   }
 
+  /*
+   * ============================
+   * PLAYER
+   * ============================
+   */
   const player =
     await prisma.player.findUnique({
       where: {
@@ -129,9 +127,6 @@ export default async function TicketsPage() {
    * ============================
    * FINALIZE MAINTENANCE
    * ============================
-   *
-   * Any expired Maintenance Window
-   * becomes permanent paused time.
    */
   await finalizeExpiredMaintenanceWindows(
     player.id
@@ -190,7 +185,6 @@ export default async function TicketsPage() {
    * ACTIVE POISON EFFECTS
    * ============================
    */
-
   const valueDecayPoisonActive =
     tickets.some(
       (ticket) =>
@@ -245,8 +239,7 @@ export default async function TicketsPage() {
         ticket.isPoison &&
         ticket.poisonEffect ===
           "MAIL_BACKLOG" &&
-        ticket.pvpAttack
-          ?.status ===
+        ticket.pvpAttack?.status ===
           "ACTIVE"
     );
 
@@ -256,8 +249,7 @@ export default async function TicketsPage() {
         ticket.isPoison &&
         ticket.poisonEffect ===
           "MAIL_BACKLOG" &&
-        ticket.pvpAttack
-          ?.status ===
+        ticket.pvpAttack?.status ===
           "COMPLETED"
     );
 
@@ -284,6 +276,11 @@ export default async function TicketsPage() {
     player.careerPath ===
     "SYSTEMS";
 
+  /*
+   * ============================
+   * QUEUE STATE
+   * ============================
+   */
   const poisonCount =
     tickets.filter(
       (ticket) =>
@@ -303,10 +300,6 @@ export default async function TicketsPage() {
    * ============================
    * MAINTENANCE PICKER DATA
    * ============================
-   *
-   * Client Components cannot
-   * receive Date objects directly,
-   * so convert them to strings.
    */
   const maintenanceTicketOptions =
     tickets.map(
@@ -321,59 +314,84 @@ export default async function TicketsPage() {
           ticket.severity,
 
         maintenanceUntil:
-          ticket
-            .maintenanceUntil
+          ticket.maintenanceUntil
             ?.toISOString() ??
           null,
       })
     );
 
   return (
-    <main className="min-h-screen bg-black px-4 py-8 text-white md:px-8">
+    <main className="min-h-screen bg-black px-4 py-5 text-white md:px-6">
 
       <PlayerHeartbeat />
+
+      {/*
+       * Hidden gameplay timer.
+       *
+       * Nothing visible is rendered,
+       * but ticket generation and
+       * abandonment checks continue.
+       */}
+      <TicketTimer
+        nextTicketAt={
+          player.nextTicketAt
+        }
+        queuePenaltyActive={
+          queuePenaltyActive
+        }
+      />
 
       <div className="mx-auto max-w-5xl">
 
         {/* ============================
             HEADER
             ============================ */}
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
 
           <div>
 
-            <h1 className="text-4xl font-black">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+              Service Management
+            </p>
+
+            <h1 className="mt-1 text-3xl font-black">
               Ticket Queue
             </h1>
 
-            <p className="mt-2 text-zinc-400">
-              {tickets.length} open ticket
-              {tickets.length === 1
-                ? ""
-                : "s"}
-            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
 
-            {poisonCount > 0 && (
-              <p className="mt-2 text-sm font-bold text-purple-400">
-                ☣ {poisonCount} Poison Ticket
-                {poisonCount === 1
-                  ? ""
-                  : "s"}{" "}
-                in queue
+              <p className="text-zinc-400">
+                <span className="font-bold text-white">
+                  {
+                    tickets.length
+                  }
+                </span>{" "}
+                open ticket
+                {
+                  tickets.length ===
+                  1
+                    ? ""
+                    : "s"
+                }
               </p>
-            )}
 
-            {systemsPassiveActive && (
-              <p className="mt-2 text-sm font-bold text-blue-400">
-                ⚙ Automation active — ticket value decay reduced by 25%
-              </p>
-            )}
+              {poisonCount > 0 && (
+                <p className="font-bold text-purple-400">
+                  ☣{" "}
+                  {
+                    poisonCount
+                  }{" "}
+                  Poison
+                </p>
+              )}
+
+            </div>
 
           </div>
 
           <Link
             href="/dashboard"
-            className="border border-zinc-700 px-4 py-2 text-sm hover:bg-zinc-900"
+            className="border border-zinc-700 px-3 py-2 text-sm font-bold hover:bg-zinc-900"
           >
             Dashboard
           </Link>
@@ -381,27 +399,51 @@ export default async function TicketsPage() {
         </div>
 
         {/* ============================
-            CAREER ABILITY
+            CAREER STATUS
+            ============================ */}
+        {(systemsPassiveActive ||
+          player.careerPath ===
+            "SECURITY") && (
+          <div className="mt-4 flex flex-wrap gap-2">
+
+            {systemsPassiveActive && (
+              <div className="border border-blue-900 bg-blue-950/10 px-3 py-2 text-xs font-bold text-blue-300">
+                ⚙ Automation — value decay reduced 25%
+              </div>
+            )}
+
+            {player.careerPath ===
+              "SECURITY" && (
+              <div className="border border-cyan-900 bg-cyan-950/10 px-3 py-2 text-xs font-bold text-cyan-300">
+                ⛨ Incident Hardened — Poison penalties reduced 25%
+              </div>
+            )}
+
+          </div>
+        )}
+
+        {/* ============================
+            SYSTEMS ACTIVE ABILITY
             ============================ */}
         {player.careerPath ===
           "SYSTEMS" &&
           player.level >=
             6 && (
-            <div className="mt-6 border border-blue-900 bg-blue-950/10 p-5">
+            <div className="mt-4 border border-blue-900 bg-blue-950/10 p-4">
 
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-500">
-                Systems Ability
-              </p>
-
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
 
                 <div>
 
-                  <h2 className="text-xl font-black text-blue-200">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-500">
+                    Systems Ability
+                  </p>
+
+                  <h2 className="mt-1 text-lg font-black text-blue-200">
                     Maintenance Window
                   </h2>
 
-                  <p className="mt-2 max-w-2xl text-sm text-zinc-400">
+                  <p className="mt-1 text-xs text-zinc-400">
                     Freeze SLA ageing and Credit decay on up to 2 tickets for 5 minutes.
                   </p>
 
@@ -411,18 +453,15 @@ export default async function TicketsPage() {
                   playerLevel={
                     player.level
                   }
-
                   playerCareerPath={
                     player.careerPath
                   }
-
                   careerAbilityReadyAt={
                     player
                       .careerAbilityReadyAt
                       ?.toISOString() ??
                     null
                   }
-
                   tickets={
                     maintenanceTicketOptions
                   }
@@ -437,57 +476,72 @@ export default async function TicketsPage() {
             ACTIVE POISON WARNING
             ============================ */}
         {persistentPoisonActive && (
-          <div className="mt-6 border border-purple-900 bg-purple-950/20 p-5">
+          <div className="mt-4 border border-purple-900 bg-purple-950/20 p-4">
 
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-purple-500">
-              Queue Poisoned
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
 
-            <h2 className="mt-2 text-xl font-black text-purple-200">
-              Active poison effects detected
-            </h2>
+              <div>
 
-            <div className="mt-4 space-y-2 text-sm text-zinc-300">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-purple-500">
+                  Queue Poisoned
+                </p>
+
+                <h2 className="mt-1 text-lg font-black text-purple-200">
+                  Active poison effects
+                </h2>
+
+              </div>
+
+              <p className="text-sm font-black text-purple-400">
+                ☣{" "}
+                {
+                  poisonCount
+                }
+              </p>
+
+            </div>
+
+            <div className="mt-3 grid gap-1 text-sm text-zinc-300 md:grid-cols-2">
 
               {queueSpeedPoisonActive && (
                 <p>
-                  • Normal tickets are arriving 30% faster.
+                  • Tickets arriving 30% faster
                 </p>
               )}
 
               {valueDecayPoisonActive && (
                 <p>
-                  • Ticket rewards are decaying 25% faster.
+                  • Rewards decaying 25% faster
                 </p>
               )}
 
               {resolutionPenaltyPoisonActive && (
                 <p>
-                  • Wrong-resolution penalties are increased by 50%.
+                  • Wrong resolves cost 50% more
                 </p>
               )}
 
               {monitoringFailureActive && (
                 <p>
-                  • BREACHING warnings are currently unavailable.
+                  • BREACHING warnings unavailable
                 </p>
               )}
 
               {bounceFailurePoisonActive && (
                 <p>
-                  • Bounce attempts have a 50% chance to fail.
+                  • Bounce attempts may fail
                 </p>
               )}
 
               {abandonmentPenaltyPoisonActive && (
                 <p>
-                  • Abandonment penalties are increased by 50%.
+                  • Abandonment penalties +50%
                 </p>
               )}
 
               {mailBacklogPoisonActive && (
                 <p>
-                  • Mail Queue Backlog is armed. Your next normal delivery will arrive as a 3-ticket burst.
+                  • Mail backlog burst armed
                 </p>
               )}
 
@@ -500,51 +554,34 @@ export default async function TicketsPage() {
             RELEASED MAIL BACKLOG
             ============================ */}
         {mailBacklogReleased && (
-          <div className="mt-4 border border-purple-950 bg-purple-950/10 p-4">
+          <div className="mt-3 border border-zinc-800 bg-zinc-950 px-4 py-3">
 
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-purple-600">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-purple-500">
               Poison Payload Released
             </p>
 
-            <p className="mt-2 text-sm text-zinc-400">
-              A Mail Queue Backlog has already released its ticket burst.
-              Its remaining Poison Ticket cannot trigger another burst.
+            <p className="mt-1 text-xs text-zinc-500">
+              A Mail Queue Backlog has already released its burst. Its remaining Poison Ticket cannot fire again.
             </p>
 
           </div>
         )}
 
         {/* ============================
-            NEXT TICKET TIMER
-            ============================ */}
-        <div className="mt-8 border border-zinc-800 bg-zinc-950 p-5">
-
-          <TicketTimer
-            nextTicketAt={
-              player.nextTicketAt
-            }
-
-            queuePenaltyActive={
-              queuePenaltyActive
-            }
-          />
-
-        </div>
-
-        {/* ============================
             QUEUE
             ============================ */}
-        <div className="mt-8 space-y-4">
+        <div className="mt-5 space-y-3">
 
-          {tickets.length === 0 && (
+          {tickets.length ===
+            0 && (
             <div className="border border-zinc-800 bg-zinc-950 p-8 text-center">
 
-              <h2 className="text-xl font-bold">
+              <h2 className="text-xl font-black">
                 Queue Empty
               </h2>
 
-              <p className="mt-2 text-zinc-400">
-                Waiting for your next ticket...
+              <p className="mt-2 text-sm text-zinc-500">
+                Enjoy it while it lasts.
               </p>
 
             </div>
@@ -554,7 +591,7 @@ export default async function TicketsPage() {
             (ticket) => {
               /*
                * ============================
-               * MAINTENANCE WINDOW
+               * MAINTENANCE
                * ============================
                */
               const maintenanceActive =
@@ -601,7 +638,7 @@ export default async function TicketsPage() {
 
               /*
                * ============================
-               * SLA WINDOW
+               * SLA
                * ============================
                */
               const abandonmentMinutes =
@@ -613,11 +650,6 @@ export default async function TicketsPage() {
                       ticket.severity
                     );
 
-              /*
-               * ============================
-               * BREACH WARNING
-               * ============================
-               */
               const breachingSoon =
                 !monitoringFailureActive &&
                 !maintenanceActive &&
@@ -625,6 +657,11 @@ export default async function TicketsPage() {
                   abandonmentMinutes *
                     0.75;
 
+              /*
+               * ============================
+               * POISON
+               * ============================
+               */
               const poisonEffectLabel =
                 ticket.isPoison
                   ? getPoisonEffectLabel(
@@ -632,11 +669,6 @@ export default async function TicketsPage() {
                     )
                   : null;
 
-              /*
-               * ============================
-               * MAIL BACKLOG
-               * ============================
-               */
               const isMailBacklog =
                 ticket.isPoison &&
                 ticket.poisonEffect ===
@@ -653,7 +685,7 @@ export default async function TicketsPage() {
                   key={
                     ticket.id
                   }
-                  className={`border p-6 ${
+                  className={`border p-4 md:p-5 ${
                     ticket.isPoison
                       ? "border-purple-900 bg-purple-950/10"
                       : maintenanceActive
@@ -663,16 +695,16 @@ export default async function TicketsPage() {
                 >
 
                   {/* ============================
-                      TICKET HEADER
+                      TICKET TOP
                       ============================ */}
                   <div className="flex items-start justify-between gap-4">
 
-                    <div>
+                    <div className="min-w-0">
 
                       <div className="flex flex-wrap items-center gap-2">
 
                         <span
-                          className={`inline-block border px-2 py-1 text-xs font-bold ${getSeverityClasses(
+                          className={`border px-2 py-1 text-xs font-bold ${getSeverityClasses(
                             ticket.severity
                           )}`}
                         >
@@ -682,52 +714,32 @@ export default async function TicketsPage() {
                         </span>
 
                         {ticket.isPoison && (
-                          <span className="inline-block border border-purple-700 bg-purple-950/40 px-2 py-1 text-xs font-black text-purple-400">
+                          <span className="border border-purple-700 bg-purple-950/40 px-2 py-1 text-xs font-black text-purple-400">
                             ☣ POISON
                           </span>
                         )}
 
-                        {ticket
-                          .slaAgeOffsetMinutes >
-                          0 && (
-                          <span className="inline-block border border-purple-900 bg-purple-950/20 px-2 py-1 text-xs font-bold text-purple-400">
-                            +
-                            {
-                              ticket
-                                .slaAgeOffsetMinutes
-                            }
-                            m SLA
-                          </span>
-                        )}
-
                         {maintenanceActive && (
-                          <span className="inline-block border border-blue-700 bg-blue-950/30 px-2 py-1 text-xs font-black text-blue-300">
-                            ⚙ MAINTENANCE WINDOW
-                          </span>
-                        )}
-
-                        {ticket
-                          .maintenancePausedMinutes >
-                          0 && (
-                          <span className="inline-block border border-blue-900 bg-blue-950/20 px-2 py-1 text-xs font-bold text-blue-400">
-                            -
-                            {
-                              ticket
-                                .maintenancePausedMinutes
-                            }
-                            m SLA
+                          <span className="border border-blue-700 bg-blue-950/30 px-2 py-1 text-xs font-black text-blue-300">
+                            ⚙ MAINTENANCE
                           </span>
                         )}
 
                         {mailBacklogPayloadReleased && (
-                          <span className="inline-block border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs font-black text-zinc-400">
+                          <span className="border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs font-black text-zinc-400">
                             PAYLOAD RELEASED
+                          </span>
+                        )}
+
+                        {breachingSoon && (
+                          <span className="border border-red-900 bg-red-950/20 px-2 py-1 text-xs font-black text-red-400">
+                            BREACHING
                           </span>
                         )}
 
                       </div>
 
-                      <p className="mt-2 text-xs text-zinc-500">
+                      <p className="mt-2 text-xs text-zinc-600">
                         INC
                         {ticket.id
                           .toString()
@@ -737,7 +749,7 @@ export default async function TicketsPage() {
                           )}
                       </p>
 
-                      <h2 className="mt-1 text-xl font-bold">
+                      <h2 className="mt-1 text-lg font-black md:text-xl">
                         {
                           ticket.title
                         }
@@ -745,44 +757,36 @@ export default async function TicketsPage() {
 
                     </div>
 
-                    {/* ============================
-                        REWARD
-                        ============================ */}
+                    {/* Reward */}
                     <div className="shrink-0 text-right">
 
                       {ticket.isPoison ? (
                         <>
-                          <p className="text-xl font-black text-purple-400">
+                          <p className="text-lg font-black text-purple-400 md:text-xl">
                             0 CR
                           </p>
 
-                          <p className="text-xs font-bold uppercase tracking-wide text-purple-700">
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-purple-700">
                             No Reward
                           </p>
                         </>
                       ) : (
                         <>
-                          <p className="text-xl font-bold">
+                          <p className="text-lg font-black md:text-xl">
                             {
                               value
                             }{" "}
                             CR
                           </p>
 
-                          <p className="text-xs text-zinc-500">
+                          <p className="text-[10px] text-zinc-600">
                             Max{" "}
                             {
-                              ticket.maxValue
-                            }{" "}
-                            CR
+                              getTicketMaximumReward(
+                                ticket.maxValue
+                              )
+                            }
                           </p>
-
-                          {systemsPassiveActive && (
-                            <p className="mt-1 text-xs text-blue-400">
-                              Automation
-                            </p>
-                          )}
-
                         </>
                       )}
 
@@ -793,108 +797,83 @@ export default async function TicketsPage() {
                   {/* ============================
                       DESCRIPTION
                       ============================ */}
-                  <p className="mt-5 leading-relaxed text-zinc-300">
+                  <p className="mt-4 text-sm leading-relaxed text-zinc-300 md:text-base">
                     {
                       ticket.description
                     }
                   </p>
 
                   {/* ============================
-                      MAINTENANCE WINDOW
-                      ============================ */}
-                  {maintenanceActive && (
-                    <div className="mt-5 border border-blue-900/70 bg-blue-950/20 p-4">
-
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-500">
-                        Systems Ability
-                      </p>
-
-                      <p className="mt-2 font-bold text-blue-200">
-                        Maintenance Window
-                      </p>
-
-                      <p className="mt-2 text-sm text-zinc-300">
-                        SLA ageing and ticket value decay are currently frozen.
-                      </p>
-
-                      {ticket
-                        .maintenanceUntil && (
-                        <p className="mt-3 text-xs text-zinc-500">
-                          Window ends at{" "}
-                          {ticket
-                            .maintenanceUntil
-                            .toLocaleTimeString(
-                              "en-AU",
-                              {
-                                hour:
-                                  "2-digit",
-
-                                minute:
-                                  "2-digit",
-
-                                second:
-                                  "2-digit",
-                              }
-                            )}
-                        </p>
-                      )}
-
-                    </div>
-                  )}
-
-                  {/* ============================
-                      POISON
+                      POISON EFFECT
                       ============================ */}
                   {ticket.isPoison && (
                     <div
-                      className={`mt-5 border p-4 ${
+                      className={`mt-4 border px-4 py-3 ${
                         mailBacklogPayloadReleased
                           ? "border-zinc-800 bg-black"
                           : "border-purple-900/70 bg-purple-950/20"
                       }`}
                     >
 
-                      <p
-                        className={`text-xs font-black uppercase tracking-[0.18em] ${
-                          mailBacklogPayloadReleased
-                            ? "text-zinc-500"
-                            : "text-purple-500"
-                        }`}
-                      >
-                        {mailBacklogPayloadReleased
-                          ? "Poison Payload Released"
-                          : "Poison Effect"}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
 
-                      <p
-                        className={`mt-2 font-bold ${
-                          mailBacklogPayloadReleased
-                            ? "text-zinc-300"
-                            : "text-purple-200"
-                        }`}
-                      >
-                        {
-                          poisonEffectLabel
-                        }
-                      </p>
+                        <p
+                          className={`text-xs font-black uppercase tracking-[0.16em] ${
+                            mailBacklogPayloadReleased
+                              ? "text-zinc-500"
+                              : "text-purple-500"
+                          }`}
+                        >
+                          {
+                            poisonEffectLabel
+                          }
+                        </p>
 
-                      <p className="mt-2 text-sm text-zinc-300">
+                      </div>
+
+                      <p className="mt-1 text-sm text-zinc-300">
                         {getPoisonEffectDescription(
-                          ticket
-                            .poisonEffect,
+                          ticket.poisonEffect,
                           ticket
                             .pvpAttack
                             ?.status
                         )}
                       </p>
 
-                      {mailBacklogPayloadReleased ? (
-                        <p className="mt-3 text-xs text-zinc-500">
-                          The payload is spent. The ticket still occupies queue space and must still be dealt with normally.
+                    </div>
+                  )}
+
+                  {/* ============================
+                      MAINTENANCE STATUS
+                      ============================ */}
+                  {maintenanceActive && (
+                    <div className="mt-4 border border-blue-900/70 bg-blue-950/20 px-4 py-3">
+
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+
+                        <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-400">
+                          Maintenance Window
                         </p>
-                      ) : (
-                        <p className="mt-3 text-xs text-zinc-500">
-                          Clearing or routing this ticket removes its active effect from your queue.
+
+                        <p className="text-xs font-bold text-blue-300">
+                          SLA FROZEN
+                        </p>
+
+                      </div>
+
+                      {ticket.maintenanceUntil && (
+                        <p className="mt-1 text-xs text-zinc-500">
+                          Ends{" "}
+                          {ticket.maintenanceUntil.toLocaleTimeString(
+                            "en-AU",
+                            {
+                              hour:
+                                "2-digit",
+
+                              minute:
+                                "2-digit",
+                            }
+                          )}
                         </p>
                       )}
 
@@ -902,21 +881,30 @@ export default async function TicketsPage() {
                   )}
 
                   {/* ============================
-                      AGE / SLA
+                      SLA / AGE
                       ============================ */}
-                  <div className="mt-5 flex flex-wrap items-center gap-3 text-sm">
+                  <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-zinc-800 pt-3 text-xs">
 
                     <p className="text-zinc-500">
-                      Age:{" "}
-                      {
-                        ageMinutes
-                      }
-                      m
+                      Age{" "}
+                      <span className="font-bold text-zinc-300">
+                        {
+                          ageMinutes
+                        }
+                        m
+                      </span>
                     </p>
 
-                    {maintenanceActive && (
-                      <p className="font-bold text-blue-400">
-                        SLA FROZEN
+                    {ticket
+                      .slaAgeOffsetMinutes >
+                      0 && (
+                      <p className="text-purple-400">
+                        +
+                        {
+                          ticket
+                            .slaAgeOffsetMinutes
+                        }
+                        m poison SLA
                       </p>
                     )}
 
@@ -928,26 +916,7 @@ export default async function TicketsPage() {
                           ticket
                             .maintenancePausedMinutes
                         }
-                        m saved by Maintenance Window
-                      </p>
-                    )}
-
-                    {ticket
-                      .slaAgeOffsetMinutes >
-                      0 && (
-                      <p className="text-purple-400">
-                        Includes +
-                        {
-                          ticket
-                            .slaAgeOffsetMinutes
-                        }
-                        m poison pressure
-                      </p>
-                    )}
-
-                    {breachingSoon && (
-                      <p className="font-bold text-red-500">
-                        BREACHING
+                        m saved
                       </p>
                     )}
 
@@ -963,7 +932,7 @@ export default async function TicketsPage() {
                   {/* ============================
                       ACTIONS
                       ============================ */}
-                  <div className="mt-6 flex items-start gap-3">
+                  <div className="mt-4 flex flex-wrap items-start gap-2">
 
                     <ResolveTicketButton
                       ticketId={
@@ -975,15 +944,12 @@ export default async function TicketsPage() {
                       ticketId={
                         ticket.id
                       }
-
                       playerLevel={
                         player.level
                       }
-
                       playerCareerPath={
                         player.careerPath
                       }
-
                       careerAbilityReadyAt={
                         player
                           .careerAbilityReadyAt
@@ -991,6 +957,26 @@ export default async function TicketsPage() {
                         null
                       }
                     />
+
+                    {ticket.isPoison && (
+                      <QuarantineButton
+                        ticketId={
+                          ticket.id
+                        }
+                        playerLevel={
+                          player.level
+                        }
+                        playerCareerPath={
+                          player.careerPath
+                        }
+                        careerAbilityReadyAt={
+                          player
+                            .careerAbilityReadyAt
+                            ?.toISOString() ??
+                          null
+                        }
+                      />
+                    )}
 
                   </div>
 

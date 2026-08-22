@@ -2,12 +2,14 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
+import {
+  getInDemandCareer,
+  IN_DEMAND_CAREER_XP_BONUS,
+  type CareerCounts,
+  type SpecialistCareer,
+} from "@/lib/career-demand";
+import { getLevelFromXp } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
-
-type CareerPath =
-  | "NETWORK"
-  | "SYSTEMS"
-  | "SECURITY";
 
 export async function POST(
   request: Request
@@ -21,8 +23,7 @@ export async function POST(
     if (!session) {
       return NextResponse.json(
         {
-          error:
-            "Not authenticated.",
+          error: "Not authenticated.",
         },
         {
           status: 401,
@@ -33,16 +34,14 @@ export async function POST(
     const player =
       await prisma.player.findUnique({
         where: {
-          userId:
-            session.user.id,
+          userId: session.user.id,
         },
       });
 
     if (!player) {
       return NextResponse.json(
         {
-          error:
-            "Player not found.",
+          error: "Player not found.",
         },
         {
           status: 404,
@@ -79,7 +78,7 @@ export async function POST(
 
     const careerPath =
       body.careerPath as
-        | CareerPath
+        | SpecialistCareer
         | undefined;
 
     if (
@@ -98,26 +97,86 @@ export async function POST(
       );
     }
 
+    const specialistPlayers =
+      await prisma.player.findMany({
+        where: {
+          careerPath: {
+            not: null,
+          },
+        },
+
+        select: {
+          careerPath: true,
+        },
+      });
+
+    const careerCounts: CareerCounts = {
+      NETWORK: 0,
+      SYSTEMS: 0,
+      SECURITY: 0,
+    };
+
+    for (const specialist of specialistPlayers) {
+      if (
+        specialist.careerPath === "NETWORK" ||
+        specialist.careerPath === "SYSTEMS" ||
+        specialist.careerPath === "SECURITY"
+      ) {
+        careerCounts[specialist.careerPath] += 1;
+      }
+    }
+
+    const inDemandCareer =
+      getInDemandCareer(
+        careerCounts,
+        player.id
+      );
+
+    const inDemand =
+      careerPath ===
+      inDemandCareer;
+
+    const xpBonus =
+      inDemand
+        ? IN_DEMAND_CAREER_XP_BONUS
+        : 0;
+
+    const newXp =
+      player.xp + xpBonus;
+
+    const newLevel =
+      getLevelFromXp(
+        newXp
+      );
+
     const updatedPlayer =
       await prisma.player.update({
         where: {
-          id:
-            player.id,
+          id: player.id,
+
+          /*
+           * Atomic guard prevents two career-selection requests from both
+           * succeeding before the first update becomes visible.
+           */
+          careerPath: null,
         },
 
         data: {
           careerPath,
-
-          lastActiveAt:
-            new Date(),
+          xp: newXp,
+          level: newLevel,
+          lastActiveAt: new Date(),
         },
       });
 
     return NextResponse.json({
       success: true,
-
       careerPath:
         updatedPlayer.careerPath,
+      inDemand,
+      xpBonus,
+      xp: updatedPlayer.xp,
+      level: updatedPlayer.level,
     });
   } catch (error) {
     console.error(

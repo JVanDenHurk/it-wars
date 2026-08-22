@@ -1,7 +1,5 @@
+import { STARTING_CREDITS } from "@/lib/game-balance";
 import { prisma } from "@/lib/prisma";
-
-const STARTING_CREDITS =
-  1000;
 
 type CreditPenaltySource = {
   attackSourcePlayerId?: number | null;
@@ -162,26 +160,6 @@ export async function applyCreditPenalty(
               careerPath:
                 null,
 
-              /*
-               * ============================
-               * CURRENT CAREER STATS
-               * ============================
-               *
-               * These are the stats shown
-               * on the dashboard for the
-               * current run.
-               */
-              careerTicketsResolved:
-                0,
-
-              careerCorrectBounces:
-                0,
-
-              careerIncorrectBounces:
-                0,
-
-              careerIncorrectResolves:
-                0,
 
               /*
                * ============================

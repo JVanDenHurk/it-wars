@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+
+import { STARTING_CREDITS } from "@/lib/game-balance";
 import { useState } from "react";
 
 export default function ClearQueuePenaltyButton() {
@@ -96,7 +98,7 @@ export default function ClearQueuePenaltyButton() {
      * returns to a freshly rendered dashboard
      * with their new Level 1 state.
      */
-    window.location.href = "/dashboard";
+    router.replace("/dashboard");
   }
 
   return (
@@ -181,7 +183,7 @@ export default function ClearQueuePenaltyButton() {
                   </p>
 
                   <p className="mt-1 text-xl font-bold">
-                    1000
+                    {STARTING_CREDITS}
                   </p>
                 </div>
               </div>

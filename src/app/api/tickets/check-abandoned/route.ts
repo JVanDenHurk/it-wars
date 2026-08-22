@@ -7,40 +7,10 @@ import {
 } from "@/lib/maintenance-window";
 import { applyCreditPenalty } from "@/lib/player-bankruptcy";
 import { prisma } from "@/lib/prisma";
+import { getAbandonmentRule } from "@/lib/ticket-abandonment";
 import {
   calculateTicketAgeMinutes,
 } from "@/lib/ticket-value";
-
-function getAbandonmentRule(
-  severity: "P1" | "P2" | "P3" | "P4"
-) {
-  switch (severity) {
-    case "P1":
-      return {
-        minutes: 10,
-        penalty: 500,
-      };
-
-    case "P2":
-      return {
-        minutes: 20,
-        penalty: 300,
-      };
-
-    case "P3":
-      return {
-        minutes: 30,
-        penalty: 200,
-      };
-
-    case "P4":
-    default:
-      return {
-        minutes: 44,
-        penalty: 100,
-      };
-  }
-}
 
 function getAbandonmentMessage(
   title: string,
@@ -492,6 +462,23 @@ export async function POST() {
               .pvpAttackId,
         }
       );
+
+    await prisma.player.update({
+      where: {
+        id:
+          player.id,
+      },
+
+      data: {
+        lifetimeTicketsHandled: {
+          increment:
+            1,
+        },
+
+        lastActiveAt:
+          new Date(),
+      },
+    });
 
     /*
      * ============================

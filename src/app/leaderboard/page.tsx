@@ -103,9 +103,6 @@ export default async function LeaderboardPage() {
 
           score:
             calculateLeaderboardScore({
-              xp:
-                player.xp,
-
               lifetimeCreditsEarned:
                 player.lifetimeCreditsEarned,
 
@@ -141,10 +138,16 @@ export default async function LeaderboardPage() {
 
         /*
          * Tie breaker:
-         * XP.
+         * lifetime Credits earned.
          */
-        if (b.xp !== a.xp) {
-          return b.xp - a.xp;
+        if (
+          b.lifetimeCreditsEarned !==
+          a.lifetimeCreditsEarned
+        ) {
+          return (
+            b.lifetimeCreditsEarned -
+            a.lifetimeCreditsEarned
+          );
         }
 
         /*

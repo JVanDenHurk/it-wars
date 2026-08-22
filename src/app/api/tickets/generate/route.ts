@@ -19,6 +19,21 @@ type PlayerCareerInfo = {
   careerPath: string | null;
 };
 
+/*
+ * Number of recent normal ticket
+ * titles temporarily excluded from
+ * the random template pool.
+ *
+ * This prevents things like:
+ *
+ * Account Locked
+ * Outlook Won't Open
+ * Account Locked
+ * Outlook Won't Open
+ */
+const RECENT_TICKET_EXCLUSION_COUNT =
+  8;
+
 function randomSeconds(
   min: number,
   max: number
@@ -35,41 +50,83 @@ function randomSeconds(
  * NEXT TICKET TIME
  * ============================
  *
- * Normal:
- * 60-120 seconds
+ * Queue pacing is deliberately
+ * dynamic.
  *
- * Ownership warning:
- * 180-300 seconds
+ * Empty queue:
+ * work arrives quickly.
  *
- * Queue-speed poison:
- * multiplier comes from
- * pvp-attacks.ts
+ * Growing queue:
+ * arrivals slow down so the
+ * player has room to recover.
+ *
+ * Ownership warning slows the
+ * interval.
+ *
+ * Queue-speed poison is applied
+ * last.
  */
 function getNextTicketTime(
+  openTicketCount: number,
   queuePenaltyActive: boolean,
   queueSpeedMultiplier = 1
 ) {
-  let seconds =
-    queuePenaltyActive
-      ? randomSeconds(
-          180,
-          300
-        )
-      : randomSeconds(
-          60,
-          120
-        );
+  let seconds: number;
+
+  if (openTicketCount <= 0) {
+    seconds =
+      randomSeconds(
+        8,
+        16
+      );
+  } else if (
+    openTicketCount ===
+    1
+  ) {
+    seconds =
+      randomSeconds(
+        15,
+        25
+      );
+  } else if (
+    openTicketCount ===
+    2
+  ) {
+    seconds =
+      randomSeconds(
+        25,
+        40
+      );
+  } else if (
+    openTicketCount ===
+    3
+  ) {
+    seconds =
+      randomSeconds(
+        40,
+        60
+      );
+  } else {
+    seconds =
+      randomSeconds(
+        60,
+        90
+      );
+  }
 
   /*
-   * Self-Service Portal Outage.
-   *
-   * Example:
-   *
-   * queueSpeedMultiplier = 0.7
-   *
-   * 100 seconds
-   *      ↓
-   * 70 seconds
+   * Ownership warning.
+   */
+  if (queuePenaltyActive) {
+    seconds =
+      Math.floor(
+        seconds *
+          1.75
+      );
+  }
+
+  /*
+   * Poison queue-speed modifier.
    */
   const safeMultiplier =
     Math.max(
@@ -79,7 +136,7 @@ function getNextTicketTime(
 
   seconds =
     Math.max(
-      15,
+      5,
       Math.floor(
         seconds *
           safeMultiplier
@@ -105,14 +162,16 @@ function getTeamCounts(
     SERVICE_DESK:
       players.filter(
         (player) =>
-          player.level < 4 ||
+          player.level <
+            4 ||
           !player.careerPath
       ).length,
 
     NETWORK:
       players.filter(
         (player) =>
-          player.level >= 4 &&
+          player.level >=
+            4 &&
           player.careerPath ===
             "NETWORK"
       ).length,
@@ -120,7 +179,8 @@ function getTeamCounts(
     SYSTEMS:
       players.filter(
         (player) =>
-          player.level >= 4 &&
+          player.level >=
+            4 &&
           player.careerPath ===
             "SYSTEMS"
       ).length,
@@ -128,7 +188,8 @@ function getTeamCounts(
     SECURITY:
       players.filter(
         (player) =>
-          player.level >= 4 &&
+          player.level >=
+            4 &&
           player.careerPath ===
             "SECURITY"
       ).length,
@@ -139,6 +200,14 @@ function getTeamCounts(
  * ============================
  * CATEGORY WEIGHTS
  * ============================
+ *
+ * Service Desk always retains
+ * some baseline weight.
+ *
+ * Specialist categories only
+ * enter the normal system queue
+ * when the corresponding team
+ * exists.
  */
 function getCategoryWeights(
   players: PlayerCareerInfo[]
@@ -183,7 +252,8 @@ function chooseWeightedCategory(
       weights
     ).filter(
       ([, weight]) =>
-        weight > 0
+        weight >
+        0
     ) as [
       ResolvableCategory,
       number,
@@ -238,25 +308,42 @@ function chooseWeightedCategory(
  * ============================
  * RANDOM TEMPLATE
  * ============================
+ *
+ * Recent ticket titles are
+ * excluded where possible.
+ *
+ * This means a large template
+ * pool actually feels large
+ * during gameplay.
+ *
+ * If every template in a
+ * category is currently excluded,
+ * we fall back to the complete
+ * category pool rather than
+ * failing ticket generation.
  */
 async function getRandomTemplate(
   categoryWeights: Record<
     ResolvableCategory,
     number
-  >
+  >,
+  excludedTitles: Set<string>
 ) {
   const selectedCategory =
     chooseWeightedCategory(
       categoryWeights
     );
 
-  if (
-    !selectedCategory
-  ) {
+  if (!selectedCategory) {
     return null;
   }
 
-  let templates =
+  /*
+   * ============================
+   * SELECT CATEGORY TEMPLATES
+   * ============================
+   */
+  let allTemplates =
     await prisma.ticketTemplate.findMany({
       where: {
         active:
@@ -267,14 +354,21 @@ async function getRandomTemplate(
       },
     });
 
-  let finalCategory =
-    selectedCategory;
+  let finalCategory:
+    ResolvableCategory =
+      selectedCategory;
 
   /*
-   * Safety fallback.
+   * ============================
+   * SERVICE DESK FALLBACK
+   * ============================
+   *
+   * If a specialist category was
+   * selected but has no templates,
+   * fall back to Service Desk.
    */
   if (
-    templates.length ===
+    allTemplates.length ===
       0 &&
     selectedCategory !==
       "SERVICE_DESK"
@@ -282,7 +376,7 @@ async function getRandomTemplate(
     finalCategory =
       "SERVICE_DESK";
 
-    templates =
+    allTemplates =
       await prisma.ticketTemplate.findMany({
         where: {
           active:
@@ -295,17 +389,43 @@ async function getRandomTemplate(
   }
 
   if (
-    templates.length ===
+    allTemplates.length ===
     0
   ) {
     return null;
   }
 
+  /*
+   * ============================
+   * RECENT TICKET SUPPRESSION
+   * ============================
+   */
+  const freshTemplates =
+    allTemplates.filter(
+      (template) =>
+        !excludedTitles.has(
+          template.title
+        )
+    );
+
+  /*
+   * Prefer templates that haven't
+   * appeared recently.
+   *
+   * If everything is excluded,
+   * fall back to the full pool.
+   */
+  const candidateTemplates =
+    freshTemplates.length >
+    0
+      ? freshTemplates
+      : allTemplates;
+
   const template =
-    templates[
+    candidateTemplates[
       Math.floor(
         Math.random() *
-          templates.length
+          candidateTemplates.length
       )
     ];
 
@@ -336,7 +456,8 @@ export async function POST() {
             "Not authenticated.",
         },
         {
-          status: 401,
+          status:
+            401,
         }
       );
     }
@@ -361,7 +482,8 @@ export async function POST() {
             "Player not found.",
         },
         {
-          status: 404,
+          status:
+            404,
         }
       );
     }
@@ -412,15 +534,72 @@ export async function POST() {
 
     /*
      * ============================
-     * SELF-SERVICE PORTAL OUTAGE
+     * CURRENT QUEUE SIZE
+     * ============================
+     */
+    const currentOpenTicketCount =
+      await prisma.ticket.count({
+        where: {
+          assignedToId:
+            player.id,
+
+          status:
+            "OPEN",
+        },
+      });
+
+    /*
+     * ============================
+     * RECENT NORMAL TICKETS
      * ============================
      *
-     * Find the active Poison Ticket.
+     * Keep the player's most recent
+     * normal ticket titles out of the
+     * random pool.
      *
-     * We load its PvP attack so the
-     * actual multiplier can come from
-     * pvp-attacks.ts rather than being
-     * duplicated here.
+     * Poison tickets deliberately do
+     * NOT participate in this system.
+     */
+    const recentTickets =
+      await prisma.ticket.findMany({
+        where: {
+          assignedToId:
+            player.id,
+
+          isPoison:
+            false,
+        },
+
+        select: {
+          title:
+            true,
+        },
+
+        orderBy: {
+          createdAt:
+            "desc",
+        },
+
+        take:
+          RECENT_TICKET_EXCLUSION_COUNT,
+      });
+
+    const excludedTitles =
+      new Set<string>(
+        recentTickets.map(
+          (
+            recentTicket: {
+              title: string;
+            }
+          ) =>
+            recentTicket.title
+        )
+      );
+
+    /*
+     * ============================
+     * SELF-SERVICE PORTAL OUTAGE
+     * ============================
      */
     const queueSpeedPoison =
       await prisma.ticket.findFirst({
@@ -481,17 +660,6 @@ export async function POST() {
      * ============================
      * MAIL QUEUE BACKLOG
      * ============================
-     *
-     * The Poison Ticket stays open
-     * until the player deals with it,
-     * but the burst itself only fires
-     * once.
-     *
-     * PvPAttack ACTIVE:
-     * burst hasn't fired yet
-     *
-     * PvPAttack COMPLETED:
-     * burst already consumed
      */
     const mailBacklogPoison =
       await prisma.ticket.findFirst({
@@ -540,8 +708,9 @@ export async function POST() {
         null;
 
     /*
-     * Get burst count from
-     * pvp-attacks.ts.
+     * ============================
+     * BACKLOG BURST SIZE
+     * ============================
      */
     let backlogTicketCount =
       1;
@@ -617,7 +786,8 @@ export async function POST() {
             "No active players are currently available.",
         },
         {
-          status: 400,
+          status:
+            400,
         }
       );
     }
@@ -636,12 +806,6 @@ export async function POST() {
      * ============================
      * NUMBER OF NORMAL TICKETS
      * ============================
-     *
-     * Normal delivery:
-     * 1
-     *
-     * Mail Queue Backlog:
-     * configured burst amount.
      */
     const ticketCount =
       mailBacklogActive
@@ -653,19 +817,36 @@ export async function POST() {
      * LOAD TEMPLATES
      * ============================
      *
-     * Every legitimate ticket gets
-     * its own category/template roll.
+     * Every ticket gets its own
+     * category/template roll.
+     *
+     * Once a ticket is selected we
+     * immediately add its title to
+     * excludedTitles.
+     *
+     * This also means a Mail Queue
+     * Backlog burst won't generate
+     * the same ticket three times.
      */
-    const chosenTemplates = [];
+    const chosenTemplates: NonNullable<
+      Awaited<
+        ReturnType<
+          typeof getRandomTemplate
+        >
+      >
+    >[] = [];
 
     for (
-      let i = 0;
-      i < ticketCount;
+      let i =
+        0;
+      i <
+      ticketCount;
       i++
     ) {
       const chosen =
         await getRandomTemplate(
-          categoryWeights
+          categoryWeights,
+          excludedTitles
         );
 
       if (!chosen) {
@@ -675,13 +856,22 @@ export async function POST() {
               "No ticket templates are available.",
           },
           {
-            status: 404,
+            status:
+              404,
           }
         );
       }
 
       chosenTemplates.push(
         chosen
+      );
+
+      /*
+       * Prevent duplicate templates
+       * inside this same delivery.
+       */
+      excludedTitles.add(
+        chosen.template.title
       );
     }
 
@@ -690,18 +880,17 @@ export async function POST() {
      * NEXT TICKET TIME
      * ============================
      *
-     * Ownership slowdown is applied
-     * first.
-     *
-     * Self-Service Portal Outage then
-     * reduces whatever interval was
-     * generated.
-     *
-     * This means poison can partially
-     * counteract an ownership slowdown.
+     * Use the queue size AFTER this
+     * delivery when determining how
+     * soon another ticket should arrive.
      */
+    const projectedOpenTicketCount =
+      currentOpenTicketCount +
+      ticketCount;
+
     const nextTicketAt =
       getNextTicketTime(
+        projectedOpenTicketCount,
         queuePenaltyActive,
         queueSpeedMultiplier
       );
@@ -824,18 +1013,13 @@ export async function POST() {
            * CONSUME MAIL BACKLOG
            * ============================
            *
-           * Important:
+           * Mark the PvP attack itself
+           * completed.
            *
-           * We mark the ATTACK as
-           * completed, not the Poison
-           * Ticket.
-           *
-           * The ticket still sits in
-           * the victim's queue and can
-           * still be resolved/bounced.
-           *
-           * But it cannot trigger a
-           * second burst.
+           * Its Poison Ticket remains in
+           * the queue until the victim
+           * resolves, bounces or
+           * quarantines it.
            */
           if (
             mailBacklogActive &&
@@ -878,8 +1062,8 @@ export async function POST() {
         true,
 
       /*
-       * Compatibility with the
-       * existing TicketTimer.
+       * Compatibility with
+       * TicketTimer.
        */
       ticketId:
         transactionResult
@@ -907,7 +1091,11 @@ export async function POST() {
         transactionResult
           .createdTickets
           .map(
-            (ticket) =>
+            (
+              ticket: {
+                id: number;
+              }
+            ) =>
               ticket.id
           ),
 
@@ -916,6 +1104,19 @@ export async function POST() {
           (chosen) =>
             chosen.category
         ),
+
+      /*
+       * Useful while we're
+       * playtesting variety.
+       */
+      generatedTitles:
+        chosenTemplates.map(
+          (chosen) =>
+            chosen.template.title
+        ),
+
+      recentTicketExclusionCount:
+        RECENT_TICKET_EXCLUSION_COUNT,
 
       nextTicketAt,
 
@@ -953,7 +1154,8 @@ export async function POST() {
           "Unable to generate ticket.",
       },
       {
-        status: 500,
+        status:
+          500,
       }
     );
   }

@@ -1,3 +1,5 @@
+import { TICKET_REWARD_MULTIPLIER } from "@/lib/game-balance";
+
 /*
  * ============================
  * EFFECTIVE TICKET AGE
@@ -143,6 +145,22 @@ export function calculateTicketAgeMinutes(
  * TICKET VALUE
  * ============================
  */
+export function getTicketMaximumReward(
+  maxValue: number
+) {
+  if (maxValue <= 0) {
+    return 0;
+  }
+
+  return Math.max(
+    0,
+    Math.floor(
+      maxValue *
+        TICKET_REWARD_MULTIPLIER
+    )
+  );
+}
+
 export function calculateTicketValue(
   maxValue: number,
   createdAt: Date,
@@ -202,14 +220,19 @@ export function calculateTicketValue(
    *
    * multiplier = 1.25
    */
+  const rewardCap =
+    getTicketMaximumReward(
+      maxValue
+    );
+
   const lossPerMinute =
-    maxValue *
+    rewardCap *
     0.02 *
     safeDecayMultiplier;
 
   const currentValue =
     Math.floor(
-      maxValue -
+      rewardCap -
         ageMinutes *
           lossPerMinute
     );

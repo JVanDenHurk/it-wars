@@ -12,47 +12,8 @@ import {
 import { applyCreditPenalty } from "@/lib/player-bankruptcy";
 import { getLevelFromXp } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
+import { canPlayerResolve } from "@/lib/resolver-capability";
 import { calculateTicketValue } from "@/lib/ticket-value";
-
-function canPlayerResolve(
-  level: number,
-  careerPath: string | null,
-  ticketCategory: string
-) {
-  if (ticketCategory === "SERVICE_DESK") {
-    return true;
-  }
-
-  if (
-    level < 4 ||
-    !careerPath
-  ) {
-    return false;
-  }
-
-  if (
-    careerPath === "NETWORK" &&
-    ticketCategory === "NETWORK"
-  ) {
-    return true;
-  }
-
-  if (
-    careerPath === "SYSTEMS" &&
-    ticketCategory === "SYSTEMS"
-  ) {
-    return true;
-  }
-
-  if (
-    careerPath === "SECURITY" &&
-    ticketCategory === "SECURITY"
-  ) {
-    return true;
-  }
-
-  return false;
-}
 
 export async function POST(
   _request: Request,
@@ -352,11 +313,6 @@ export async function POST(
                 1,
             },
 
-            careerTicketsResolved: {
-              increment:
-                1,
-            },
-
             lifetimeTicketsHandled: {
               increment:
                 1,
@@ -519,58 +475,27 @@ export async function POST(
         }
       );
 
-    if (
-      penaltyResult.bankrupt
-    ) {
-      await prisma.player.update({
-        where: {
-          id:
-            player.id,
+    await prisma.player.update({
+      where: {
+        id:
+          player.id,
+      },
+
+      data: {
+        incorrectResolves: {
+          increment:
+            1,
         },
 
-        data: {
-          incorrectResolves: {
-            increment:
-              1,
-          },
-
-          lifetimeTicketsHandled: {
-            increment:
-              1,
-          },
-
-          lastActiveAt:
-            new Date(),
-        },
-      });
-    } else {
-      await prisma.player.update({
-        where: {
-          id:
-            player.id,
+        lifetimeTicketsHandled: {
+          increment:
+            1,
         },
 
-        data: {
-          incorrectResolves: {
-            increment:
-              1,
-          },
-
-          careerIncorrectResolves: {
-            increment:
-              1,
-          },
-
-          lifetimeTicketsHandled: {
-            increment:
-              1,
-          },
-
-          lastActiveAt:
-            new Date(),
-        },
-      });
-    }
+        lastActiveAt:
+          new Date(),
+      },
+    });
 
     return NextResponse.json({
       success:

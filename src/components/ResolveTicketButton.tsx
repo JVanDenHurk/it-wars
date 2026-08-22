@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { STARTING_CREDITS } from "@/lib/game-balance";
 import { getRoleTitle } from "@/lib/player-level";
 
 interface ResolveTicketButtonProps {
@@ -59,29 +60,6 @@ type SuccessInfo = {
   } | null;
 } | null;
 
-function getPromotionBonus(level: number) {
-  if (level === 2) {
-    return "+5% credits from correct resolutions";
-  }
-
-  if (level === 3) {
-    return "+10% credits from correct resolutions";
-  }
-
-  if (level === 4) {
-    return "Specialist career path unlocked";
-  }
-
-  if (level === 5) {
-    return "+20% specialist ticket rewards";
-  }
-
-  if (level >= 6) {
-    return "+25% specialist ticket rewards";
-  }
-
-  return null;
-}
 
 function getRandomSuccessMessage() {
   const messages = [
@@ -121,10 +99,6 @@ export default function ResolveTicketButton({
 
   const [message, setMessage] =
     useState("");
-
-  const [result, setResult] = useState<
-    "error" | null
-  >(null);
 
   /*
    * Successful resolution popup
@@ -201,7 +175,6 @@ export default function ResolveTicketButton({
   async function resolveTicket() {
     setLoading(true);
     setMessage("");
-    setResult(null);
 
     try {
       const response = await fetch(
@@ -221,8 +194,6 @@ export default function ResolveTicketButton({
           data =
             JSON.parse(responseText);
         } catch {
-          setResult("error");
-
           setMessage(
             `Server returned an invalid response (${response.status}).`
           );
@@ -232,8 +203,6 @@ export default function ResolveTicketButton({
       }
 
       if (!response.ok) {
-        setResult("error");
-
         setMessage(
           data.error ??
             `Server error (${response.status})`
@@ -338,8 +307,6 @@ export default function ResolveTicketButton({
         error
       );
 
-      setResult("error");
-
       setMessage(
         "Unable to contact the server."
       );
@@ -382,8 +349,7 @@ export default function ResolveTicketButton({
   }
 
   function acknowledgeDemotion() {
-    window.location.href =
-      "/dashboard";
+    router.replace("/dashboard");
   }
 
   function continueAfterPromotion() {
@@ -400,12 +366,6 @@ export default function ResolveTicketButton({
     );
   }
 
-  const promotionBonus =
-    promotion
-      ? getPromotionBonus(
-          promotion.level
-        )
-      : null;
 
   const promotionTitle =
     promotion &&
@@ -643,7 +603,7 @@ export default function ResolveTicketButton({
                   </p>
 
                   <p className="mt-1 text-xl font-bold">
-                    1000
+                    {STARTING_CREDITS}
                   </p>
                 </div>
 
@@ -694,20 +654,6 @@ export default function ResolveTicketButton({
                   Specialist Career Available
                 </p>
 
-                {promotionBonus && (
-                  <div className="mt-5 border border-zinc-800 bg-black p-4">
-
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">
-                      New Benefit
-                    </p>
-
-                    <p className="mt-2 font-bold text-yellow-400">
-                      {promotionBonus}
-                    </p>
-
-                  </div>
-                )}
-
                 <p className="mt-4 text-sm text-zinc-400">
                   Choose between Network, Systems, or Security.
                 </p>
@@ -740,22 +686,6 @@ export default function ResolveTicketButton({
                     promotion.level
                   }
                 </p>
-
-                {promotionBonus && (
-                  <div className="mt-5 border border-zinc-800 bg-black p-4">
-
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">
-                      Promotion Bonus
-                    </p>
-
-                    <p className="mt-2 font-bold text-green-400">
-                      {
-                        promotionBonus
-                      }
-                    </p>
-
-                  </div>
-                )}
 
                 <button
                   type="button"

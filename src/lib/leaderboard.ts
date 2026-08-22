@@ -1,5 +1,4 @@
 export interface LeaderboardStats {
-  xp: number;
   lifetimeCreditsEarned: number;
   ticketsResolved: number;
   correctBounces: number;
@@ -7,11 +6,15 @@ export interface LeaderboardStats {
   bankruptcies: number;
 }
 
+/**
+ * Leaderboard score is lifetime-only. Bankruptcy can reset a player's current
+ * level/XP/credits, but it does not erase the career record they built before
+ * that reset.
+ */
 export function calculateLeaderboardScore(
   player: LeaderboardStats
 ) {
   const score =
-    player.xp +
     Math.floor(
       player.lifetimeCreditsEarned / 10
     ) +

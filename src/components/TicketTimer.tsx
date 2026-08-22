@@ -1,7 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { STARTING_CREDITS } from "@/lib/game-balance";
 
 interface TicketTimerProps {
   nextTicketAt: string | Date | null;
@@ -16,29 +18,14 @@ type AbandonedTicket = {
   failureMessage: string;
 };
 
-function formatTime(totalSeconds: number) {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-
-  return `${minutes.toString().padStart(2, "0")}:${seconds
-    .toString()
-    .padStart(2, "0")}`;
-}
-
 export default function TicketTimer({
   nextTicketAt,
-  queuePenaltyActive = false,
+  queuePenaltyActive: _queuePenaltyActive = false,
 }: TicketTimerProps) {
   const router = useRouter();
 
   const [secondsRemaining, setSecondsRemaining] =
     useState<number | null>(null);
-
-  const [checking, setChecking] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
 
   const [abandonedTicket, setAbandonedTicket] =
     useState<AbandonedTicket | null>(null);
@@ -63,8 +50,15 @@ export default function TicketTimer({
 
   /*
    * ============================
-   * NEXT TICKET COUNTDOWN
+   * HIDDEN NEXT TICKET TIMER
    * ============================
+   *
+   * The timer still runs normally,
+   * but nothing is shown to the player.
+   *
+   * Tickets should feel like they
+   * arrive naturally rather than on
+   * a visible countdown.
    */
   useEffect(() => {
     function updateTimer() {
@@ -98,13 +92,13 @@ export default function TicketTimer({
     updateTimer();
 
     const interval =
-      setInterval(
+      window.setInterval(
         updateTimer,
         1000
       );
 
     return () => {
-      clearInterval(
+      window.clearInterval(
         interval
       );
     };
@@ -115,56 +109,43 @@ export default function TicketTimer({
    * SAFE PAGE REFRESH
    * ============================
    *
-   * A new ticket may arrive while
-   * the player is reading:
+   * A ticket may arrive while
+   * another gameplay modal is open.
    *
-   * - successful resolution popup
-   * - failure popup
-   * - promotion popup
-   * - bankruptcy popup
-   *
-   * Do not refresh until those
-   * popups have been closed.
+   * Wait until the modal closes
+   * before refreshing the page.
    */
-  function refreshWhenSafe() {
-    const modalOpen =
-      document.body.dataset
-        .gameModalOpen ===
-      "true";
+  const refreshWhenSafe =
+    useCallback(() => {
+      const modalOpen =
+        document.body.dataset
+          .gameModalOpen ===
+        "true";
 
-    /*
-     * Nothing open.
-     * Refresh immediately.
-     */
-    if (!modalOpen) {
-      router.refresh();
-      return;
-    }
+      if (!modalOpen) {
+        router.refresh();
+        return;
+      }
 
-    /*
-     * A modal is open.
-     *
-     * Wait until it closes.
-     */
-    const refreshInterval =
-      window.setInterval(
-        () => {
-          const stillOpen =
-            document.body.dataset
-              .gameModalOpen ===
-            "true";
+      const refreshInterval =
+        window.setInterval(
+          () => {
+            const stillOpen =
+              document.body.dataset
+                .gameModalOpen ===
+              "true";
 
-          if (!stillOpen) {
-            window.clearInterval(
-              refreshInterval
-            );
+            if (!stillOpen) {
+              window.clearInterval(
+                refreshInterval
+              );
 
-            router.refresh();
-          }
-        },
-        250
-      );
-  }
+              router.refresh();
+            }
+          },
+          250
+        );
+    }, [router]);
 
   /*
    * ============================
@@ -184,9 +165,6 @@ export default function TicketTimer({
       true;
 
     async function generateTicket() {
-      setChecking(true);
-      setError("");
-
       try {
         const response =
           await fetch(
@@ -213,8 +191,8 @@ export default function TicketTimer({
                 responseText
               );
           } catch {
-            setError(
-              `Server returned an invalid response (${response.status}).`
+            console.error(
+              `Ticket generation returned an invalid response (${response.status}).`
             );
 
             return;
@@ -222,7 +200,7 @@ export default function TicketTimer({
         }
 
         if (!response.ok) {
-          setError(
+          console.error(
             data.error ??
               "Unable to generate ticket."
           );
@@ -231,11 +209,11 @@ export default function TicketTimer({
         }
 
         /*
-         * Ticket has already been
-         * created in the database.
+         * Ticket is already created
+         * server-side.
          *
-         * Only delay refreshing
-         * the page if a modal is open.
+         * Refresh only when gameplay
+         * popups are no longer open.
          */
         refreshWhenSafe();
       } catch (error) {
@@ -243,19 +221,13 @@ export default function TicketTimer({
           "Automatic ticket generation failed:",
           error
         );
-
-        setError(
-          "Unable to contact the server."
-        );
-      } finally {
-        setChecking(false);
       }
     }
 
     generateTicket();
   }, [
     secondsRemaining,
-    router,
+    refreshWhenSafe,
   ]);
 
   /*
@@ -392,13 +364,13 @@ export default function TicketTimer({
      * Then every 10 seconds.
      */
     const interval =
-      setInterval(
+      window.setInterval(
         checkAbandonedTickets,
         10000
       );
 
     return () => {
-      clearInterval(
+      window.clearInterval(
         interval
       );
     };
@@ -411,24 +383,12 @@ export default function TicketTimer({
    * ============================
    * ABANDONMENT MODAL STATE
    * ============================
-   *
-   * TicketTimer has its own modals,
-   * so it also needs to tell the
-   * refresh system when they are open.
    */
   useEffect(() => {
     const modalOpen =
       abandonedTicket !== null ||
       demoted;
 
-    /*
-     * Only set the global flag if
-     * this component has one of its
-     * own modals open.
-     *
-     * Don't delete another component's
-     * active flag here.
-     */
     if (modalOpen) {
       document.body.dataset
         .gameModalOpen =
@@ -460,81 +420,24 @@ export default function TicketTimer({
     delete document.body.dataset
       .gameModalOpen;
 
-    window.location.href =
-      "/dashboard";
+    router.replace(
+      "/dashboard"
+    );
   }
 
   /*
    * ============================
-   * TIMER UI
+   * UI
    * ============================
+   *
+   * Deliberately no ticket timer,
+   * countdown, "incoming" notice or
+   * queue countdown is rendered.
+   *
+   * Tickets simply appear.
    */
-
-  let timerContent;
-
-  if (
-    secondsRemaining === null
-  ) {
-    timerContent = (
-      <p className="text-sm text-zinc-500">
-        Checking queue...
-      </p>
-    );
-  } else if (
-    secondsRemaining <= 0 ||
-    checking
-  ) {
-    timerContent = (
-      <div>
-        <p className="text-sm font-bold text-green-400">
-          Ticket incoming...
-        </p>
-
-        {queuePenaltyActive && (
-          <p className="mt-1 text-xs text-yellow-400">
-            Queue priority reduced
-          </p>
-        )}
-
-        {error && (
-          <p className="mt-2 text-sm text-red-400">
-            {error}
-          </p>
-        )}
-      </div>
-    );
-  } else {
-    timerContent = (
-      <div>
-        <p className="text-xs uppercase tracking-wide text-zinc-500">
-          Next Ticket
-        </p>
-
-        <p className="mt-1 text-2xl font-bold">
-          {formatTime(
-            secondsRemaining
-          )}
-        </p>
-
-        {queuePenaltyActive && (
-          <p className="mt-1 text-xs text-yellow-400">
-            Queue priority reduced
-          </p>
-        )}
-
-        {error && (
-          <p className="mt-2 text-sm text-red-400">
-            {error}
-          </p>
-        )}
-      </div>
-    );
-  }
-
   return (
     <>
-      {timerContent}
-
       {/* ============================
           ABANDONED TICKET MODAL
           ============================ */}
@@ -687,7 +590,7 @@ export default function TicketTimer({
                   </p>
 
                   <p className="mt-1 text-xl font-bold">
-                    1000
+                    {STARTING_CREDITS}
                   </p>
                 </div>
 
