@@ -6,12 +6,22 @@ datasource db {
   provider = "postgresql"
 }
 
+/**
+ * ============================
+ * CAREER PATHS
+ * ============================
+ */
 enum CareerPath {
   NETWORK
   SYSTEMS
   SECURITY
 }
 
+/**
+ * ============================
+ * TICKET TYPES
+ * ============================
+ */
 enum TicketCategory {
   SERVICE_DESK
   NETWORK
@@ -94,6 +104,30 @@ enum PoisonEffect {
   MAIL_BACKLOG
 }
 
+/**
+ * ============================
+ * FEEDBACK
+ * ============================
+ */
+enum FeedbackType {
+  BUG
+  SUGGESTION
+  BALANCE
+  OTHER
+}
+
+enum FeedbackStatus {
+  NEW
+  REVIEWING
+  DONE
+  REJECTED
+}
+
+/**
+ * ============================
+ * PLAYER
+ * ============================
+ */
 model Player {
   id Int @id @default(autoincrement())
 
@@ -104,10 +138,6 @@ model Player {
    * ============================
    * PLAYER IDENTITY
    * ============================
-   * usernameChangedAt is null until
-   * the player changes their username.
-   * Username changes are limited
-   * to once every 30 days.
    */
   username          String    @unique
   usernameChangedAt DateTime?
@@ -116,7 +146,6 @@ model Player {
    * ============================
    * CURRENT CAREER
    * ============================
-   * These reset on bankruptcy.
    */
   level      Int         @default(1)
   xp         Int         @default(0)
@@ -126,10 +155,6 @@ model Player {
    * ============================
    * CAREER ABILITY
    * ============================
-   * Timestamp for when the player's
-   * active specialist ability can
-   * next be used.
-   * Null means immediately ready.
    */
   careerAbilityReadyAt DateTime?
 
@@ -137,19 +162,13 @@ model Player {
    * ============================
    * CURRENT CREDITS
    * ============================
-   * Credits are both currency
-   * and effectively player health.
-   * Reset to starting Credits
-   * after bankruptcy.
    */
   credits Int @default(750)
-
 
   /**
    * ============================
    * LIFETIME PVP STATS
    * ============================
-   * These never reset.
    */
   kills        Int @default(0)
   bankruptcies Int @default(0)
@@ -158,9 +177,6 @@ model Player {
    * ============================
    * LIFETIME TICKET PERFORMANCE
    * ============================
-   * These never reset.
-   * They are shown on the
-   * player's profile page.
    */
   ticketsResolved   Int @default(0)
   correctBounces    Int @default(0)
@@ -171,7 +187,6 @@ model Player {
    * ============================
    * LIFETIME TOTALS
    * ============================
-   * These also never reset.
    */
   lifetimeCreditsEarned  Int @default(0)
   lifetimeTicketsHandled Int @default(0)
@@ -217,10 +232,22 @@ model Player {
   assignedTickets Ticket[] @relation("AssignedTickets")
   sentTickets     Ticket[] @relation("SentTickets")
 
+  /**
+   * ============================
+   * FEEDBACK
+   * ============================
+   */
+  feedback Feedback[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+/**
+ * ============================
+ * TICKET
+ * ============================
+ */
 model Ticket {
   id Int @id @default(autoincrement())
 
@@ -253,12 +280,6 @@ model Ticket {
    * ============================
    * REWARDS
    * ============================
-   * Normal tickets use:
-   * maxValue
-   * baseXp
-   * Poison Tickets normally use:
-   * maxValue = 0
-   * baseXp   = 0
    */
   maxValue Int
   baseXp   Int @default(10)
@@ -295,9 +316,6 @@ model Ticket {
    * ============================
    * MOST RECENT BOUNCE
    * ============================
-   * Null means the ticket came
-   * directly from the game or
-   * PvP system.
    */
   lastSentById Int?
   lastSentBy   Player? @relation("SentTickets", fields: [lastSentById], references: [id], onDelete: SetNull)
@@ -306,9 +324,6 @@ model Ticket {
    * ============================
    * ORIGINAL PVP ATTACKER
    * ============================
-   * Never changes when the
-   * Poison Ticket moves between
-   * players.
    */
   attackSourcePlayerId Int?
   attackSourcePlayer   Player? @relation("AttackTickets", fields: [attackSourcePlayerId], references: [id], onDelete: SetNull)
@@ -338,9 +353,6 @@ model Ticket {
   /**
    * Artificial SLA pressure
    * added by poison attacks.
-   * Effective age includes this
-   * value without modifying
-   * createdAt.
    */
   slaAgeOffsetMinutes Int @default(0)
 
@@ -348,15 +360,6 @@ model Ticket {
    * ============================
    * SYSTEMS - MAINTENANCE WINDOW
    * ============================
-   * maintenanceUntil:
-   * While this timestamp is in
-   * the future, SLA ageing and
-   * Credit decay are frozen.
-   * maintenancePausedMinutes:
-   * Once the Maintenance Window
-   * ends, its completed frozen
-   * time is permanently stored
-   * here.
    */
   maintenanceUntil         DateTime?
   maintenancePausedMinutes Int       @default(0)
@@ -387,6 +390,11 @@ model Ticket {
   @@index([abandonmentPenaltyApplied])
 }
 
+/**
+ * ============================
+ * TICKET TEMPLATE
+ * ============================
+ */
 model TicketTemplate {
   id Int @id @default(autoincrement())
 
@@ -445,11 +453,58 @@ model TicketTemplate {
 
 /**
  * ============================
+ * PLAYER FEEDBACK
+ * ============================
+ */
+model Feedback {
+  id Int @id @default(autoincrement())
+
+  /**
+   * ============================
+   * FEEDBACK DETAILS
+   * ============================
+   */
+  type   FeedbackType
+  status FeedbackStatus @default(NEW)
+
+  /**
+   * Feedback body submitted
+   * by the player.
+   */
+  message String
+
+  /**
+   * ============================
+   * PLAYER
+   * ============================
+   */
+  playerId Int
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  /**
+   * ============================
+   * ADMIN NOTES
+   * ============================
+   *
+   * Internal notes for admins.
+   * These are not intended to
+   * be shown to players.
+   */
+  adminNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([playerId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+/**
+ * ============================
  * PVP ATTACK
  * ============================
- * One purchased poison attack.
- * One attack can create one
- * or multiple Poison Tickets.
  */
 model PvPAttack {
   id Int @id @default(autoincrement())
@@ -502,14 +557,41 @@ model PvPAttack {
   @@index([causedBankruptcy])
 }
 
+/**
+ * ============================
+ * BETTER AUTH USER
+ * ============================
+ */
 model User {
   id            String   @id
   name          String
   email         String
   emailVerified Boolean  @default(false)
   image         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+
+  /**
+   * ============================
+   * BETTER AUTH ADMIN
+   * ============================
+   *
+   * Normal accounts use:
+   * role = "user"
+   *
+   * Administrators use:
+   * role = "admin"
+   */
+  role String? @default("user")
+
+  /**
+   * Ban / suspension fields
+   * used by Better Auth Admin.
+   */
+  banned     Boolean? @default(false)
+  banReason  String?
+  banExpires DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   sessions Session[]
   accounts Account[]
@@ -517,26 +599,51 @@ model User {
   player Player?
 
   @@unique([email])
+  @@index([role])
+  @@index([banned])
   @@map("user")
 }
 
+/**
+ * ============================
+ * BETTER AUTH SESSION
+ * ============================
+ */
 model Session {
   id        String   @id
   expiresAt DateTime
   token     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   ipAddress String?
   userAgent String?
-  userId    String
+
+  userId String
+
+  /**
+   * ============================
+   * BETTER AUTH ADMIN
+   * ============================
+   *
+   * Used when an admin
+   * impersonates another user.
+   */
+  impersonatedBy String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
   @@index([userId])
+  @@index([impersonatedBy])
   @@map("session")
 }
 
+/**
+ * ============================
+ * BETTER AUTH ACCOUNT
+ * ============================
+ */
 model Account {
   id         String @id
   accountId  String
@@ -560,6 +667,11 @@ model Account {
   @@map("account")
 }
 
+/**
+ * ============================
+ * BETTER AUTH VERIFICATION
+ * ============================
+ */
 model Verification {
   id         String   @id
   identifier String

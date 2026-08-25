@@ -7,12 +7,8 @@ import DashboardRefresh from "@/components/DashboardRefresh";
 import PlayerHeartbeat from "@/components/PlayerHeartbeat";
 import SignOutButton from "@/components/SignOutButton";
 import { auth } from "@/lib/auth";
-import {
-  calculateLeaderboardScore,
-} from "@/lib/leaderboard";
-import {
-  getRoleTitle,
-} from "@/lib/player-level";
+import { calculateLeaderboardScore } from "@/lib/leaderboard";
+import { getRoleTitle } from "@/lib/player-level";
 import { prisma } from "@/lib/prisma";
 
 type LeaderboardPlayer = {
@@ -24,73 +20,51 @@ type LeaderboardPlayer = {
   bankruptcies: number;
 };
 
-function getNextLevelXp(
-  level: number
-) {
+function getNextLevelXp(level: number) {
   switch (level) {
     case 1:
       return 150;
-
     case 2:
       return 350;
-
     case 3:
       return 700;
-
     case 4:
       return 1200;
-
     case 5:
       return 1800;
-
     case 6:
       return 2500;
-
     case 7:
       return 3400;
-
     case 8:
       return 4500;
-
     case 9:
       return 6000;
-
     default:
       return null;
   }
 }
 
-function getCurrentLevelFloorXp(
-  level: number
-) {
+function getCurrentLevelFloorXp(level: number) {
   switch (level) {
     case 1:
       return 0;
-
     case 2:
       return 150;
-
     case 3:
       return 350;
-
     case 4:
       return 700;
-
     case 5:
       return 1200;
-
     case 6:
       return 1800;
-
     case 7:
       return 2500;
-
     case 8:
       return 3400;
-
     case 9:
       return 4500;
-
     case 10:
     default:
       return 6000;
@@ -329,7 +303,8 @@ export default async function DashboardPage() {
     );
 
   const careerChoiceAvailable =
-    player.level >= 4 &&
+    player.level >=
+      4 &&
     !player.careerPath;
 
   /*
@@ -535,6 +510,23 @@ export default async function DashboardPage() {
               className="border border-zinc-700 px-3 py-2 text-sm font-bold hover:bg-zinc-900"
             >
               Profile
+            </Link>
+
+            <Link
+              href="/how-to-play"
+              className="border border-zinc-700 px-3 py-2 text-sm font-bold hover:bg-zinc-900"
+            >
+              How to Play
+            </Link>
+
+            {/* ============================
+                FEEDBACK
+                ============================ */}
+            <Link
+              href="/feedback"
+              className="border border-blue-800 bg-blue-950/10 px-3 py-2 text-sm font-bold text-blue-300 hover:bg-blue-950/30"
+            >
+              Feedback
             </Link>
 
             <Link
@@ -819,6 +811,7 @@ export default async function DashboardPage() {
             ============================ */}
         <div className="mt-3 grid gap-3 md:grid-cols-2">
 
+          {/* ACTIVE PLAYERS */}
           <div className="border border-zinc-800 bg-zinc-950 p-4">
 
             <div className="flex items-start justify-between gap-4">
@@ -862,6 +855,7 @@ export default async function DashboardPage() {
 
           </div>
 
+          {/* LEADERBOARD */}
           <div className="border border-zinc-800 bg-zinc-950 p-4">
 
             <div className="flex items-start justify-between gap-4">
@@ -874,7 +868,6 @@ export default async function DashboardPage() {
 
                 {leaderboardLeader ? (
                   <>
-
                     <div className="mt-2 flex items-center gap-2">
 
                       <span className="text-xl font-black text-yellow-400">
@@ -897,7 +890,6 @@ export default async function DashboardPage() {
                       }{" "}
                       Score
                     </p>
-
                   </>
                 ) : (
                   <p className="mt-2 text-sm text-zinc-500">
