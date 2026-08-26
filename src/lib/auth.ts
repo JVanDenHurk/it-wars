@@ -3,7 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError } from "better-auth/api";
 import { admin } from "better-auth/plugins";
 
-import { resend } from "@/lib/email";
+import { getResend } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { validateUsername } from "@/lib/username";
 
@@ -130,6 +130,14 @@ export const auth = betterAuth({
         user,
         url,
       }) => {
+        /*
+         * Create the Resend client
+         * only when an email actually
+         * needs to be sent.
+         */
+        const resend =
+          getResend();
+
         const { error } =
           await resend.emails.send({
             from:

@@ -10,6 +10,11 @@ COPY . .
 
 RUN npx prisma generate
 
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
+RUN npm run build
+
 EXPOSE 3000
 
-CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]
+CMD ["npm", "start", "--", "-H", "0.0.0.0"]

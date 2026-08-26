@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 
     container_name: itwars-app
 
@@ -17,22 +19,10 @@ services:
       - .env
 
     environment:
-      DATABASE_URL: postgresql://itwars:itwars_dev_password@postgres:5432/itwars
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 
     depends_on:
       - postgres
-
-    volumes:
-      - .:/app
-      - /app/node_modules
-
-    command:
-      - npm
-      - run
-      - dev
-      - --
-      - --hostname
-      - 0.0.0.0
 
   postgres:
     image: postgres:17
@@ -42,12 +32,9 @@ services:
     restart: unless-stopped
 
     environment:
-      POSTGRES_USER: itwars
-      POSTGRES_PASSWORD: itwars_dev_password
-      POSTGRES_DB: itwars
-
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
 
     volumes:
       - itwars_postgres_data:/var/lib/postgresql/data
