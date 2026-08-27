@@ -6,6 +6,8 @@ import ClearQueuePenaltyButton from "@/components/ClearQueuePenaltyButton";
 import DashboardRefresh from "@/components/DashboardRefresh";
 import PlayerHeartbeat from "@/components/PlayerHeartbeat";
 import SignOutButton from "@/components/SignOutButton";
+import TicketTimer from "@/components/TicketTimer";
+
 import { auth } from "@/lib/auth";
 import { calculateLeaderboardScore } from "@/lib/leaderboard";
 import { getRoleTitle } from "@/lib/player-level";
@@ -473,6 +475,16 @@ export default async function DashboardPage() {
 
       <PlayerHeartbeat />
 
+      {/* Generates tickets while the player remains on the dashboard */}
+      <TicketTimer
+        nextTicketAt={
+          player.nextTicketAt
+        }
+        queuePenaltyActive={
+          queuePenaltyActive
+        }
+      />
+
       <DashboardRefresh />
 
       <div className="mx-auto max-w-6xl">
@@ -519,9 +531,6 @@ export default async function DashboardPage() {
               How to Play
             </Link>
 
-            {/* ============================
-                FEEDBACK
-                ============================ */}
             <Link
               href="/feedback"
               className="border border-blue-800 bg-blue-950/10 px-3 py-2 text-sm font-bold text-blue-300 hover:bg-blue-950/30"
@@ -669,67 +678,49 @@ export default async function DashboardPage() {
         <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
 
           <div className="border border-zinc-800 bg-zinc-950 p-4">
-
             <p className="text-xs uppercase tracking-wide text-zinc-500">
               Level
             </p>
 
             <p className="mt-1 text-2xl font-black">
-              {
-                player.level
-              }
+              {player.level}
             </p>
-
           </div>
 
           <div className="border border-zinc-800 bg-zinc-950 p-4">
-
             <p className="text-xs uppercase tracking-wide text-zinc-500">
               Career XP
             </p>
 
             <p className="mt-1 text-2xl font-black">
-              {
-                player.xp
-              }
+              {player.xp}
             </p>
-
           </div>
 
           <div className="border border-zinc-800 bg-zinc-950 p-4">
-
             <p className="text-xs uppercase tracking-wide text-zinc-500">
               Credits
             </p>
 
             <div className="mt-1 flex items-end gap-1">
-
               <p className="text-2xl font-black">
-                {
-                  player.credits
-                }
+                {player.credits}
               </p>
 
               <p className="pb-0.5 text-[10px] text-zinc-500">
                 CR
               </p>
-
             </div>
-
           </div>
 
           <div className="border border-zinc-800 bg-zinc-950 p-4">
-
             <p className="text-xs uppercase tracking-wide text-zinc-500">
               Position
             </p>
 
             <p className="mt-1 text-lg font-black leading-tight">
-              {
-                roleTitle
-              }
+              {roleTitle}
             </p>
-
           </div>
 
         </div>
@@ -742,29 +733,18 @@ export default async function DashboardPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
 
             <div>
-
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
                 Career Progress
               </p>
 
               <p className="mt-1 text-sm font-bold text-white">
-                {
-                  careerDisplayName
-                }
+                {careerDisplayName}
               </p>
-
             </div>
 
             {nextLevelXp ? (
               <p className="text-xs font-bold text-zinc-400">
-                {
-                  player.xp
-                }{" "}
-                /{" "}
-                {
-                  nextLevelXp
-                }{" "}
-                XP
+                {player.xp} / {nextLevelXp} XP
               </p>
             ) : (
               <p className="text-xs font-bold text-zinc-400">
@@ -775,7 +755,6 @@ export default async function DashboardPage() {
           </div>
 
           <div className="mt-3 h-2 overflow-hidden bg-zinc-800">
-
             <div
               className="h-full bg-white transition-all"
               style={{
@@ -783,15 +762,12 @@ export default async function DashboardPage() {
                   `${progressPercentage}%`,
               }}
             />
-
           </div>
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
 
             <p className="text-xs text-zinc-500">
-              {
-                nextMilestoneText
-              }
+              {nextMilestoneText}
             </p>
 
             {player.level ===
@@ -811,7 +787,6 @@ export default async function DashboardPage() {
             ============================ */}
         <div className="mt-3 grid gap-3 md:grid-cols-2">
 
-          {/* ACTIVE PLAYERS */}
           <div className="border border-zinc-800 bg-zinc-950 p-4">
 
             <div className="flex items-start justify-between gap-4">
@@ -827,9 +802,7 @@ export default async function DashboardPage() {
                   <span className="h-2.5 w-2.5 rounded-full bg-green-400" />
 
                   <p className="text-2xl font-black">
-                    {
-                      activePlayers
-                    }
+                    {activePlayers}
                   </p>
 
                 </div>
@@ -855,7 +828,6 @@ export default async function DashboardPage() {
 
           </div>
 
-          {/* LEADERBOARD */}
           <div className="border border-zinc-800 bg-zinc-950 p-4">
 
             <div className="flex items-start justify-between gap-4">
@@ -928,15 +900,11 @@ export default async function DashboardPage() {
             </p>
 
             <h2 className="mt-1 text-lg font-black">
-              {
-                nextMilestoneTitle
-              }
+              {nextMilestoneTitle}
             </h2>
 
             <p className="mt-1 text-xs text-zinc-500">
-              {
-                nextMilestoneText
-              }
+              {nextMilestoneText}
             </p>
 
           </div>
