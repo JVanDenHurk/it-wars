@@ -5,15 +5,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 
     container_name: itwars-app
 
     restart: unless-stopped
 
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
 
     env_file:
       - .env
